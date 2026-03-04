@@ -1,0 +1,15 @@
+{
+  "name": "real-estate-ml-app-team-10",
+  "version": "1.0.0",
+  "description": "A full-stack, data-driven web application designed to analyze and predict single-family housing prices across multiple geographic levels—from individual properties to nationwide trends. This platform enables users to explore historical, current, and future real estate prices through an interactive, Zillow-style interface.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "electron": "^40.6.1"
+  }
+}
