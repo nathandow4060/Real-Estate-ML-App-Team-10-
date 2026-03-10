@@ -10,16 +10,15 @@ npm install
 and the decencies should automatically with no issue. If it does idk.
 
 ## Starting
+Running code has been simplified and reduced to just one simple command
+```
+npm run dev
+```
+This will start a local server for React to output the ui portion. changes can be seen live, and there is no need to re-run npm run dev for every change. Then electron will connect to that server and display the react ui.
 
-The react portion has to get built first for electron to wrap around the app. To do this simply
-```
-npm run build
-```
-The `/frontend/dist-react` should be created with an index.html and another directory. Here is where we can now see some output.
-```
-npm run dev:electron
-```
-This will finally generate a window where we can see the react code we made. As far as I understand, you have to build the react app first then run electron to see any changes you may have made to the react side.
+What still needs to be worked on: 
+ * the ipc between electron and the ui
+ * preloading 
 
 
 
