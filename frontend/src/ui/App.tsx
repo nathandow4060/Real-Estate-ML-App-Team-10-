@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
+import House from './assets/house.jpg'
 import './App.css'
 import {Chart as ChartJS} from "chart.js/auto"
 import {Line} from "react-chartjs-2";
+import DynamicLineChart from "./assets/dynamicLineChart.tsx"
 
 function App() {
   const [count, setCount] = useState(0)
@@ -10,14 +12,13 @@ function App() {
   return (
     <>
       <div>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
+        <a href="https://youtu.be/QWL856dVPIM?si=4lWARAivVvwzxaBK&t=10" target="_blank">
+          <img src={House} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>React</h1>
+      <h1>HomeView</h1>
       <div className="card">
-
-        <Line data = {{
+        <Line id="graph" data = {{
         labels: ['1990', '1991', '1992', '1993', '1994', '1995', '1996'],
           datasets: [{
             label: 'Housing Prices (USD $)',
@@ -33,6 +34,7 @@ function App() {
         }}
         />
 
+        <DynamicLineChart/>
 
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
