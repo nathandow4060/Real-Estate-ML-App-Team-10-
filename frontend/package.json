@@ -19,7 +19,9 @@
     "dist:linuxArm": "npm run transpile:electron && npm run build && electron-builder --linux --arm64"
   },
   "dependencies": {
+    "chart.js": "^4.5.1",
     "react": "^19.2.0",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
