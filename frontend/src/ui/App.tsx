@@ -18,21 +18,6 @@ function App() {
       </div>
       <h1>HomeView</h1>
       <div className="card">
-        <Line id="graph" data = {{
-        labels: ['1990', '1991', '1992', '1993', '1994', '1995', '1996'],
-          datasets: [{
-            label: 'Housing Prices (USD $)',
-            data: [18, 12, 6, 9, 12, 3, 9],
-            backgroundColor: [
-            'rgba(255, 26, 104, 0.2)'
-            ],
-            borderColor: [
-              'rgba(255, 26, 104, 1)'
-            ],
-            borderWidth: 1
-          }]
-        }}
-        />
 
         <DynamicLineChart/>
 
