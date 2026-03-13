@@ -1,7 +1,18 @@
 import React, { useState } from "react";
 import { Line } from "react-chartjs-2";
 
-
+/* 
+X format: [] - String array
+Y format: [
+      {
+        label: "",
+        data: [],
+        backgroundColor: "rgba()",
+        borderColor: 'rgba()',
+        borderWidth: 1
+      },
+    ]
+*/
 
 function DynamicLineChart({pastX, pastY, futureX, futureY}) 
   // the DynamicLineChart will take X and Y data for 2 graphs 
