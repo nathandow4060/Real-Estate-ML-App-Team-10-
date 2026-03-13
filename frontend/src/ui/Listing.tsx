@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import House from './assets/house.jpg'
-import './App.css'
+import './Listing.css'
 import {Chart as ChartJS} from "chart.js/auto"
 import {Line} from "react-chartjs-2";
 import DynamicLineChart from "./assets/dynamicLineChart.tsx"
 
-function App() {
+function Listing() {
   const [count, setCount] = useState(0)
 
   let PastX = ["1990", "1991", "1992"]
@@ -14,7 +14,7 @@ function App() {
         label: "Price History (USD $)",
         data: [65, 59, 80],
         backgroundColor: "rgba(75,192,192,0.4)",
-        borderColor: 'rgb(25, 142, 221)',
+        borderColor: 'rgba(25, 142, 221, 1)',
         borderWidth: 1
       },
     ]
@@ -29,6 +29,7 @@ function App() {
       },
     ]
 
+    
     PastY[0].data = [21,345345, 234234]
 
   return (
@@ -72,4 +73,4 @@ function App() {
   )
 }
 
-export default App
+export default Listing
