@@ -1,33 +1,17 @@
 import React, { useState } from "react";
 import { Line } from "react-chartjs-2";
 
-function DynamicLineChart() {
-  let pastX = ["1990", "1991", "1992"]
-  let pastY = [
-      {
-        label: "Price History (USD $)",
-        data: [65, 59, 80],
-        backgroundColor: "rgba(75,192,192,0.4)",
-        borderColor: 'rgb(25, 142, 221)',
-        borderWidth: 1
-      },
-    ]
-  let futureX = ["2025", "2026", "2027"]
-  let futureY = [
-      {
-        label: "Price Prediction (USD $)",
-        data: [100, 200, 600],
-        backgroundColor: 'rgba(255, 26, 104, 0.2)',
-            borderColor: 'rgba(255, 26, 104, 1)',
-            borderWidth: 1
-      },
-    ]
 
+
+function DynamicLineChart({pastX, pastY, futureX, futureY}) 
+  // the DynamicLineChart will take X and Y data for 2 graphs 
+  {
   const [chartData, setChartData] = useState({
     labels: pastX,
     datasets: pastY,
   });
   const[buttonText, setButtonText] = useState("view prediction");
+  // I should really use a unique use state variable
 
   const switchData = () => {
     if(buttonText === "view prediction"){
