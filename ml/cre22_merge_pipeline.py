@@ -19,13 +19,10 @@ FILES = {
     'sales': ROOT / 'Real_Estate_Sales_2001-2023_with_scrape_data.csv',
     'mortgage': ROOT / 'MORTGAGE30US.csv',
     'cpi': ROOT / 'CPI_CUUR0100SA0.csv',
-    'unemployment_1': ROOT / 'BLS_unemployment_response_2001-2009.json',
-    'unemployment_2': ROOT / 'BLS_unemployment_response_2010-2023.json',
     'housing_supply': ROOT / 'housing_supply_ACTLISCOUCT.csv',
     'mill_rates': ROOT / 'Mill_Rates_for_FY_2014-2026_20260304.csv',
-    'dgs10': ROOT / 'DGS10.csv',
     'gdp_real_estate': ROOT / 'FRED_ctrerenleargsp.xlsx',
-    'qwi_hira': ROOT / 'uscensus_qwi_HirA' / 'qwi_2d0b7d0c4da34aadb2826fcad74aac2f.csv',
+    'unemployment': ROOT / 'BLS_unemployment_2001-2023.csv',
 }
 
 for name, path in FILES.items():
@@ -63,18 +60,28 @@ def merge_asof_back(
     - nearest can pull future information and leak it into the model.
     - backward guarantees we only use information available on or before the sale date.
     """
-    left_sorted = left.sort_values(left_date_col).copy()
-    right_sorted = right.sort_values(right_date_col).copy()
+
+    left_work = left.copy()
+    right_work = right.copy()
 
     temp_right_date = right_date_col
-    if right_date_col in left_sorted.columns:
+    if right_date_col in left_work.columns:
         temp_right_date = f'__{right_date_col}_right'
-        right_sorted = right_sorted.rename(columns={right_date_col: temp_right_date})
+        right_work = right_work.rename(columns={right_date_col: temp_right_date})
+
+    left_valid = left_work[left_work[left_date_col].notna()].copy()
+    left_invalid = left_work[left_work[left_date_col].isna()].copy()
+
+    right_valid = right_work[right_work[temp_right_date].notna()].copy()
+
+    left_valid = left_valid.sort_values(left_date_col)
+    right_valid = right_valid.sort_values(temp_right_date)
 
     keep_cols = [temp_right_date] + (by or []) + value_cols
-    merged = pd.merge_asof(
-        left_sorted,
-        right_sorted[keep_cols],
+
+    merged_valid = pd.merge_asof(
+        left_valid,
+        right_valid[keep_cols],
         left_on=left_date_col,
         right_on=temp_right_date,
         by=by,
@@ -82,10 +89,15 @@ def merge_asof_back(
         tolerance=tolerance,
     )
 
-    if temp_right_date in merged.columns:
-        merged = merged.drop(columns=[temp_right_date])
+    if temp_right_date in merged_valid.columns:
+        merged_valid = merged_valid.drop(columns=[temp_right_date])
 
-    return merged.sort_index()
+    for col in value_cols:
+        left_invalid[col] = np.nan
+
+    merged = pd.concat([merged_valid, left_invalid], axis=0).sort_index()
+
+    return merged
 
 
 def validate_left_join(
@@ -155,13 +167,13 @@ def load_mortgage30us(path: Path) -> pd.DataFrame:
     df['mortgage30us'] = pd.to_numeric(df['MORTGAGE30US'], errors='coerce')
     return df[['obs_date', 'mortgage30us']].dropna().drop_duplicates('obs_date').sort_values('obs_date')
 
-
+"""
 def load_dgs10(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
     df['obs_date'] = pd.to_datetime(df['observation_date'])
     df['dgs10'] = pd.to_numeric(df['DGS10'], errors='coerce')
     return df[['obs_date', 'dgs10']].dropna().drop_duplicates('obs_date').sort_values('obs_date')
-
+"""
 
 def load_cpi(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
@@ -195,12 +207,13 @@ def _parse_bls_json(path: Path) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+"""
 def load_unemployment(path_1: Path, path_2: Path) -> pd.DataFrame:
     df = pd.concat([_parse_bls_json(path_1), _parse_bls_json(path_2)], ignore_index=True)
     df = df.sort_values('obs_date').drop_duplicates('obs_date', keep='last').dropna()
     df['sale_month_start'] = df['obs_date']
     return df[['sale_month_start', 'unemployment_rate']]
-
+"""
 
 def load_housing_supply(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
@@ -227,6 +240,16 @@ def load_mill_rates(path: Path) -> pd.DataFrame:
         .drop_duplicates(['town_norm', 'fiscal_year_end_june30'])
     )
 
+def load_unemployment(path: Path) -> pd.DataFrame:
+    df = pd.read_csv(path)
+    df['sale_month_start'] = pd.to_datetime(df['date'])
+    df['unemployment_rate'] = pd.to_numeric(df['value'], errors='coerce')
+    return (
+        df[['sale_month_start', 'unemployment_rate']]
+        .dropna()
+        .drop_duplicates('sale_month_start')
+        .sort_values('sale_month_start')
+    )
 
 def load_gdp_real_estate(path: Path) -> pd.DataFrame:
     df = pd.read_excel(path)
@@ -238,7 +261,7 @@ def load_gdp_real_estate(path: Path) -> pd.DataFrame:
 
     return df[['obs_date', 'gdp_real_estate']].dropna().drop_duplicates('obs_date').sort_values('obs_date')
 
-
+"""
 def load_qwi_hira(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path, low_memory=False)
 
@@ -265,7 +288,7 @@ def load_qwi_hira(path: Path) -> pd.DataFrame:
     df['qwi_hira'] = pd.to_numeric(df['HirA'], errors='coerce')
 
     return df[['obs_date', 'qwi_hira']].dropna().drop_duplicates('obs_date').sort_values('obs_date')
-
+"""
 
 # ------------------------------
 # Merge steps
@@ -275,21 +298,21 @@ def add_mortgage30us(df: pd.DataFrame) -> pd.DataFrame:
     right = load_mortgage30us(FILES['mortgage'])
     return merge_asof_back(df, right, 'sale_date', 'obs_date', ['mortgage30us'])
 
-
+"""
 def add_dgs10(df: pd.DataFrame) -> pd.DataFrame:
     right = load_dgs10(FILES['dgs10'])
     return merge_asof_back(df, right, 'sale_date', 'obs_date', ['dgs10'])
-
+"""
 
 def add_cpi(df: pd.DataFrame) -> pd.DataFrame:
     right = load_cpi(FILES['cpi'])
     return df.merge(right, on='sale_month_start', how='left', validate='m:1')
 
-
+"""
 def add_unemployment(df: pd.DataFrame) -> pd.DataFrame:
     right = load_unemployment(FILES['unemployment_1'], FILES['unemployment_2'])
     return df.merge(right, on='sale_month_start', how='left', validate='m:1')
-
+"""
 
 def add_housing_supply(df: pd.DataFrame) -> pd.DataFrame:
     right = load_housing_supply(FILES['housing_supply'])
@@ -310,11 +333,15 @@ def add_gdp_real_estate(df: pd.DataFrame) -> pd.DataFrame:
     right = load_gdp_real_estate(FILES['gdp_real_estate'])
     return merge_asof_back(df, right, 'sale_date', 'obs_date', ['gdp_real_estate'])
 
+def add_unemployment(df: pd.DataFrame) -> pd.DataFrame:
+    right = load_unemployment(FILES['unemployment'])
+    return df.merge(right, on='sale_month_start', how='left', validate='m:1')
 
+"""
 def add_qwi_hira(df: pd.DataFrame) -> pd.DataFrame:
     right = load_qwi_hira(FILES['qwi_hira'])
     return merge_asof_back(df, right, 'sale_date', 'obs_date', ['qwi_hira'])
-
+"""
 
 # ------------------------------
 # Pipeline
@@ -325,33 +352,31 @@ def build_master_dataset() -> tuple[pd.DataFrame, list[dict[str, Any]]]:
     checks: list[dict[str, Any]] = []
 
     df = load_primary_sales(FILES['sales'])
+    print("Rows with missing sale_date:", int(df['sale_date'].isna().sum()))
     checks.append(
         {
             'join_name': 'primary_sales_loaded',
             'rows': int(len(df)),
             'duplicate_key_rows': int(df.duplicated(unique_key_cols).sum()),
             'duplicate_serial_number_rows': int(df['Serial Number'].duplicated().sum()),
-            'sale_date_min': str(df['sale_date'].min().date()),
-            'sale_date_max': str(df['sale_date'].max().date()),
+            'sale_date_min': str(df['sale_date'].min().date()) if df['sale_date'].notna().any() else None,
+            'sale_date_max': str(df['sale_date'].max().date()) if df['sale_date'].notna().any() else None,
         }
     )
 
     for join_name, fn, added_cols in [
         ('mortgage30us', add_mortgage30us, ['mortgage30us']),
-        ('dgs10', add_dgs10, ['dgs10']),
         ('cpi', add_cpi, ['cpi_cuur0100sa0']),
         ('unemployment', add_unemployment, ['unemployment_rate']),
         ('housing_supply', add_housing_supply, ['housing_supply_actliscouct']),
         ('mill_rates', add_mill_rates, ['mill_rate']),
         ('gdp_real_estate', add_gdp_real_estate, ['gdp_real_estate']),
-        ('qwi_hira', add_qwi_hira, ['qwi_hira']),
     ]:
         before = df.copy()
         df = fn(df)
         checks.append(validate_left_join(before, df, join_name, added_cols, unique_key_cols))
 
     return df, checks
-
 
 if __name__ == '__main__':
     merged_df, checks = build_master_dataset()
