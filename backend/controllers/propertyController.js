@@ -27,7 +27,7 @@ exports.getPropertyByAddr = async (req, res, next) => {
         const state = req.body.state
 
         const result = await db.query(
-            `SELECT * FROM property WHERE 
+            `SELECT * FROM public."Property" WHERE 
             street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
             [street_addr, city, state, zipcode]
         )
@@ -45,7 +45,7 @@ exports.getPropertiesByCityState = async (req, res, next) => {
 
 
         const result = await db.query(
-            `SELECT * FROM property WHERE 
+            `SELECT * FROM public."Property" WHERE 
              city = $1 AND state = $2`,
             [city, state]
         )
