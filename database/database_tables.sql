@@ -1,3 +1,7 @@
+CREATE ROLE admin2 LOGIN PASSWORD --insert password here
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin2
+
 --Composite key does not include zipcode as it is not constant in all records
 CREATE TABLE "Property"(
     pid BIGSERIAL PRIMARY KEY,
