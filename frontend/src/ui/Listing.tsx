@@ -4,6 +4,7 @@ import './Listing.css'
 import {Chart as ChartJS} from "chart.js/auto"
 import {Line} from "react-chartjs-2";
 import DynamicLineChart from "./assets/dynamicLineChart.tsx"
+import Search from './assets/search.tsx';
 
 function Listing() {
   const [count, setCount] = useState(0)
@@ -11,7 +12,7 @@ function Listing() {
   let PastX = ["1990", "1991", "1992"]
   let PastY = [
       {
-        label: "Price History (USD $)",
+        label: "Purchasse History (USD $)",
         data: [65, 59, 80],
         backgroundColor: "rgba(75,192,192,0.4)",
         borderColor: 'rgba(25, 142, 221, 1)',
@@ -28,9 +29,24 @@ function Listing() {
             borderWidth: 1
       },
     ]
-
     
     PastY[0].data = [21,345345, 234234]
+
+
+  function setXY(xValues, yValues){ 
+        fetch() //replace with real json data 
+    .then(response => response.json())
+    .then(jsonData => {
+      console.log(jsonData);
+      // Work with the jsonData object here
+      jsonData.forEach(element => {
+        xValues.push(element.date_of_sales)
+        yValues[0].data.push(element.sale_amount)
+      });
+    })
+    .catch(error => console.error('Error fetching JSON:', error));
+  }
+
 
   return (
     <>
@@ -41,6 +57,8 @@ function Listing() {
       </div>
       <h1>HomeView</h1>
       <div className="card">
+        <Search/> 
+        
         <Line id="graph" data = {{
         labels: ['1990', '1991', '1992', '1993', '1994', '1995', '1996'],
           datasets: [{
