@@ -1,3 +1,7 @@
+CREATE ROLE admin2 LOGIN PASSWORD --insert password here
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin2
+
 --Composite key does not include zipcode as it is not constant in all records
 CREATE TABLE "Property"(
     pid BIGSERIAL PRIMARY KEY,
@@ -38,10 +42,11 @@ CREATE TABLE "Timeseries_Set_Info" (
 CREATE TABLE "Timeseries_Data_Points" (
     id BIGSERIAL PRIMARY KEY,
     timeseries_set_id BIGINT NOT NULL,
-    date_of_data_sample BIGINT NOT NULL,
-    data_point DOUBLE PRECISION NOT NULL,
+    date_of_data_sample TEXT NOT NULL,
+    data_point DOUBLE PRECISION,
+	data_location TEXT,
     FOREIGN KEY (timeseries_set_id) REFERENCES "Timeseries_Set_Info"(id) ON DELETE CASCADE,
-    UNIQUE (timeseries_set_id, date_of_data_sample)
+    UNIQUE (timeseries_set_id, date_of_data_sample, data_location)
 );
 
 
