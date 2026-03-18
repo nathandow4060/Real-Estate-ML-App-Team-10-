@@ -1,16 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import House from './assets/house.jpg'
 import './Listing.css'
 import {Chart as ChartJS} from "chart.js/auto"
 import {Line} from "react-chartjs-2";
 import DynamicLineChart from "./assets/dynamicLineChart.tsx"
 import Search from './assets/search.tsx';
+import Table from "./assets/table.tsx";
+import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
+import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
 
 function Listing() {
-  const [count, setCount] = useState(0)
 
-  let PastX = ["1990", "1991", "1992"]
-  let PastY = [
+  let housePastX = ["1990", "1991", "1992"]
+  
+  let housePastY = [
       {
         label: "Purchasse History (USD $)",
         data: [65, 59, 80],
@@ -19,34 +22,74 @@ function Listing() {
         borderWidth: 1
       },
     ]
-  let FutureX = ["2025", "2026", "2027"]
-  let FutureY = [
+  let houseFutureX = ["2025", "2026", "2027"]
+  let houseFutureY = [
       {
         label: "Price Prediction (USD $)",
         data: [100, 200, 600],
         backgroundColor: 'rgba(255, 26, 104, 0.2)',
-            borderColor: 'rgba(255, 26, 104, 1)',
-            borderWidth: 1
+        borderColor: 'rgba(255, 26, 104, 1)',
+        borderWidth: 1
       },
     ]
     
-    PastY[0].data = [21,345345, 234234]
+    //PastY[0].data = [21,345345, 234234]'
 
+    var request;
 
-  function setXY(xValues, yValues){ 
-        fetch() //replace with real json data 
-    .then(response => response.json())
-    .then(jsonData => {
-      console.log(jsonData);
-      // Work with the jsonData object here
-      jsonData.forEach(element => {
-        xValues.push(element.date_of_sales)
-        yValues[0].data.push(element.sale_amount)
+    const onPlaceSelected = (feature) => {
+      console.log('Selected:', feature?.properties);
+
+      if(feature?.properties.result_type === "building"){
+        request = {
+          type: feature.properties.result_type,
+          data:{
+          address: feature?.properties.address_line1,
+          city:feature?.properties.city,
+          zipcode: feature?.properties.postcode,
+          state: feature?.properties.state_code
+        }}
+      }
+      console.log(request)
+    };
+
+    function setXY(xValues, yValues, response){ 
+        xValues.push(response.date_of_sales)
+        yValues[0].data.push(response.sale_amount)
+    }
+
+    const baseURL = 'https://real-estate-ml-app-team-10.onrender.com/'
+
+    async function getSalesData() {
+        //e.preventDefault() // prevent page reload; may not be needed
+        let urlToCall = baseURL+'property-sales'
+        console.log(urlToCall)
+        const res = await fetch(urlToCall, {
+          method: "POST",
+          headers: {
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          address: "123 Jizzy LN",
+          city: "Austin",
+          zipcode: 12345,
+          state: "TX"
+        })
+      })
+      const jsonRes = await res.json() 
+      console.log(jsonRes)
+      let data = ''
+      jsonRes.data.array.forEach(element => {
+        setXY(housePastX, housePastY, element)
       });
-    })
-    .catch(error => console.error('Error fetching JSON:', error));
-  }
 
+    }
+
+
+
+  useEffect(() => {
+    
+  }, []);
 
   return (
     <>
@@ -57,9 +100,28 @@ function Listing() {
       </div>
       <h1>HomeView</h1>
       <div className="card">
-        <Search/> 
-        
-        <Line id="graph" data = {{
+        <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
+              <GeoapifyGeocoderAutocomplete placeholder="Enter address here"
+                lang={'en'}
+                limit={9}
+                filterByPlace={"512b2c5d66fd2e52c0590f9fcfdb33d34440f00101f901a287020000000000c0020a"}
+                placeSelect={onPlaceSelected}
+                //suggestionsChange={onSuggestionsChange}
+              />
+        </GeoapifyContext>
+        <img src = {House} height="350"/>
+        <h2>Price Data</h2>
+        <DynamicLineChart pastX={housePastX} pastY={housePastY} futureX={houseFutureX} futureY={houseFutureY} />
+        <h2>Additional Data</h2>
+        <Table/>
+      </div>
+    </>
+  )
+}
+export default Listing
+
+/*
+<Line id="graph" data = {{
         labels: ['1990', '1991', '1992', '1993', '1994', '1995', '1996'],
           datasets: [{
             label: 'Housing Prices (USD $)',
@@ -74,21 +136,4 @@ function Listing() {
           }]
         }}
         />
-
-        <DynamicLineChart pastX={PastX} pastY={PastY} futureX={FutureX} futureY={FutureY} />
-
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
-
-export default Listing
+*/
