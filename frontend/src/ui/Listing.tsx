@@ -57,7 +57,7 @@ function Listing() {
         yValues[0].data.push(response.sale_amount)
     }
 
-    const baseURL = 'http://localhost:5000/'
+    const baseURL = 'https://real-estate-ml-app-team-10.onrender.com/'
 
     async function getSalesData() { // POST request for propert-sales history using "request" variable saves data to X Y structs (ADD PARAMETERS LATER)
         //e.preventDefault() // prevent page reload; may not be needed
@@ -132,6 +132,8 @@ function Listing() {
                 //suggestionsChange={onSuggestionsChange}
               />
         </GeoapifyContext>
+        <button onClick={getSalesData}>Post Sales Data</button>
+         <button onClick={getPropertyData}>Post Property Data</button>
         <img src = {House} height="350"/>
         <h2>Price Data</h2>
         <DynamicLineChart pastX={housePastX} pastY={housePastY} futureX={houseFutureX} futureY={houseFutureY} />
