@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import House from './assets/house.jpg'
 import './Listing.css'
 import {Chart as ChartJS} from "chart.js/auto"
@@ -8,8 +9,15 @@ import Search from './assets/search.tsx';
 import Table from "./assets/table.tsx";
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
+import Table from "./assets/table.tsx";
+import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
+import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
 
 function Listing() {
+
+  let housePastX = ["1990", "1991", "1992"]
+  
+  let housePastY = [
 
   let housePastX = ["1990", "1991", "1992"]
   
@@ -24,10 +32,14 @@ function Listing() {
     ]
   let houseFutureX = ["2025", "2026", "2027"]
   let houseFutureY = [
+  let houseFutureX = ["2025", "2026", "2027"]
+  let houseFutureY = [
       {
         label: "Price Prediction (USD $)",
         data: [100, 200, 600],
         backgroundColor: 'rgba(255, 26, 104, 0.2)',
+        borderColor: 'rgba(255, 26, 104, 1)',
+        borderWidth: 1
         borderColor: 'rgba(255, 26, 104, 1)',
         borderWidth: 1
       },
@@ -58,7 +70,7 @@ function Listing() {
         yValues[0].data.push(response.sale_amount)
     }
 
-    const baseURL = 'http://localhost:5000/'
+    const baseURL = 'https://real-estate-ml-app-team-10.onrender.com/'
 
     async function getSalesData() {
         //e.preventDefault() // prevent page reload; may not be needed
@@ -122,6 +134,28 @@ export default Listing
 
 /*
 <Line id="graph" data = {{
+        <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
+              <GeoapifyGeocoderAutocomplete placeholder="Enter address here"
+                lang={'en'}
+                limit={9}
+                filterByPlace={"512b2c5d66fd2e52c0590f9fcfdb33d34440f00101f901a287020000000000c0020a"}
+                placeSelect={onPlaceSelected}
+                //suggestionsChange={onSuggestionsChange}
+              />
+        </GeoapifyContext>
+        <img src = {House} height="350"/>
+        <h2>Price Data</h2>
+        <DynamicLineChart pastX={housePastX} pastY={housePastY} futureX={houseFutureX} futureY={houseFutureY} />
+        <h2>Additional Data</h2>
+        <Table/>
+      </div>
+    </>
+  )
+}
+export default Listing
+
+/*
+<Line id="graph" data = {{
         labels: ['1990', '1991', '1992', '1993', '1994', '1995', '1996'],
           datasets: [{
             label: 'Housing Prices (USD $)',
@@ -136,4 +170,5 @@ export default Listing
           }]
         }}
         />
+*/
 */
