@@ -15,8 +15,7 @@ import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
 
 function Listing() {
 
-  let housePastX = ["1990", "1991", "1992"]
-  
+  let housePastX = ["1990", "1991", "1992"] // contains X and Y data for graphs 
   let housePastY = [
 
   let housePastX = ["1990", "1991", "1992"]
@@ -47,7 +46,7 @@ function Listing() {
     
     //PastY[0].data = [21,345345, 234234]'
 
-    var request;
+    var request = {} // contains data for the GET request to the backend
 
     const onPlaceSelected = (feature) => {
       console.log('Selected:', feature?.properties);
@@ -65,14 +64,14 @@ function Listing() {
       console.log(request)
     };
 
-    function setXY(xValues, yValues, response){ 
+    function setXY(xValues, yValues, response){ // setter method for given xValues and yValues
         xValues.push(response.date_of_sales)
         yValues[0].data.push(response.sale_amount)
     }
 
     const baseURL = 'https://real-estate-ml-app-team-10.onrender.com/'
 
-    async function getSalesData() {
+    async function getSalesData() { // POST request for propert-sales history using "request" variable saves data to X Y structs (ADD PARAMETERS LATER)
         //e.preventDefault() // prevent page reload; may not be needed
         let urlToCall = baseURL+'property-sales'
         console.log(urlToCall)
@@ -97,9 +96,33 @@ function Listing() {
 
     }
 
+    var propertyData = {} // stores data from getProperyData POST request
+
+    async function getPropertyData() { // POST request for property data using "request" variable saves data to propertyData
+        //e.preventDefault() // prevent page reload; may not be needed
+        let urlToCall = baseURL+'/property/full_addr'
+        console.log(urlToCall)
+        const res = await fetch(urlToCall, {
+          method: "POST",
+          headers: {
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          address: "123 Jizzy LN",
+          city: "Austin",
+          zipcode: 12345,
+          state: "TX"
+        })
+      })
+      const jsonRes = await res.json() 
+      console.log(jsonRes)
+      return(jsonRes)
+
+    }
 
 
-  useEffect(() => {
+
+  useEffect(() => { // I think this runs on page render
     
   }, []);
 
@@ -125,7 +148,7 @@ function Listing() {
         <h2>Price Data</h2>
         <DynamicLineChart pastX={housePastX} pastY={housePastY} futureX={houseFutureX} futureY={houseFutureY} />
         <h2>Additional Data</h2>
-        <Table/>
+        <Table response = {propertyData}/>
       </div>
     </>
   )
