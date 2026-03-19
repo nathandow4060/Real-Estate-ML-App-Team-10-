@@ -1,6 +1,56 @@
-//AUTHOR: Ethan McDonell
+//AUTHOR: Ethan McDonell and Nathan Dow
 const db = require('../db')
 
+//Display Gets
+exports.getPropertyAttributes = async (req, res, next) => {
+    try {
+        const street_addr = req.body.address
+        const city = req.body.city
+        const zipcode = req.body.zipcode
+        const state = req.body.state
+        const result = await db.query(
+            `SELECT 
+                pid,
+                street_address,
+                city,
+                state,
+                zipcode,
+                year_built,
+                house_style,
+                num_bedrooms,
+                num_bathrooms,
+                living_area_sqft,
+                stories,
+                latitude,
+                longitude
+            FROM public."Property" WHERE 
+            street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
+            [street_addr, city, state, zipcode]
+        )
+        if (result.rowCount === 0) {
+            return res.status(404).json({ status: 'error', message: 'Property not found' })
+        }
+        const prop = result.rows[0]
+        const attributes = [
+            { label: "Address",     value: `${prop.street_address}, ${prop.city}, ${prop.state} ${prop.zipcode}` },
+            { label: "Year Built",  value: prop.year_built },
+            { label: "Style",       value: prop.house_style },
+            { label: "Bedrooms",    value: prop.num_bedrooms },
+            { label: "Bathrooms",   value: prop.num_bathrooms },
+            { label: "Sq Ft",       value: prop.living_area_sqft },
+            { label: "Stories",     value: prop.stories },
+            { label: "Latitude",    value: prop.latitude },
+            { label: "Longitude",   value: prop.longitude },
+        ]
+        res.json({ status: 'success', data: attributes })
+    } catch (err) {
+        next(err)
+    }
+}
+
+
+
+//Search Gets
 //returns all properties stored in db; get route
 exports.getAllPropertiesByState = async (req, res, next) => {
   try {
@@ -57,5 +107,6 @@ exports.getPropertiesByCityState = async (req, res, next) => {
 module.exports = {
     getAllPropertiesByState: exports.getAllPropertiesByState,
     getPropertyByAddr: exports.getPropertyByAddr,
-    getPropertiesByCityState: exports.getPropertiesByCityState
+    getPropertiesByCityState: exports.getPropertiesByCityState,
+    getPropertyAttributes:    exports.getPropertyAttributes
 }

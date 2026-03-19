@@ -1,151 +1,244 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import House from './assets/house.jpg'
 import './Listing.css'
-import {Chart as ChartJS} from "chart.js/auto"
-import {Line} from "react-chartjs-2";
 import DynamicLineChart from "./assets/dynamicLineChart.tsx"
-//import Search from './assets/search.tsx';
-import Table from "./assets/table.tsx";
+import Table from "./assets/table.tsx"
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
 
+const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
+
+interface Attribute {
+  label: string
+  value: any
+}
+
+interface ChartDataset {
+  label: string
+  data: number[]
+  backgroundColor: string
+  borderColor: string
+  borderWidth: number
+}
+
 function Listing() {
 
-  let housePastX = ["1990", "1991", "1992"] // contains X and Y data for graphs 
-  let housePastY = [
-      {
-        label: "Purchasse History (USD $)",
-        data: [65, 59, 80],
-        backgroundColor: "rgba(75,192,192,0.4)",
-        borderColor: 'rgba(25, 142, 221, 1)',
-        borderWidth: 1
-      },
-    ]
-  let houseFutureX = ["2025", "2026", "2027"]
-  let houseFutureY = [
-      {
-        label: "Price Prediction (USD $)",
-        data: [100, 200, 600],
-        backgroundColor: 'rgba(255, 26, 104, 0.2)',
-        borderColor: 'rgba(255, 26, 104, 1)',
-        borderWidth: 1
-      },
-    ]
-    
-    //PastY[0].data = [21,345345, 234234]'
+  // ── State ─────────────────────────────────────────────────────────────────
+  const [attributes, setAttributes] = useState<Attribute[]>([])
+  const [loading, setLoading]       = useState<boolean>(false)
+  const [error, setError]           = useState<string | null>(null)
+  const [searched, setSearched]     = useState<boolean>(false)
 
-    var request = {} // contains data for the GET request to the backend
+  // ── Chart data ────────────────────────────────────────────────────────────
+  const housePastX: string[] = ["1990", "1991", "1992"]
+  const housePastY: ChartDataset[] = [
+    {
+      label: "Purchase History (USD $)",
+      data: [65, 59, 80],
+      backgroundColor: "rgba(75,192,192,0.4)",
+      borderColor: 'rgba(25, 142, 221, 1)',
+      borderWidth: 1
+    }
+  ]
+  const houseFutureX: string[] = ["2025", "2026", "2027"]
+  const houseFutureY: ChartDataset[] = [
+    {
+      label: "Price Prediction (USD $)",
+      data: [100, 200, 600],
+      backgroundColor: 'rgba(255, 26, 104, 0.2)',
+      borderColor: 'rgba(255, 26, 104, 1)',
+      borderWidth: 1
+    }
+  ]
 
-    const onPlaceSelected = (feature) => {
-      console.log('Selected:', feature?.properties);
+  // ── Search handler ────────────────────────────────────────────────────────
+  const onPlaceSelected = async (feature: any) => {
+    if (feature?.properties.result_type !== "building") return
 
-      if(feature?.properties.result_type === "building"){
-        request = {
-          type: feature.properties.result_type,
-          data:{
-          address: feature?.properties.address_line1,
-          city:feature?.properties.city,
-          zipcode: feature?.properties.postcode,
-          state: feature?.properties.state_code
-        }}
+    const { address_line1, city, postcode, state_code } = feature.properties
+    console.log('Selected:', address_line1, city, postcode, state_code)
+
+    setLoading(true)
+    setError(null)
+    setSearched(true)
+
+    try {
+      const res = await fetch(`${BASE_URL}/property/attributes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address: address_line1,
+          city:    city,
+          zipcode: postcode,
+          state:   state_code
+        })
+      })
+      const json = await res.json()
+
+      if (json.status === 'success') {
+        setAttributes(json.data)
+      } else {
+        setError('Property not found in database.')
+        setAttributes([])
       }
-      console.log(request)
-    };
-
-    function setXY(xValues, yValues, response){ // setter method for given xValues and yValues
-        xValues.push(response.date_of_sales)
-        yValues[0].data.push(response.sale_amount)
+    } catch (err) {
+      setError('Failed to connect to server.')
+      console.error(err)
+    } finally {
+      setLoading(false)
     }
+  }
 
-    const baseURL = 'https://real-estate-ml-app-team-10.onrender.com/'
+  // ── Sales data (kept for debug buttons) ──────────────────────────────────
+  function setXY(xValues: any[], yValues: any[], response: any) {
+    xValues.push(response.date_of_sale)
+    yValues[0].data.push(response.sale_amount)
+  }
 
-    async function getSalesData() { // POST request for propert-sales history using "request" variable saves data to X Y structs (ADD PARAMETERS LATER)
-        //e.preventDefault() // prevent page reload; may not be needed
-        let urlToCall = baseURL+'property-sales'
-        console.log(urlToCall)
-        const res = await fetch(urlToCall, {
-          method: "POST",
-          headers: {
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          address: "123 Jizzy LN",
-          city: "Austin",
-          zipcode: 12345,
-          state: "TX"
-        })
+  async function getSalesData() {
+    const urlToCall = BASE_URL + '/property-sales'
+    console.log(urlToCall)
+    const res = await fetch(urlToCall, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        address: "185 Hilcrest RD",
+        city: "Branford",
+        zipcode: 98070,
+        state: "CT"
       })
-      const jsonRes = await res.json() 
-      console.log(jsonRes)
-      let data = ''
-      jsonRes.data.array.forEach(element => {
+    })
+    const jsonRes = await res.json()
+    console.log(jsonRes)
+    if (jsonRes.data) {
+      jsonRes.data.forEach((element: any) => {
         setXY(housePastX, housePastY, element)
-      });
-
-    }
-
-    var propertyData = {} // stores data from getProperyData POST request
-
-    async function getPropertyData() { // POST request for property data using "request" variable saves data to propertyData
-        //e.preventDefault() // prevent page reload; may not be needed
-        let urlToCall = baseURL+'/property/full_addr'
-        console.log(urlToCall)
-        const res = await fetch(urlToCall, {
-          method: "POST",
-          headers: {
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          address: "123 Jizzy LN",
-          city: "Austin",
-          zipcode: 12345,
-          state: "TX"
-        })
       })
-      const jsonRes = await res.json() 
-      console.log(jsonRes)
-      return(jsonRes)
-
     }
+  }
 
+  async function getPropertyData() {
+    const urlToCall = BASE_URL + '/property/full_addr'
+    console.log(urlToCall)
+    const res = await fetch(urlToCall, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        address: "185 Hilcrest RD",
+        city: "Branford",
+        zipcode: 98070,
+        state: "CT"
+      })
+    })
+    const jsonRes = await res.json()
+    console.log(jsonRes)
+    return jsonRes
+  }
 
-
-  useEffect(() => { // I think this runs on page render
-    
-  }, []);
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <>
-      <div>
-        <a href="https://youtu.be/QWL856dVPIM?si=4lWARAivVvwzxaBK&t=10" target="_blank">
-          <img src={House} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>HomeView</h1>
-      <div className="card">
+    <main className="pdp-wrapper">
+
+      {/* ── Header ── */}
+      <header className="pdp-header">
+        <h1>HomeView</h1>
         <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
-              <GeoapifyGeocoderAutocomplete placeholder="Enter address here"
-                lang={'en'}
-                limit={9}
-                filterByPlace={"512b2c5d66fd2e52c0590f9fcfdb33d34440f00101f901a287020000000000c0020a"}
-                placeSelect={onPlaceSelected}
-                //suggestionsChange={onSuggestionsChange}
-              />
+          <GeoapifyGeocoderAutocomplete
+            placeholder="Enter an address..."
+            lang="en"
+            limit={9}
+            filterByPlace="512b2c5d66fd2e52c0590f9fcfdb33d34440f00101f901a287020000000000c0020a"
+            placeSelect={onPlaceSelected}
+          />
         </GeoapifyContext>
-        <button onClick={getSalesData}>Post Sales Data</button>
-         <button onClick={getPropertyData}>Post Property Data</button>
-        <img src = {House} height="350"/>
-        <h2>Price Data</h2>
-        <DynamicLineChart pastX={housePastX} pastY={housePastY} futureX={houseFutureX} futureY={houseFutureY} />
-        <h2>Additional Data</h2>
-        
+      </header>
+
+      {/* ── Debug buttons — remove before final demo ── */}
+      <div style={{ marginBottom: '12px', display: 'flex', gap: '8px' }}>
+        <button onClick={getSalesData}>Test Sales Data</button>
+        <button onClick={getPropertyData}>Test Property Data</button>
       </div>
-    </>
+
+      {/* ── Loading / Error states ── */}
+      {loading && <p className="status-msg">Loading property data...</p>}
+      {error   && <p className="status-msg error">{error}</p>}
+
+      {/* ── Property page — shows after successful search ── */}
+      {searched && !loading && attributes.length > 0 && (
+        <div className="pdp-body">
+
+          {/* LEFT — photo + attribute table */}
+          <section className="pdp-main">
+            <img src={House} alt="Property" className="pdp-photo" />
+
+            <div className="pdp-attributes">
+              <h2>Property Details</h2>
+              <table className="attr-table">
+                <tbody>
+                  {attributes.map((attr: Attribute, i: number) => (
+                    <tr key={i}>
+                      <td className="attr-label">{attr.label}</td>
+                      <td className="attr-value">{attr.value ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* RIGHT — charts sidebar */}
+          <aside className="pdp-sidebar">
+            <div className="chart-block">
+              <h2>Property Price History</h2>
+              <DynamicLineChart
+                pastX={housePastX} pastY={housePastY}
+                futureX={houseFutureX} futureY={houseFutureY}
+              />
+            </div>
+
+            <div className="chart-block">
+              <h2>City Price History</h2>
+              <DynamicLineChart
+                pastX={housePastX} pastY={housePastY}
+                futureX={houseFutureX} futureY={houseFutureY}
+              />
+            </div>
+
+            <div className="chart-block">
+              <h2>County Price History</h2>
+              <DynamicLineChart
+                pastX={housePastX} pastY={housePastY}
+                futureX={houseFutureX} futureY={houseFutureY}
+              />
+            </div>
+
+            <div className="chart-block">
+              <h2>State Price History</h2>
+              <DynamicLineChart
+                pastX={housePastX} pastY={housePastY}
+                futureX={houseFutureX} futureY={houseFutureY}
+              />
+            </div>
+          </aside>
+
+        </div>
+      )}
+
+      {/* ── Empty state — before any search ── */}
+      {!searched && (
+        <div className="pdp-empty">
+          <img src={House} alt="HomeView" className="pdp-hero" />
+          <p>Search an address above to view property details</p>
+        </div>
+      )}
+
+    </main>
   )
 }
+
 export default Listing
 
-/*
+{/*
 <Line id="graph" data = {{
         labels: ['1990', '1991', '1992', '1993', '1994', '1995', '1996'],
           datasets: [{
@@ -161,4 +254,4 @@ export default Listing
           }]
         }}
         />
-*/
+*/}
