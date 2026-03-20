@@ -10,8 +10,24 @@ interface Attribute {
 const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
 function App() {
-  const [page, setPage]             = useState<'home' | 'listing'>('home')
-  const [attributes, setAttributes] = useState<Attribute[]>([])
+  //const [page, setPage] = useState<'home' | 'listing'>('home')
+  //const [attributes, setAttributes] = useState<Attribute[]>([])
+
+  //Testing:
+  const [page, setPage] = useState<'home' | 'listing'>('listing')
+  const [attributes, setAttributes] = useState<Attribute[]>([
+    { label: "Address",    value: "14 DOWNS RD, Monroe, CT 6468" },
+    { label: "Year Built", value: 1951 },
+    { label: "Style",      value: "Colonial" },
+    { label: "Bedrooms",   value: 4 },
+    { label: "Bathrooms",  value: 2 },
+    { label: "Sq Ft",      value: 1908 },
+    { label: "Stories",    value: 2 },
+    { label: "Latitude",   value: 41.3857335 },
+    { label: "Longitude",  value: -73.1862192 },
+  ])
+
+
   const [loading, setLoading]       = useState<boolean>(false)
   const [error, setError]           = useState<string | null>(null)
 
