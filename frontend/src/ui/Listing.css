@@ -141,6 +141,48 @@ Nate's styling
   opacity: 0.6;
 }
 
+.attr-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.attr-table tr {
+  border-bottom: 1px solid #444;
+}
+.attr-label {
+  padding: 10px 8px;
+  font-weight: 600;
+  color: #aaaaaa;
+  width: 40%;
+}
+.attr-value {
+  padding: 10px 8px;
+  color: #ffffff;
+}
+
+/* ── Property details heading ── */
+.pdp-attributes h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+/* ── Sidebar chart headings ── */
+.pdp-sidebar h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #dddddd;
+}
+
+/* ── Header ── */
+.pdp-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  white-space: nowrap;
+  margin: 0;
+  color: #ffffff;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .pdp-body {
@@ -151,4 +193,3 @@ Nate's styling
     align-items: flex-start;
   }
 }
-
