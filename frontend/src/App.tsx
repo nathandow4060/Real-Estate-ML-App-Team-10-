@@ -31,6 +31,31 @@ function App() {
   const [loading, setLoading]       = useState<boolean>(false)
   const [error, setError]           = useState<string | null>(null)
 
+  function normalizeAddress(address: string): string {
+  return address
+    .toUpperCase()
+    .replace(/\bROAD\b/g, 'RD')
+    .replace(/\bSTREET\b/g, 'ST')
+    .replace(/\bAVENUE\b/g, 'AVE')
+    .replace(/\bDRIVE\b/g, 'DR')
+    .replace(/\bLANE\b/g, 'LN')
+    .replace(/\bCOURT\b/g, 'CT')
+    .replace(/\bBOULEVARD\b/g, 'BLVD')
+    .replace(/\bCIRCLE\b/g, 'CIR')
+    .replace(/\bPLACE\b/g, 'PL')
+    .replace(/\bHIGHWAY\b/g, 'HWY')
+    .replace(/\bTERRACE\b/g, 'TER')
+    .replace(/\bTRAIL\b/g, 'TRL')
+    .replace(/\bWAY\b/g, 'WAY')
+    .replace(/\bHILL\b/g, 'HL')
+    .replace(/\bMOUNT\b/g, 'MT')
+    .replace(/\bNORTH\b/g, 'N')
+    .replace(/\bSOUTH\b/g, 'S')
+    .replace(/\bEAST\b/g, 'E')
+    .replace(/\bWEST\b/g, 'W')
+    .trim()
+  }
+
   const onPlaceSelected = async (feature: any) => {
     if (feature?.properties.result_type !== "building") return
 
@@ -45,8 +70,8 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          address: address_line1,
-          city:    city,
+          address: normalizeAddress(address_line1),  // ← normalize before sending
+          city:    city.toUpperCase(),               // ← DB has uppercase cities
           zipcode: postcode,
           state:   state_code
         })
@@ -67,6 +92,8 @@ function App() {
       setLoading(false)
     }
   }
+
+  
 
   return (
     <>
