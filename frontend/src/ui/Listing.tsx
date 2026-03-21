@@ -83,7 +83,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
   return (
     <main className="pdp-wrapper">
 
-      {/* ── Header with search bar ── */}
+      {/*Header with search bar*/}
       <header className="pdp-header">
         <h1>HomeView</h1>
         <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
@@ -97,15 +97,15 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
         </GeoapifyContext>
       </header>
 
-      {/* ── Loading / Error states ── */}
+      {/*Loading / Error states*/}
       {loading && <p className="status-msg">Loading property data...</p>}
       {error   && <p className="status-msg error">{error}</p>}
 
-      {/* ── Main two-column layout ── */}
+      {/*Main two-column layout */}
       {!loading && attributes.length > 0 && (
         <div className="pdp-body">
 
-          {/* ── LEFT: photo + attribute table ── */}
+          {/* LEFT: photo + attribute table */}
           <section className="pdp-main">
             <img src={House} alt="Property" className="pdp-photo" />
 
@@ -132,7 +132,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
             </div>
           </section>
 
-          {/* ── RIGHT: charts sidebar ── */}
+          {/* RIGHT: charts sidebar */}
           <aside className="pdp-sidebar">
             <div className="chart-block">
               <h2>Property Price History</h2>

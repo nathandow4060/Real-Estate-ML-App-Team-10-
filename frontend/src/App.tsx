@@ -55,6 +55,7 @@ function App() {
   const [loading, setLoading]       = useState<boolean>(false)
   const [error, setError]           = useState<string | null>(null)
 
+  // Needs to be normalized so the backend can read
   function normalizeAddress(address: string): string {
   return address
     .toUpperCase()
@@ -127,7 +128,7 @@ function App() {
         if (salesJson.status === 'success') setSalesData(salesJson.data)
         else setSalesData([])
 
-       // City — cached (same for all properties in same city)
+       // City
         const cityJson = await cachedFetch(`${BASE_URL}/property/city-history`, {
           city: city.toUpperCase(),
           state: state_code
@@ -135,7 +136,7 @@ function App() {
         if (cityJson.status === 'success') setCityData(cityJson.data)
         else setCityData([])
 
-        // County — cached (same for all properties in same zipcode)
+        // County
         const countyJson = await cachedFetch(`${BASE_URL}/property/county-history`, {
           zipcode: postcode,
           state: state_code
@@ -143,7 +144,7 @@ function App() {
         if (countyJson.status === 'success') setCountyData(countyJson.data)
         else setCountyData([])
 
-        // State — cached (same for ALL CT properties every time)
+        // State
         const stateJson = await cachedFetch(`${BASE_URL}/property/state-history`, {
           state: state_code
         })
