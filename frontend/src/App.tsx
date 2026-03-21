@@ -9,10 +9,33 @@ interface Attribute {
 
 const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
+const cache: Record<string, any> = {}
+
+//Used to catche the calculated average sales for city, county, and state
+async function cachedFetch(url: string, body: object) {
+  const key = url + JSON.stringify(body)
+  if (cache[key]) {
+    console.log('Cache hit:', key)
+    return cache[key]
+  }
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  })
+  const json = await res.json()
+  cache[key] = json
+  return json
+}
+
 function App() {
   const [page, setPage] = useState<'home' | 'listing'>('home')
   const [attributes, setAttributes] = useState<Attribute[]>([])
   const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
+
+  const [cityData,   setCityData]   = useState<{year: string, avg_price: number}[]>([])
+  const [countyData, setCountyData] = useState<{year: string, avg_price: number}[]>([])
+  const [stateData,  setStateData]  = useState<{year: string, avg_price: number}[]>([])
 
   /*Testing:
   const [page, setPage] = useState<'home' | 'listing'>('listing')
@@ -101,13 +124,32 @@ function App() {
           })
         })
         const salesJson = await salesRes.json()
-        if (salesJson.status === 'success') {
-          setSalesData(salesJson.data)
-        } else {
-          setSalesData([])
-        }
+        if (salesJson.status === 'success') setSalesData(salesJson.data)
+        else setSalesData([])
 
+       // City — cached (same for all properties in same city)
+        const cityJson = await cachedFetch(`${BASE_URL}/property/city-history`, {
+          city: city.toUpperCase(),
+          state: state_code
+        })
+        if (cityJson.status === 'success') setCityData(cityJson.data)
+        else setCityData([])
 
+        // County — cached (same for all properties in same zipcode)
+        const countyJson = await cachedFetch(`${BASE_URL}/property/county-history`, {
+          zipcode: postcode,
+          state: state_code
+        })
+        if (countyJson.status === 'success') setCountyData(countyJson.data)
+        else setCountyData([])
+
+        // State — cached (same for ALL CT properties every time)
+        const stateJson = await cachedFetch(`${BASE_URL}/property/state-history`, {
+          state: state_code
+        })
+        if (stateJson.status === 'success') setStateData(stateJson.data)
+        else setStateData([])
+        
         setPage('listing')
 
       } else {
@@ -136,6 +178,9 @@ function App() {
           loading={loading}
           error={error}
           salesData={salesData}
+          cityData={cityData}
+          countyData={countyData}
+          stateData={stateData}
         />
       )}
     </>

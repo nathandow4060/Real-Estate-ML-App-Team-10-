@@ -23,11 +23,14 @@ interface ListingProps {
   loading: boolean
   error: string | null
   salesData: {date_of_sale: string, sale_amount: number}[]
+  cityData:   {year: string, avg_price: number}[]
+  countyData: {year: string, avg_price: number}[]
+  stateData:  {year: string, avg_price: number}[]
 }
 
 
 
-function Listing({ onPlaceSelected, attributes, loading, error, salesData}: ListingProps) {
+function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityData, countyData, stateData}: ListingProps) {
   const lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
 
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
@@ -46,6 +49,33 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData}: List
     data: [100, 200, 600],
     backgroundColor: 'rgba(255, 26, 104, 0.2)',
     borderColor: 'rgba(255, 26, 104, 1)',
+    borderWidth: 1
+  }]
+
+  const cityPastX: string[]      = cityData.map(d => d.year)
+  const cityPastY: ChartDataset[] = [{
+    label: "Avg City Sale Price (USD $)",
+    data: cityData.map(d => d.avg_price),
+    backgroundColor: "rgba(153,102,255,0.4)",
+    borderColor: 'rgba(153,102,255,1)',
+    borderWidth: 1
+  }]
+
+  const countyPastX: string[]      = countyData.map(d => d.year)
+  const countyPastY: ChartDataset[] = [{
+    label: "Avg County Sale Price (USD $)",
+    data: countyData.map(d => d.avg_price),
+    backgroundColor: "rgba(255,159,64,0.4)",
+    borderColor: 'rgba(255,159,64,1)',
+    borderWidth: 1
+  }]
+
+  const statePastX: string[]      = stateData.map(d => d.year)
+  const statePastY: ChartDataset[] = [{
+    label: "Avg State Sale Price (USD $)",
+    data: stateData.map(d => d.avg_price),
+    backgroundColor: "rgba(255,99,132,0.4)",
+    borderColor: 'rgba(255,99,132,1)',
     borderWidth: 1
   }]
 
@@ -115,7 +145,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData}: List
             <div className="chart-block">
               <h2>City Price History</h2>
               <DynamicLineChart
-                pastX={housePastX} pastY={housePastY}
+                pastX={cityPastX} pastY={cityPastY}
                 futureX={houseFutureX} futureY={houseFutureY}
               />
             </div>
@@ -123,7 +153,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData}: List
             <div className="chart-block">
               <h2>County Price History</h2>
               <DynamicLineChart
-                pastX={housePastX} pastY={housePastY}
+                pastX={countyPastX} pastY={countyPastY}
                 futureX={houseFutureX} futureY={houseFutureY}
               />
             </div>
@@ -131,7 +161,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData}: List
             <div className="chart-block">
               <h2>State Price History</h2>
               <DynamicLineChart
-                pastX={housePastX} pastY={housePastY}
+                pastX={statePastX} pastY={statePastY}
                 futureX={houseFutureX} futureY={houseFutureY}
               />
             </div>
