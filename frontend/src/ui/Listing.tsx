@@ -1,149 +1,182 @@
-import { useState, useEffect } from 'react'
 import House from './assets/house.jpg'
 import './Listing.css'
-import {Chart as ChartJS} from "chart.js/auto"
-import {Line} from "react-chartjs-2";
 import DynamicLineChart from "./assets/dynamicLineChart.tsx"
-import Search from './assets/search.tsx';
-import Table from "./assets/table.tsx";
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
 
-function Listing() {
+interface Attribute {
+  label: string
+  value: any
+}
 
-  let housePastX = ["1990", "1991", "1992"] // contains X and Y data for graphs 
-  let housePastY = [
-      {
-        label: "Purchasse History (USD $)",
-        data: [65, 59, 80],
-        backgroundColor: "rgba(75,192,192,0.4)",
-        borderColor: 'rgba(25, 142, 221, 1)',
-        borderWidth: 1
-      },
-    ]
-  let houseFutureX = ["2025", "2026", "2027"]
-  let houseFutureY = [
-      {
-        label: "Price Prediction (USD $)",
-        data: [100, 200, 600],
-        backgroundColor: 'rgba(255, 26, 104, 0.2)',
-        borderColor: 'rgba(255, 26, 104, 1)',
-        borderWidth: 1
-      },
-    ]
-    
-    //PastY[0].data = [21,345345, 234234]'
+interface ChartDataset {
+  label: string
+  data: number[]
+  backgroundColor: string
+  borderColor: string
+  borderWidth: number
+}
 
-    var request = {} // contains data for the GET request to the backend
-
-    const onPlaceSelected = (feature) => {
-      console.log('Selected:', feature?.properties);
-
-      if(feature?.properties.result_type === "building"){
-        request = {
-          type: feature.properties.result_type,
-          data:{
-          address: feature?.properties.address_line1,
-          city:feature?.properties.city,
-          zipcode: feature?.properties.postcode,
-          state: feature?.properties.state_code
-        }}
-      }
-      console.log(request)
-    };
-
-    function setXY(xValues, yValues, response){ // setter method for given xValues and yValues
-        xValues.push(response.date_of_sales)
-        yValues[0].data.push(response.sale_amount)
-    }
-
-    const baseURL = 'http://localhost:5000/'
-
-    async function getSalesData() { // POST request for propert-sales history using "request" variable saves data to X Y structs (ADD PARAMETERS LATER)
-        //e.preventDefault() // prevent page reload; may not be needed
-        let urlToCall = baseURL+'property-sales'
-        console.log(urlToCall)
-        const res = await fetch(urlToCall, {
-          method: "POST",
-          headers: {
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          address: "123 Jizzy LN",
-          city: "Austin",
-          zipcode: 12345,
-          state: "TX"
-        })
-      })
-      const jsonRes = await res.json() 
-      console.log(jsonRes)
-      let data = ''
-      jsonRes.data.array.forEach(element => {
-        setXY(housePastX, housePastY, element)
-      });
-
-    }
-
-    var propertyData = {} // stores data from getProperyData POST request
-
-    async function getPropertyData() { // POST request for property data using "request" variable saves data to propertyData
-        //e.preventDefault() // prevent page reload; may not be needed
-        let urlToCall = baseURL+'/property/full_addr'
-        console.log(urlToCall)
-        const res = await fetch(urlToCall, {
-          method: "POST",
-          headers: {
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          address: "123 Jizzy LN",
-          city: "Austin",
-          zipcode: 12345,
-          state: "TX"
-        })
-      })
-      const jsonRes = await res.json() 
-      console.log(jsonRes)
-      return(jsonRes)
-
-    }
+interface ListingProps {
+  onPlaceSelected: (feature: any) => void
+  attributes: Attribute[]
+  loading: boolean
+  error: string | null
+  salesData: {date_of_sale: string, sale_amount: number}[]
+  cityData:   {year: string, avg_price: number}[]
+  countyData: {year: string, avg_price: number}[]
+  stateData:  {year: string, avg_price: number}[]
+}
 
 
 
-  useEffect(() => { // I think this runs on page render
-    
-  }, []);
+function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityData, countyData, stateData}: ListingProps) {
+  const lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
+
+  const housePastX: string[] = salesData.map(s => s.date_of_sale)
+  const housePastY: ChartDataset[] = [{
+    label: "Purchase History (USD $)",
+    data: salesData.map(s => s.sale_amount),
+    backgroundColor: "rgba(75,192,192,0.4)",
+    borderColor: 'rgba(25, 142, 221, 1)',
+    borderWidth: 1
+  }]
+
+  //Still needs to be predicted
+  const houseFutureX: string[] = ["2025", "2026", "2027"]
+  const houseFutureY: ChartDataset[] = [{
+    label: "Price Prediction (USD $)",
+    data: [100, 200, 600],
+    backgroundColor: 'rgba(255, 26, 104, 0.2)',
+    borderColor: 'rgba(255, 26, 104, 1)',
+    borderWidth: 1
+  }]
+
+  const cityPastX: string[]      = cityData.map(d => d.year)
+  const cityPastY: ChartDataset[] = [{
+    label: "Avg City Sale Price (USD $)",
+    data: cityData.map(d => d.avg_price),
+    backgroundColor: "rgba(153,102,255,0.4)",
+    borderColor: 'rgba(153,102,255,1)',
+    borderWidth: 1
+  }]
+
+  const countyPastX: string[]      = countyData.map(d => d.year)
+  const countyPastY: ChartDataset[] = [{
+    label: "Avg County Sale Price (USD $)",
+    data: countyData.map(d => d.avg_price),
+    backgroundColor: "rgba(255,159,64,0.4)",
+    borderColor: 'rgba(255,159,64,1)',
+    borderWidth: 1
+  }]
+
+  const statePastX: string[]      = stateData.map(d => d.year)
+  const statePastY: ChartDataset[] = [{
+    label: "Avg State Sale Price (USD $)",
+    data: stateData.map(d => d.avg_price),
+    backgroundColor: "rgba(255,99,132,0.4)",
+    borderColor: 'rgba(255,99,132,1)',
+    borderWidth: 1
+  }]
+
 
   return (
-    <>
-      <div>
-        <a href="https://youtu.be/QWL856dVPIM?si=4lWARAivVvwzxaBK&t=10" target="_blank">
-          <img src={House} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>HomeView</h1>
-      <div className="card">
+    <main className="pdp-wrapper">
+
+      {/* ── Header with search bar ── */}
+      <header className="pdp-header">
+        <h1>HomeView</h1>
         <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
-              <GeoapifyGeocoderAutocomplete placeholder="Enter address here"
-                lang={'en'}
-                limit={9}
-                filterByPlace={"512b2c5d66fd2e52c0590f9fcfdb33d34440f00101f901a287020000000000c0020a"}
-                placeSelect={onPlaceSelected}
-                //suggestionsChange={onSuggestionsChange}
-              />
+          <GeoapifyGeocoderAutocomplete
+            placeholder="Enter an address..."
+            lang="en"
+            limit={9}
+            filterByPlace="512b2c5d66fd2e52c0590f9fcfdb33d34440f00101f901a287020000000000c0020a"
+            placeSelect={onPlaceSelected}
+          />
         </GeoapifyContext>
-        <img src = {House} height="350"/>
-        <h2>Price Data</h2>
-        <DynamicLineChart pastX={housePastX} pastY={housePastY} futureX={houseFutureX} futureY={houseFutureY} />
-        <h2>Additional Data</h2>
-        <Table response = {propertyData}/>
-      </div>
-    </>
+      </header>
+
+      {/* ── Loading / Error states ── */}
+      {loading && <p className="status-msg">Loading property data...</p>}
+      {error   && <p className="status-msg error">{error}</p>}
+
+      {/* ── Main two-column layout ── */}
+      {!loading && attributes.length > 0 && (
+        <div className="pdp-body">
+
+          {/* ── LEFT: photo + attribute table ── */}
+          <section className="pdp-main">
+            <img src={House} alt="Property" className="pdp-photo" />
+
+            <div className="pdp-price">
+              <h2>Last Sale Price</h2>
+              <p className="price-value">
+                ${lastSale?.sale_amount.toLocaleString()}
+              </p>
+              <p className="price-date">Sold: {lastSale?.date_of_sale}</p>
+            </div>
+
+            <div className="pdp-attributes">
+              <h2>Property Details</h2>
+              <table className="attr-table">
+                <tbody>
+                  {attributes.map((attr: Attribute, i: number) => (
+                    <tr key={i}>
+                      <td className="attr-label">{attr.label}</td>
+                      <td className="attr-value">{attr.value ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* ── RIGHT: charts sidebar ── */}
+          <aside className="pdp-sidebar">
+            <div className="chart-block">
+              <h2>Property Price History</h2>
+              <DynamicLineChart
+                pastX={housePastX} pastY={housePastY}
+                futureX={houseFutureX} futureY={houseFutureY}
+              />
+            </div>
+
+            <div className="chart-block">
+              <h2>City Price History</h2>
+              <DynamicLineChart
+                pastX={cityPastX} pastY={cityPastY}
+                futureX={houseFutureX} futureY={houseFutureY}
+              />
+            </div>
+
+            <div className="chart-block">
+              <h2>County Price History</h2>
+              <DynamicLineChart
+                pastX={countyPastX} pastY={countyPastY}
+                futureX={houseFutureX} futureY={houseFutureY}
+              />
+            </div>
+
+            <div className="chart-block">
+              <h2>State Price History</h2>
+              <DynamicLineChart
+                pastX={statePastX} pastY={statePastY}
+                futureX={houseFutureX} futureY={houseFutureY}
+              />
+            </div>
+          </aside>
+
+        </div>
+      )}
+
+    </main>
   )
 }
+
 export default Listing
 
-/*
+{/*
 <Line id="graph" data = {{
         labels: ['1990', '1991', '1992', '1993', '1994', '1995', '1996'],
           datasets: [{
@@ -159,4 +192,4 @@ export default Listing
           }]
         }}
         />
-*/
+*/}

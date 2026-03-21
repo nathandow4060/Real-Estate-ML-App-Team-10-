@@ -1,6 +1,27 @@
 import React, { useState } from "react";
 import { Line } from "react-chartjs-2";
 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+)
+
 /* 
 X format: [] - String array
 Y format: [
@@ -14,7 +35,12 @@ Y format: [
     ]
 */
 
-function DynamicLineChart({pastX, pastY, futureX, futureY}) 
+function DynamicLineChart({pastX, pastY, futureX, futureY}: {
+  pastX: string[]
+  pastY: any[]
+  futureX: string[]
+  futureY: any[]
+}) 
   // the DynamicLineChart will take X and Y data for 2 graphs 
   {
   const [chartData, setChartData] = useState({
