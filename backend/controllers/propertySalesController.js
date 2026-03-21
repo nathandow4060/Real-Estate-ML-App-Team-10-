@@ -26,7 +26,7 @@ exports.getCityPriceHistory = async (req, res, next) => {
         const state = req.body.state
         const result = await db.query(`
             SELECT 
-                SUBSTRING(ps.date_of_sale, 1, 4) AS year,
+                RIGHT(ps.date_of_sale, 4) AS year,
                 ROUND(AVG(ps.sale_amount)) AS avg_price
             FROM public."Property" AS p
             JOIN public."Property_Sale" AS ps ON p.pid = ps.property_id
@@ -46,11 +46,11 @@ exports.getCountyPriceHistory = async (req, res, next) => {
         const state = req.body.state
         const result = await db.query(`
             SELECT 
-                SUBSTRING(ps.date_of_sale, 1, 4) AS year,
+                RIGHT(ps.date_of_sale, 4) AS year,
                 ROUND(AVG(ps.sale_amount)) AS avg_price
             FROM public."Property" AS p
             JOIN public."Property_Sale" AS ps ON p.pid = ps.property_id
-            WHERE p.zipcode = $1 AND p.state ILIKE $2
+            WHERE p.city ILIKE $1 AND p.state ILIKE $2
             GROUP BY year
             ORDER BY year ASC
         `, [zipcode, state])
@@ -65,11 +65,11 @@ exports.getStatePriceHistory = async (req, res, next) => {
         const state = req.body.state
         const result = await db.query(`
             SELECT 
-                SUBSTRING(ps.date_of_sale, 1, 4) AS year,
+                RIGHT(ps.date_of_sale, 4) AS year,
                 ROUND(AVG(ps.sale_amount)) AS avg_price
             FROM public."Property" AS p
             JOIN public."Property_Sale" AS ps ON p.pid = ps.property_id
-            WHERE p.state ILIKE $1
+            WHERE p.city ILIKE $1 AND p.state ILIKE $2
             GROUP BY year
             ORDER BY year ASC
         `, [state])
