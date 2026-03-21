@@ -22,26 +22,34 @@ interface ListingProps {
   attributes: Attribute[]
   loading: boolean
   error: string | null
+  salesData: {date_of_sale: string, sale_amount: number}[]
 }
 
-const housePastX: string[] = ["1990", "1991", "1992"]
-const housePastY: ChartDataset[] = [{
-  label: "Purchase History (USD $)",
-  data: [65, 59, 80],
-  backgroundColor: "rgba(75,192,192,0.4)",
-  borderColor: 'rgba(25, 142, 221, 1)',
-  borderWidth: 1
-}]
-const houseFutureX: string[] = ["2025", "2026", "2027"]
-const houseFutureY: ChartDataset[] = [{
-  label: "Price Prediction (USD $)",
-  data: [100, 200, 600],
-  backgroundColor: 'rgba(255, 26, 104, 0.2)',
-  borderColor: 'rgba(255, 26, 104, 1)',
-  borderWidth: 1
-}]
 
-function Listing({ onPlaceSelected, attributes, loading, error }: ListingProps) {
+
+function Listing({ onPlaceSelected, attributes, loading, error, salesData}: ListingProps) {
+  const lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
+
+  const housePastX: string[] = salesData.map(s => s.date_of_sale)
+  const housePastY: ChartDataset[] = [{
+    label: "Purchase History (USD $)",
+    data: salesData.map(s => s.sale_amount),
+    backgroundColor: "rgba(75,192,192,0.4)",
+    borderColor: 'rgba(25, 142, 221, 1)',
+    borderWidth: 1
+  }]
+
+  //Still needs to be predicted
+  const houseFutureX: string[] = ["2025", "2026", "2027"]
+  const houseFutureY: ChartDataset[] = [{
+    label: "Price Prediction (USD $)",
+    data: [100, 200, 600],
+    backgroundColor: 'rgba(255, 26, 104, 0.2)',
+    borderColor: 'rgba(255, 26, 104, 1)',
+    borderWidth: 1
+  }]
+
+
   return (
     <main className="pdp-wrapper">
 
@@ -70,6 +78,14 @@ function Listing({ onPlaceSelected, attributes, loading, error }: ListingProps) 
           {/* ── LEFT: photo + attribute table ── */}
           <section className="pdp-main">
             <img src={House} alt="Property" className="pdp-photo" />
+
+            <div className="pdp-price">
+              <h2>Last Sale Price</h2>
+              <p className="price-value">
+                ${lastSale?.sale_amount.toLocaleString()}
+              </p>
+              <p className="price-date">Sold: {lastSale?.date_of_sale}</p>
+            </div>
 
             <div className="pdp-attributes">
               <h2>Property Details</h2>

@@ -12,6 +12,7 @@ const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 function App() {
   const [page, setPage] = useState<'home' | 'listing'>('home')
   const [attributes, setAttributes] = useState<Attribute[]>([])
+  const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
 
   /*Testing:
   const [page, setPage] = useState<'home' | 'listing'>('listing')
@@ -80,7 +81,27 @@ function App() {
 
       if (json.status === 'success') {
         setAttributes(json.data)
+
+        const salesRes = await fetch(`${BASE_URL}/property-sales`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            address: normalizeAddress(address_line1),
+            city:    city.toUpperCase(),
+            zipcode: postcode,
+            state:   state_code
+          })
+        })
+        const salesJson = await salesRes.json()
+        if (salesJson.status === 'success') {
+          setSalesData(salesJson.data)
+        } else {
+          setSalesData([])
+        }
+
+
         setPage('listing')
+
       } else {
         setError('Property not found in database.')
         setAttributes([])
@@ -106,6 +127,7 @@ function App() {
           attributes={attributes}
           loading={loading}
           error={error}
+          salesData={salesData}
         />
       )}
     </>

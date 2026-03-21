@@ -183,6 +183,32 @@ Nate's styling
   color: #ffffff;
 }
 
+.pdp-price {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  border-left: 4px solid #25a244;
+}
+.pdp-price h2 {
+  font-size: 14px;
+  color: #aaaaaa;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.price-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #25a244;
+  margin: 0 0 4px 0;
+}
+.price-date {
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .pdp-body {
