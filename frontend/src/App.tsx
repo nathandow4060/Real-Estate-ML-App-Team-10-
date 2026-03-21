@@ -129,7 +129,7 @@ function App() {
         else setSalesData([])
 
        // City
-        const cityJson = await cachedFetch(`${BASE_URL}/property/city-history`, {
+        const cityJson = await cachedFetch(`${BASE_URL}/property-sales/city-history`, {
           city: city.toUpperCase(),
           state: state_code
         })
@@ -137,7 +137,7 @@ function App() {
         else setCityData([])
 
         // County
-        const countyJson = await cachedFetch(`${BASE_URL}/property/county-history`, {
+        const countyJson = await cachedFetch(`${BASE_URL}/property-sales/county-history`, {
           zipcode: postcode,
           state: state_code
         })
@@ -145,7 +145,7 @@ function App() {
         else setCountyData([])
 
         // State
-        const stateJson = await cachedFetch(`${BASE_URL}/property/state-history`, {
+        const stateJson = await cachedFetch(`${BASE_URL}/property-sales/state-history`, {
           state: state_code
         })
         if (stateJson.status === 'success') setStateData(stateJson.data)
