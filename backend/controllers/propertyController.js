@@ -20,9 +20,7 @@ exports.getPropertyAttributes = async (req, res, next) => {
                 num_bedrooms,
                 num_bathrooms,
                 living_area_sqft,
-                stories,
-                latitude,
-                longitude
+                stories
             FROM public."Property" WHERE 
             street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
             [street_addr, city, state, zipcode]
@@ -38,11 +36,17 @@ exports.getPropertyAttributes = async (req, res, next) => {
             { label: "Bedrooms",    value: prop.num_bedrooms },
             { label: "Bathrooms",   value: prop.num_bathrooms },
             { label: "Sq Ft",       value: prop.living_area_sqft },
-            { label: "Stories",     value: prop.stories },
-            { label: "Latitude",    value: prop.latitude },
-            { label: "Longitude",   value: prop.longitude },
+            { label: "Stories",     value: prop.stories }
         ]
-        res.json({ status: 'success', data: attributes })
+
+        nonNull = attributes.filter(attr => 
+            attr.value !== null && 
+            attr.value !== undefined && 
+            attr.value !== '' && 
+            String(attr.value) !== 'NaN'
+        )
+        
+        res.json({ status: 'success', data: nonNull })
     } catch (err) {
         next(err)
     }
