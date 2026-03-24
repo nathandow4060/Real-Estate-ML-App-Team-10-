@@ -26,7 +26,7 @@ exports.getCityPriceHistory = async (req, res, next) => {
         const state = req.body.state
         const result = await db.query(`
             SELECT 
-                SUBSTRING(ps.date_of_sale, 1, 4) AS year,
+                RIGHT(ps.date_of_sale, 4) AS year,
                 ROUND(AVG(ps.sale_amount)) AS avg_price
             FROM public."Property" AS p
             JOIN public."Property_Sale" AS ps ON p.pid = ps.property_id
@@ -35,9 +35,7 @@ exports.getCityPriceHistory = async (req, res, next) => {
             ORDER BY year ASC
         `, [city, state])
         res.json({ status: 'success', data: result.rows })
-    } catch (err) {
-        next(err)
-    }
+    } catch (err) { next(err) }
 }
 
 exports.getCountyPriceHistory = async (req, res, next) => {
@@ -46,7 +44,7 @@ exports.getCountyPriceHistory = async (req, res, next) => {
         const state = req.body.state
         const result = await db.query(`
             SELECT 
-                SUBSTRING(ps.date_of_sale, 1, 4) AS year,
+                RIGHT(ps.date_of_sale, 4) AS year,
                 ROUND(AVG(ps.sale_amount)) AS avg_price
             FROM public."Property" AS p
             JOIN public."Property_Sale" AS ps ON p.pid = ps.property_id
@@ -55,9 +53,7 @@ exports.getCountyPriceHistory = async (req, res, next) => {
             ORDER BY year ASC
         `, [zipcode, state])
         res.json({ status: 'success', data: result.rows })
-    } catch (err) {
-        next(err)
-    }
+    } catch (err) { next(err) }
 }
 
 exports.getStatePriceHistory = async (req, res, next) => {
@@ -65,7 +61,7 @@ exports.getStatePriceHistory = async (req, res, next) => {
         const state = req.body.state
         const result = await db.query(`
             SELECT 
-                SUBSTRING(ps.date_of_sale, 1, 4) AS year,
+                RIGHT(ps.date_of_sale, 4) AS year,
                 ROUND(AVG(ps.sale_amount)) AS avg_price
             FROM public."Property" AS p
             JOIN public."Property_Sale" AS ps ON p.pid = ps.property_id
@@ -74,9 +70,7 @@ exports.getStatePriceHistory = async (req, res, next) => {
             ORDER BY year ASC
         `, [state])
         res.json({ status: 'success', data: result.rows })
-    } catch (err) {
-        next(err)
-    }
+    } catch (err) { next(err) }
 }
 
 module.exports = {
