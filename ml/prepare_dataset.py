@@ -7,10 +7,11 @@ import numpy as np
 import pandas as pd
 
 # How to run: Run this script in the same folder as the joined dataset named "cre22_master_dataset_test_output"
-# In your terminal: python prepare_dataset.py cre22_master_dataset_test_output.csv cre22_master_dataset_cleaned.csv
+# In your terminal: python prepare_dataset_city_style_encoded.py cre22_master_dataset_test_output.csv cre22_master_dataset_cleaned.csv
 # This will output the cleaned dataset "cre22_master_dataset_cleaned.csv"
 # Optionally you can do this in your terminal to get a report on the cleaning as well:
-# python prepare_dataset.py cre22_master_dataset_test_output.csv cre22_master_dataset_cleaned.csv cre22_cleaning_report.csv
+# python prepare_dataset_city_style_encoded.py cre22_master_dataset_test_output.csv cre22_master_dataset_cleaned.csv cre22_cleaning_report.csv
+
 
 def normalize_text(series: pd.Series) -> pd.Series:
     s = series.astype("string").str.upper().str.strip()
@@ -24,6 +25,7 @@ def normalize_text(series: pd.Series) -> pd.Series:
     return s
 
 
+
 def coalesce_columns(df: pd.DataFrame, columns: list[str]) -> pd.Series:
     present = [c for c in columns if c in df.columns]
     if not present:
@@ -35,8 +37,30 @@ def coalesce_columns(df: pd.DataFrame, columns: list[str]) -> pd.Series:
     return s
 
 
+
 def to_numeric(series: pd.Series) -> pd.Series:
     return pd.to_numeric(series, errors="coerce")
+
+
+
+def encode_categorical(series: pd.Series) -> tuple[pd.Series, pd.DataFrame]:
+    """
+    Assign a deterministic integer code to each distinct non-null category.
+    Missing values stay blank in the encoded output.
+
+    Codes start at 1 so blank can remain blank instead of being 0.
+    """
+    s = normalize_text(series)
+    unique_values = sorted(v for v in s.dropna().unique())
+    mapping = {value: code for code, value in enumerate(unique_values, start=1)}
+
+    encoded = s.map(mapping).astype("Int64")
+    mapping_df = pd.DataFrame({
+        "category": unique_values,
+        "code": [mapping[v] for v in unique_values],
+    })
+    return encoded, mapping_df
+
 
 
 def parse_stories_value(x) -> float:
@@ -66,6 +90,7 @@ def parse_stories_value(x) -> float:
         return np.nan
 
 
+
 def parse_bedrooms_value(x) -> float:
     if pd.isna(x):
         return np.nan
@@ -76,6 +101,7 @@ def parse_bedrooms_value(x) -> float:
 
     m = re.search(r"(\d+)", s)
     return float(m.group(1)) if m else np.nan
+
 
 
 def parse_bathrooms_value(x) -> float:
@@ -101,12 +127,14 @@ def parse_bathrooms_value(x) -> float:
     return value
 
 
+
 def normalize_zipcode_value(x):
     if pd.isna(x):
         return pd.NA
 
     digits = re.sub(r"\D", "", str(x))
     return digits[:5] if len(digits) >= 5 else pd.NA
+
 
 
 def split_address_parts(series: pd.Series) -> pd.DataFrame:
@@ -169,9 +197,11 @@ def split_address_parts(series: pd.Series) -> pd.DataFrame:
     return out
 
 
+
 def clean_sale_date(df: pd.DataFrame) -> pd.Series:
     raw = coalesce_columns(df, ["sale_date", "Date Recorded"])
     return pd.to_datetime(raw, errors="coerce")
+
 
 
 def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = None) -> None:
@@ -183,6 +213,7 @@ def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = No
 
     keep_mask = sale_amount_raw.notna()
     dropped_rows = int((~keep_mask).sum())
+    input_rows = len(df)
 
     df = df.loc[keep_mask].copy().reset_index(drop=True)
     sale_amount_raw = sale_amount_raw.loc[keep_mask].reset_index(drop=True)
@@ -213,7 +244,8 @@ def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = No
     out["list_year"] = to_numeric(coalesce_columns(df, ["list_year", "List Year"]))
 
     # Location and address
-    out["town_norm"] = normalize_text(coalesce_columns(df, ["town_norm", "Town"]))
+    out["city"] = normalize_text(coalesce_columns(df, ["city", "town_norm", "Town"]))
+    out["city_code"], city_mapping = encode_categorical(out["city"])
 
     address_parts = split_address_parts(coalesce_columns(df, ["address_norm", "Address"]))
     out = pd.concat([out, address_parts], axis=1)
@@ -242,6 +274,7 @@ def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = No
     out.loc[out["living_area_sqft"] <= 0, "living_area_sqft"] = np.nan
 
     out["style"] = normalize_text(coalesce_columns(df, ["style"]))
+    out["style_code"], style_mapping = encode_categorical(out["style"])
 
     # Macro / external columns, kept as-is except numeric coercion
     out["fiscal_year_end_june30"] = to_numeric(coalesce_columns(df, ["fiscal_year_end_june30"]))
@@ -292,14 +325,17 @@ def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = No
                 "rows_dropped_for_missing_or_invalid_sale_amount",
             ],
             "value": [
-                len(keep_mask),
+                input_rows,
                 len(out),
                 dropped_rows,
             ],
         })
-        with pd.ExcelWriter(report_csv.replace(".csv", ".xlsx")) as writer:
+        report_xlsx = report_csv.replace(".csv", ".xlsx")
+        with pd.ExcelWriter(report_xlsx) as writer:
             report.to_excel(writer, index=False, sheet_name="column_report")
             summary.to_excel(writer, index=False, sheet_name="summary")
+            city_mapping.to_excel(writer, index=False, sheet_name="city_code_map")
+            style_mapping.to_excel(writer, index=False, sheet_name="style_code_map")
 
     print(f"Cleaned dataset written to: {output_csv}")
     print(f"Rows dropped because sale_amount was missing or invalid: {dropped_rows}")
@@ -308,7 +344,7 @@ def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = No
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage:")
-        print("python prepare_dataset.py input.csv output.csv [report.csv]")
+        print("python prepare_dataset_city_style_encoded.py input.csv output.csv [report.csv]")
         sys.exit(1)
 
     input_csv = sys.argv[1]
