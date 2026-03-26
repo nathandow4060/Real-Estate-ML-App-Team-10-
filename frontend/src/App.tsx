@@ -61,6 +61,13 @@ async function cachedFetch(url: string, body: object) {
     .trim()
   }
 
+  let savedAutocomplete = {
+    address_line1: "",
+    city: "",
+    postcode: "",
+    state_code: "",
+  }
+
 function App() {
   const [page, setPage] = useState<'home' | 'listing'>('home')
   const [attributes, setAttributes] = useState<Attribute[]>([])
@@ -93,9 +100,16 @@ function App() {
   const onPlaceSelected = async (feature: any) => {
     if (feature?.properties.result_type !== "building") return
 
-    const { address_line1, city, postcode, state_code } = feature.properties
-    console.log('Selected:', address_line1, city, postcode, state_code)
+    savedAutocomplete.address_line1 = feature.properties.address_line1
+    savedAutocomplete.city = feature.properties.city
+    savedAutocomplete.postcode = feature.properties.postcode
+    savedAutocomplete.state_code = feature.properties.state_code
 
+    console.log('Selected:', savedAutocomplete.address_line1, savedAutocomplete.city, savedAutocomplete.postcode, savedAutocomplete.state_code)
+  }
+
+
+  const onSubmit = async (feature: any) => {
     setLoading(true)
     setError(null)
 
@@ -104,10 +118,10 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          address: normalizeAddress(address_line1),  // ← normalize before sending
-          city:    city.toUpperCase(),               // ← DB has uppercase cities
-          zipcode: postcode,
-          state:   state_code
+          address: normalizeAddress(savedAutocomplete.address_line1),  // ← normalize before sending
+          city:    savedAutocomplete.city.toUpperCase(),               // ← DB has uppercase cities
+          zipcode: savedAutocomplete.postcode,
+          state:   savedAutocomplete.state_code
         })
       })
       const json = await res.json()
@@ -119,10 +133,10 @@ function App() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            address: normalizeAddress(address_line1),
-            city:    city.toUpperCase(),
-            zipcode: postcode,
-            state:   state_code
+            address: normalizeAddress(savedAutocomplete.address_line1),
+            city:    savedAutocomplete.city.toUpperCase(),
+            zipcode: savedAutocomplete.postcode,
+            state:   savedAutocomplete.state_code
           })
         })
         const salesJson = await salesRes.json()
@@ -131,23 +145,23 @@ function App() {
 
        // City
         const cityJson = await cachedFetch(`${BASE_URL}/property-sales/city-history`, {
-          city: city.toUpperCase(),
-          state: state_code
+          city: savedAutocomplete.city.toUpperCase(),
+          state: savedAutocomplete.state_code
         })
         if (cityJson.status === 'success') setCityData(cityJson.data)
         else setCityData([])
 
         // County
         const countyJson = await cachedFetch(`${BASE_URL}/property-sales/county-history`, {
-          zipcode: postcode,
-          state: state_code
+          zipcode: savedAutocomplete.postcode,
+          state: savedAutocomplete.state_code
         })
         if (countyJson.status === 'success') setCountyData(countyJson.data)
         else setCountyData([])
 
         // State
         const stateJson = await cachedFetch(`${BASE_URL}/property-sales/state-history`, {
-          state: state_code
+          state: savedAutocomplete.state_code
         })
         if (stateJson.status === 'success') setStateData(stateJson.data)
         else setStateData([])
@@ -171,11 +185,15 @@ function App() {
   return (
     <>
       {page === 'home' && (
-        <Home onPlaceSelected={onPlaceSelected} />
+        <Home 
+          onPlaceSelected={onPlaceSelected}
+          onSubmit={onSubmit}
+        />
       )}
       {page === 'listing' && (
         <Listing
           onPlaceSelected={onPlaceSelected}
+          onSubmit={onSubmit}
           attributes={attributes}
           loading={loading}
           error={error}

@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import House from './assets/house.jpg'
 import './Listing.css'
 import DynamicLineChart from "./assets/dynamicLineChart.tsx"
@@ -19,6 +20,7 @@ interface ChartDataset {
 
 interface ListingProps {
   onPlaceSelected: (feature: any) => void
+  onSubmit: (feature: any) => void
   attributes: Attribute[]
   loading: boolean
   error: string | null
@@ -29,9 +31,27 @@ interface ListingProps {
 }
 
 
-function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityData, countyData, stateData}: ListingProps) {
-  const lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
-
+function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, countyData, stateData}: ListingProps) {
+  
+  
+  const[lastSaleText, setLastSaleText] = useState<"Last Sale Price" | "Current Estimation">("Last Sale Price");
+  let lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
+  /*
+  let lastSalePrice = lastSale?.sale_amount.toLocaleString()
+  let lastSaleYear = lastSale?.date_of_sale
+  if(lastSale === null) {
+    lastSalePrice = "—"
+    lastSaleYear = "—"
+  }
+  //else 
+  // if predicted price flag === false
+    setLastSaleText("Last Sale Price")
+    lastSalePrice = lastSale?.sale_amount.toLocaleString()
+    lastSaleYear = lastSale?.date_of_sale
+  // if predicted price flag === true
+    setLastSaleText("Current Estimation")
+    // idk bro
+ */
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
   const housePastY: ChartDataset[] = [{
     label: "Purchase History (USD $)",
@@ -94,6 +114,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
             placeSelect={onPlaceSelected}
           />
         </GeoapifyContext>
+        <button onClick = {onSubmit}>Submit</button>
       </header>
 
       {/*Loading / Error states*/}
@@ -109,7 +130,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
             <img src={House} alt="Property" className="pdp-photo" />
 
             <div className="pdp-price">
-              <h2>Last Sale Price</h2>
+              <h2>{lastSaleText}</h2>
               <p className="price-value">
                 ${lastSale?.sale_amount.toLocaleString()}
               </p>
@@ -133,6 +154,9 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
 
           {/* RIGHT: charts sidebar */}
           <aside className="pdp-sidebar">
+
+            <p>Disclaimer: prediction data is experimental and should not be used solely to make any financial decisions</p>
+
             <div className="chart-block">
               <h2>Property Price History</h2>
               <DynamicLineChart

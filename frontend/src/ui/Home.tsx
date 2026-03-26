@@ -7,9 +7,10 @@ import NavMap from './components/NavMap'
 
 interface HomeProps {
   onPlaceSelected: (feature: any) => void
+  onSubmit: (feature: any) => void
 }
 
-function Home({ onPlaceSelected }: HomeProps) {
+function Home({ onPlaceSelected, onSubmit }: HomeProps) {
   return (
     <main className="home-wrapper">
       <header className="home-header">
@@ -27,6 +28,9 @@ function Home({ onPlaceSelected }: HomeProps) {
             placeSelect={onPlaceSelected}
           />
         </GeoapifyContext>
+      </div>
+      <div>
+        <button onClick = {onSubmit}>Submit</button> 
       </div>
       <NavMap onPlaceSelected={onPlaceSelected}/>
     </main>
