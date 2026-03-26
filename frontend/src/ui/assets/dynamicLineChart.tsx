@@ -47,8 +47,7 @@ function DynamicLineChart({pastX, pastY, futureX, futureY}: {
     labels: pastX,
     datasets: pastY,
   });
-  const[buttonText, setButtonText] = useState("view prediction");
-  // I should really use a unique use state variable
+  const[buttonText, setButtonText] = useState<'view prediction' | 'view history'>("view prediction");
 
   const switchData = () => {
     if(buttonText === "view prediction"){
@@ -71,7 +70,6 @@ function DynamicLineChart({pastX, pastY, futureX, futureY}: {
     <div>
       <Line data={chartData} />
       <button onClick={switchData}>{buttonText}</button>
-      <p>Disclaimer: prediction data is experiemental and should not be used solely to make any financial decisions</p>
     </div>
   );
 }
