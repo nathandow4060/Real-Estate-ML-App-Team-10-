@@ -11,7 +11,7 @@ const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
 const cache: Record<string, any> = {}
 
-//Used to catche the calculated average sales for city, county, and state
+//Used to catche the calculated average sales for zipcode, city, and state
 async function cachedFetch(url: string, body: object) {
   const key = url + JSON.stringify(body)
   if (cache[key]) {
@@ -28,7 +28,35 @@ async function cachedFetch(url: string, body: object) {
   return json
 }
 
- function normalizeAddress(address: string): string {
+function App() {
+  const [page, setPage] = useState<'home' | 'listing'>('home')
+  const [attributes, setAttributes] = useState<Attribute[]>([])
+  const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
+
+  const [cityData,   setCityData]   = useState<{year: string, avg_price: number}[]>([])
+  const [zipData,    setZipData] = useState<{year: string, avg_price: number}[]>([])
+  const [stateData,  setStateData]  = useState<{year: string, avg_price: number}[]>([])
+
+  /*Testing:
+  const [page, setPage] = useState<'home' | 'listing'>('listing')
+  const [attributes, setAttributes] = useState<Attribute[]>([
+    { label: "Address",    value: "14 DOWNS RD, Monroe, CT 6468" },
+    { label: "Year Built", value: 1951 },
+    { label: "Style",      value: "Colonial" },
+    { label: "Bedrooms",   value: 4 },
+    { label: "Bathrooms",  value: 2 },
+    { label: "Sq Ft",      value: 1908 },
+    { label: "Stories",    value: 2 },
+    { label: "Latitude",   value: 41.3857335 },
+    { label: "Longitude",  value: -73.1862192 },
+  ])
+  */
+
+  const [loading, setLoading]       = useState<boolean>(false)
+  const [error, setError]           = useState<string | null>(null)
+
+  // Needs to be normalized so the backend can read
+  function normalizeAddress(address: string): string {
   return address
     .toUpperCase()
     .replace(/\bROAD\b/g, 'RD')
@@ -143,6 +171,16 @@ function App() {
         if (salesJson.status === 'success') setSalesData(salesJson.data)
         else setSalesData([])
 
+
+        //  Zip Code
+        const zipJson = await cachedFetch(`${BASE_URL}/property-sales/zipcode-history`, {
+          zipcode: postcode,
+          state: state_code
+        })
+        if (zipJson.status === 'success') setZipData(zipJson.data)
+        else setZipData([])
+
+
        // City
         const cityJson = await cachedFetch(`${BASE_URL}/property-sales/city-history`, {
           city: savedAutocomplete.city.toUpperCase(),
@@ -151,14 +189,7 @@ function App() {
         if (cityJson.status === 'success') setCityData(cityJson.data)
         else setCityData([])
 
-        // County
-        const countyJson = await cachedFetch(`${BASE_URL}/property-sales/county-history`, {
-          zipcode: savedAutocomplete.postcode,
-          state: savedAutocomplete.state_code
-        })
-        if (countyJson.status === 'success') setCountyData(countyJson.data)
-        else setCountyData([])
-
+        
         // State
         const stateJson = await cachedFetch(`${BASE_URL}/property-sales/state-history`, {
           state: savedAutocomplete.state_code
@@ -199,7 +230,7 @@ function App() {
           error={error}
           salesData={salesData}
           cityData={cityData}
-          countyData={countyData}
+          zipData={zipData}
           stateData={stateData}
         />
       )}
