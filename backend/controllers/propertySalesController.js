@@ -83,7 +83,7 @@ exports.getStatePriceHistory = async (req, res, next) => {
 
 module.exports = {
     getPropertySales:         exports.getPropertySales,
-    getStateZipHistory:       exports.geZipHistory,
+    getStateZipHistory:       exports.getZipHistory,
     getCityPriceHistory:      exports.getCityPriceHistory,
     //getCountyPriceHistory:  exports.getCountyPriceHistory,
     getStatePriceHistory:     exports.getStatePriceHistory
