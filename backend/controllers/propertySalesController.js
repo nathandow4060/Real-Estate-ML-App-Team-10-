@@ -58,12 +58,13 @@ exports.getCityPriceHistory = async (req, res, next) => {
 }
 
 // Not possible for Conneticut
+/*
 exports.getCountyPriceHistory = async (req, res, next) => {
     try {
         
     } catch (err) { next(err) }
 }
-
+*/
 exports.getStatePriceHistory = async (req, res, next) => {
     try {
         const state = req.body.state
