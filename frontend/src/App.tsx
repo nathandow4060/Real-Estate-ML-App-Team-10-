@@ -145,8 +145,8 @@ function App() {
 
         //  Zip Code
         const zipJson = await cachedFetch(`${BASE_URL}/property-sales/zipcode-history`, {
-          zipcode: postcode,
-          state: state_code
+          zipcode: savedAutocomplete.postcode,
+          state: savedAutocomplete.state_code
         })
         if (zipJson.status === 'success') setZipData(zipJson.data)
         else setZipData([])

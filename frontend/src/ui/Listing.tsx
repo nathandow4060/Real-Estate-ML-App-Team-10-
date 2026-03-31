@@ -32,8 +32,7 @@ interface ListingProps {
 
 
 
-function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityData, zipData, stateData}: ListingProps) {
-  const lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
+function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData}: ListingProps) {
 
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
   const housePastY: ChartDataset[] = [{
@@ -82,6 +81,25 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
     borderColor: 'rgba(255,99,132,1)',
     borderWidth: 1
   }]
+
+  const[lastSaleText, setLastSaleText] = useState<"Last Sale Price" | "Current Estimation">("Last Sale Price");
+  let lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
+  /*
+  let lastSalePrice = lastSale?.sale_amount.toLocaleString()
+  let lastSaleYear = lastSale?.date_of_sale
+  if(lastSale === null) {
+    lastSalePrice = "—"
+    lastSaleYear = "—"
+  }
+  //else 
+  // if predicted price flag === false
+    setLastSaleText("Last Sale Price")
+    lastSalePrice = lastSale?.sale_amount.toLocaleString()
+    lastSaleYear = lastSale?.date_of_sale
+  // if predicted price flag === true
+    setLastSaleText("Current Estimation")
+    // idk bro
+ */
 
 
   return (
