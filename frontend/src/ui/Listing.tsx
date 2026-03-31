@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import House from './assets/house.jpg'
 import './Listing.css'
 import DynamicLineChart from "./assets/dynamicLineChart.tsx"
@@ -19,6 +20,7 @@ interface ChartDataset {
 
 interface ListingProps {
   onPlaceSelected: (feature: any) => void
+  onSubmit: (feature: any) => void
   attributes: Attribute[]
   loading: boolean
   error: string | null
@@ -97,6 +99,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
             placeSelect={onPlaceSelected}
           />
         </GeoapifyContext>
+        <button onClick = {onSubmit}>Submit</button>
       </header>
 
       {/*Loading / Error states*/}
@@ -112,7 +115,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
             <img src={House} alt="Property" className="pdp-photo" />
 
             <div className="pdp-price">
-              <h2>Last Sale Price</h2>
+              <h2>{lastSaleText}</h2>
               <p className="price-value">
                 ${lastSale?.sale_amount.toLocaleString()}
               </p>
@@ -136,6 +139,9 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
 
           {/* RIGHT: charts sidebar */}
           <aside className="pdp-sidebar">
+
+            <p>Disclaimer: prediction data is experimental and should not be used solely to make any financial decisions</p>
+
             <div className="chart-block">
               <h2>Property Price History</h2>
               <DynamicLineChart
