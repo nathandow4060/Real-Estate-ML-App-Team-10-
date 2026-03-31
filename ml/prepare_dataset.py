@@ -2,15 +2,22 @@ from __future__ import annotations
 
 import re
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-# How to run: Run this script in the same folder as the joined dataset named "cre22_master_dataset_test_output"
-# In your terminal: python prepare_dataset_city_style_encoded.py cre22_master_dataset_test_output.csv cre22_master_dataset_cleaned.csv
-# This will output the cleaned dataset "cre22_master_dataset_cleaned.csv"
-# Optionally you can do this in your terminal to get a report on the cleaning as well:
-# python prepare_dataset_city_style_encoded.py cre22_master_dataset_test_output.csv cre22_master_dataset_cleaned.csv cre22_cleaning_report.csv
+ROOT = Path(__file__).resolve().parent
+DATA_DIR = ROOT / "data"
+INPUT_FILENAME = "cre22_master_dataset_test_output.csv"
+OUTPUT_FILENAME = "cre22_master_dataset_cleaned.csv"
+REPORT_FILENAME = "cre22_cleaning_report.csv"
+
+# How to run:
+# python prepare_dataset.py
+# Reads from ml/data/cre22_master_dataset_test_output.csv
+# Writes to ml/data/cre22_master_dataset_cleaned.csv
+# Writes report to ml/data/cre22_cleaning_report.csv
 
 
 def normalize_text(series: pd.Series) -> pd.Series:
@@ -205,7 +212,21 @@ def clean_sale_date(df: pd.DataFrame) -> pd.Series:
 
 
 def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = None) -> None:
-    df = pd.read_csv(input_csv)
+    input_path = Path(input_csv)
+    if not input_path.is_absolute():
+        input_path = DATA_DIR / input_path
+
+    output_path = Path(output_csv)
+    if not output_path.is_absolute():
+        output_path = DATA_DIR / output_path
+
+    report_path: Path | None = None
+    if report_csv is not None:
+        report_path = Path(report_csv)
+        if not report_path.is_absolute():
+            report_path = DATA_DIR / report_path
+
+    df = pd.read_csv(input_path)
 
     # Build the target first so we can truthfully drop bad-label rows
     sale_amount_raw = to_numeric(coalesce_columns(df, ["sale_amount", "Sale Amount"]))
@@ -244,8 +265,8 @@ def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = No
     out["list_year"] = to_numeric(coalesce_columns(df, ["list_year", "List Year"]))
 
     # Location and address
-    out["city"] = normalize_text(coalesce_columns(df, ["city", "town_norm", "Town"]))
-    out["city_code"], city_mapping = encode_categorical(out["city"])
+    out["town_norm"] = normalize_text(coalesce_columns(df, ["town_norm", "city", "Town"]))
+    out["town_encoded"], town_mapping = encode_categorical(out["town_norm"])
 
     address_parts = split_address_parts(coalesce_columns(df, ["address_norm", "Address"]))
     out = pd.concat([out, address_parts], axis=1)
@@ -274,7 +295,7 @@ def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = No
     out.loc[out["living_area_sqft"] <= 0, "living_area_sqft"] = np.nan
 
     out["style"] = normalize_text(coalesce_columns(df, ["style"]))
-    out["style_code"], style_mapping = encode_categorical(out["style"])
+    out["style_encoded"], style_mapping = encode_categorical(out["style"])
 
     # Macro / external columns, kept as-is except numeric coercion
     out["fiscal_year_end_june30"] = to_numeric(coalesce_columns(df, ["fiscal_year_end_june30"]))
@@ -308,9 +329,9 @@ def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = No
 
     # Write cleaned CSV
     # NaN values are written as blank cells by default
-    out.to_csv(output_csv, index=False)
+    out.to_csv(output_path, index=False)
 
-    if report_csv is not None:
+    if report_path is not None:
         report = pd.DataFrame({
             "column": out.columns,
             "dtype": [str(out[c].dtype) for c in out.columns],
@@ -330,25 +351,16 @@ def prepare_dataset(input_csv: str, output_csv: str, report_csv: str | None = No
                 dropped_rows,
             ],
         })
-        report_xlsx = report_csv.replace(".csv", ".xlsx")
+        report_xlsx = str(report_path).replace(".csv", ".xlsx")
         with pd.ExcelWriter(report_xlsx) as writer:
             report.to_excel(writer, index=False, sheet_name="column_report")
             summary.to_excel(writer, index=False, sheet_name="summary")
-            city_mapping.to_excel(writer, index=False, sheet_name="city_code_map")
-            style_mapping.to_excel(writer, index=False, sheet_name="style_code_map")
+            town_mapping.to_excel(writer, index=False, sheet_name="town_encoded_map")
+            style_mapping.to_excel(writer, index=False, sheet_name="style_encoded_map")
 
-    print(f"Cleaned dataset written to: {output_csv}")
+    print(f"Cleaned dataset written to: {output_path}")
     print(f"Rows dropped because sale_amount was missing or invalid: {dropped_rows}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage:")
-        print("python prepare_dataset_city_style_encoded.py input.csv output.csv [report.csv]")
-        sys.exit(1)
-
-    input_csv = sys.argv[1]
-    output_csv = sys.argv[2]
-    report_csv = sys.argv[3] if len(sys.argv) >= 4 else None
-
-    prepare_dataset(input_csv, output_csv, report_csv)
+    prepare_dataset(INPUT_FILENAME, OUTPUT_FILENAME, REPORT_FILENAME) # changed from running with commandline arguements to just running the file
