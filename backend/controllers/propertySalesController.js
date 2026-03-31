@@ -20,6 +20,25 @@ exports.getPropertySales = async (req, res, next) => {
 }
 
 //Sales Price Averages
+exports.getZipPriceHistory = async (req, res, next) => {
+    try {
+        const zipcode = req.body.zipcode
+        const state = req.body.state
+        const result = await db.query(`
+            SELECT 
+                RIGHT(ps.date_of_sale, 4) AS year,
+                ROUND(AVG(ps.sale_amount)) AS avg_price
+            FROM public."Property" AS p
+            JOIN public."Property_Sale" AS ps ON p.pid = ps.property_id
+            WHERE p.zipcode = $1 AND p.state ILIKE $2
+            GROUP BY year
+            ORDER BY year ASC
+        `, [zipcode, state])
+        res.json({ status: 'success', data: result.rows })
+    } catch (err) { next(err) }
+}
+
+
 exports.getCityPriceHistory = async (req, res, next) => {
     try {
         const city = req.body.city
@@ -38,24 +57,14 @@ exports.getCityPriceHistory = async (req, res, next) => {
     } catch (err) { next(err) }
 }
 
+// Not possible for Conneticut
+/*
 exports.getCountyPriceHistory = async (req, res, next) => {
     try {
-        const zipcode = req.body.zipcode
-        const state = req.body.state
-        const result = await db.query(`
-            SELECT 
-                RIGHT(ps.date_of_sale, 4) AS year,
-                ROUND(AVG(ps.sale_amount)) AS avg_price
-            FROM public."Property" AS p
-            JOIN public."Property_Sale" AS ps ON p.pid = ps.property_id
-            WHERE p.zipcode = $1 AND p.state ILIKE $2
-            GROUP BY year
-            ORDER BY year ASC
-        `, [zipcode, state])
-        res.json({ status: 'success', data: result.rows })
+        
     } catch (err) { next(err) }
 }
-
+*/
 exports.getStatePriceHistory = async (req, res, next) => {
     try {
         const state = req.body.state
@@ -74,8 +83,9 @@ exports.getStatePriceHistory = async (req, res, next) => {
 }
 
 module.exports = {
-    getPropertySales: exports.getPropertySales,
+    getPropertySales:         exports.getPropertySales,
+    getZipPriceHistory:       exports.getZipPriceHistory,
     getCityPriceHistory:      exports.getCityPriceHistory,
-    getCountyPriceHistory:    exports.getCountyPriceHistory,
+    //getCountyPriceHistory:  exports.getCountyPriceHistory,
     getStatePriceHistory:     exports.getStatePriceHistory
 }

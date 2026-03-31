@@ -11,7 +11,7 @@ const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
 const cache: Record<string, any> = {}
 
-//Used to catche the calculated average sales for city, county, and state
+//Used to catche the calculated average sales for zipcode, city, and state
 async function cachedFetch(url: string, body: object) {
   const key = url + JSON.stringify(body)
   if (cache[key]) {
@@ -34,7 +34,7 @@ function App() {
   const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
 
   const [cityData,   setCityData]   = useState<{year: string, avg_price: number}[]>([])
-  const [countyData, setCountyData] = useState<{year: string, avg_price: number}[]>([])
+  const [zipData,    setZipData] = useState<{year: string, avg_price: number}[]>([])
   const [stateData,  setStateData]  = useState<{year: string, avg_price: number}[]>([])
 
   /*Testing:
@@ -142,6 +142,16 @@ function App() {
         if (salesJson.status === 'success') setSalesData(salesJson.data)
         else setSalesData([])
 
+
+        //  Zip Code
+        const zipJson = await cachedFetch(`${BASE_URL}/property-sales/zipcode-history`, {
+          zipcode: postcode,
+          state: state_code
+        })
+        if (zipJson.status === 'success') setZipData(zipJson.data)
+        else setZipData([])
+
+
        // City
         const cityJson = await cachedFetch(`${BASE_URL}/property-sales/city-history`, {
           city: savedAutocomplete.city.toUpperCase(),
@@ -150,14 +160,7 @@ function App() {
         if (cityJson.status === 'success') setCityData(cityJson.data)
         else setCityData([])
 
-        // County
-        const countyJson = await cachedFetch(`${BASE_URL}/property-sales/county-history`, {
-          zipcode: savedAutocomplete.postcode,
-          state: savedAutocomplete.state_code
-        })
-        if (countyJson.status === 'success') setCountyData(countyJson.data)
-        else setCountyData([])
-
+        
         // State
         const stateJson = await cachedFetch(`${BASE_URL}/property-sales/state-history`, {
           state: savedAutocomplete.state_code
@@ -198,7 +201,7 @@ function App() {
           error={error}
           salesData={salesData}
           cityData={cityData}
-          countyData={countyData}
+          zipData={zipData}
           stateData={stateData}
         />
       )}
