@@ -24,25 +24,25 @@ class Model:
         self.params = params # loads dictionary of component X and y pd series for train, val, test sets
 
         # generated information
-        self.model = None # this is populated either when model is run, or when a model is loaded from file
+        self.xgboost_regressor = None # this is populated either when model is run, or when a model is loaded from file
         self.hyper_parameters = None # this is populated when bayes_search is run
         self.predictions = None # this is populated when predictions are generated
         self.performance = None # this is populated when performance is evaluated
 
     # loads model from initialized file path
     def load_model(self):
-        self.model = xgb.XGBRegressor()
-        self.model.load_model(self.file_save_path)
+        self.xgboost_regressor = xgb.XGBRegressor()
+        self.xgboost_regressor.load_model(self.file_save_path)
         #load booster 
         booster = __buildBooster(self.file_save_path, self.params['X_train'], self.params['y_train'], hyper_params=self.hyperparameters, num_class=1)
         xgb._Booster = booster   # attach trained booster
     
     # saves model to initialized file path
     def save_model(self):
-        if self.model is None:
+        if self.xgboost_regressor is None:
             raise ValueError("Model is not initialized")
         else:
-            self.model.save_model(self.file_save_path)
+            self.xgboost_regressor.save_model(self.file_save_path)
 
     def bayesian_search(self, n_iterations: int = 50, cv_folds: int = 5, verbosity: int = 0) -> list[float | int]:
         """
@@ -83,7 +83,7 @@ class Model:
         )
         search.fit(X_train, y_train)
 
-        self.self.hyper_parameters = search.best_params_ # save found optimal hyper_params
+        self.hyper_parameters = search.best_params_ # save found optimal hyper_params
 
     def __buildBooster(src_model_path: str, X_target, y_target, prediction_mode: str, hyper_params: dict, num_class: int = None):
         # 1) refresh leaf weights (native booster)
@@ -153,10 +153,11 @@ class Model:
 
     def model(self, X_y_components: dict[str, pd.Series]):
         # model does not exist yet, but hyper-params Do (model not loaded, Bayes search ran)
-        if self.model is None and self.hyper_parameters is not None:
-            self.model = xgb.XGBRegressor(eval_metric='rmse', tree_method='hist', random_state=42, n_jobs=-1, device='cpu', hyperparams=self.hyper_parameters) # default objective
+        if self.xgboost_regressor is None and self.hyper_parameters is not None:
+            self.xgboost_regressor = xgb.XGBRegressor(eval_metric='rmse', tree_method='hist', random_state=42, n_jobs=-1, device='cpu', **self.hyper_parameters) # default objective
+            print(f"Model Created: {self.xgboost_regressor}") # debug
             # set other  features later with xgb.set.config()
-        elif self.model and self.hyper_parameters is None:
+        elif self.xgboost_regressor and self.hyper_parameters is None:
             print("Error: run bayes search before modeling. (model.bayesian_search())")
 
         # parse X and y components
@@ -166,25 +167,25 @@ class Model:
         y_val = X_y_components['y_val']
         
         # fit model to train and val sets
-        self.model.fit(X_train, y_train, sample_weight=class_weight, eval_set=[(X_train, y_train), (X_val, y_val)], verbose=False)
+        self.xgboost_regressor.fit(X_train, y_train, eval_set=[(X_train, y_train), (X_val, y_val)], verbose=False)
         
-        return self.model # returns model for debugging
+        return self.xgboost_regressor # returns model for debugging
 
     # generates dataframe of predictions using trained model
     # if generateForAll=T generates preds for train, val, test. If generateForAll=F generates only preds for test
     def generate_predictions(self):
         train_preds = None
         val_preds = None
-        if self.model in None:
+        if self.xgboost_regressor is None:
             print("Error: Model must be initialized before making predictions.")
         
         # generate predictions
-        train_preds = self.model.predict(self.params['y_train'])
-        val_preds = self.model.predict(self.params['y_val'])
-        test_preds =  = self.model.predict(self.params['y_test'])
+        train_preds = self.xgboost_regressor.predict(self.params['X_train'])
+        val_preds = self.xgboost_regressor.predict(self.params['X_val'])
+        test_preds = self.xgboost_regressor.predict(self.params['X_test'])
 
         #package
-        preds = {'y_train_pred':, train_preds, 'y_val_pred':, val_preds, 'y_test_pred':, test_preds}
+        preds = {'y_train_pred': train_preds, 'y_val_pred': val_preds, 'y_test_pred': test_preds}
 
         return preds
         
@@ -193,7 +194,7 @@ class Model:
     # pass the names of the datasets to evaluate. ex datasets=['train', 'val', 'test']
     # pass predicted values series as dictionary. Ensure datasets and predicted_vals align
     def evaluate_performance(self, datasets, y_actual, y_predicted):
-         if self.model in None:
+        if self.xgboost_regressor is None:
             print("Error: Model must be initialized before evaluation.")
 
         # setup df to hold performance metrics
@@ -204,7 +205,7 @@ class Model:
         # correlate y_actuals, y_preds
         y_actuals = [y_actual['y_train'], y_actual['y_val'], y_actual['y_test']]
         y_preds =  [y_predicted['y_train_pred'], y_predicted['y_val_pred'], y_predicted['y_test_pred']]
-        
+
         for y_actual, y_pred, dataset in zip(y_actuals, y_preds, datasets):
             r2 = r2_score(y_actual, y_pred)
             rmse = root_mean_squared_error(y_actual, y_pred)
