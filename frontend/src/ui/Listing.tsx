@@ -53,7 +53,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
-  const zipPastX: string[]      = zipData.map(d => d.year)
+  const zipPastX: string[] = zipData.map(d => d.year)
   const zipPastY: ChartDataset[] = [{
     label: "Avg Zip-Code Sale Price (USD $)",
     data: zipData.map(d => d.avg_price),
@@ -62,7 +62,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
-  const cityPastX: string[]      = cityData.map(d => d.year)
+  const cityPastX: string[] = cityData.map(d => d.year)
   const cityPastY: ChartDataset[] = [{
     label: "Avg City Sale Price (USD $)",
     data: cityData.map(d => d.avg_price),
@@ -73,7 +73,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
   
 
-  const statePastX: string[]      = stateData.map(d => d.year)
+  const statePastX: string[] = stateData.map(d => d.year)
   const statePastY: ChartDataset[] = [{
     label: "Avg State Sale Price (USD $)",
     data: stateData.map(d => d.avg_price),
@@ -82,23 +82,29 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
-  const[lastSaleText, setLastSaleText] = useState<"Last Sale Price" | "Current Estimation">("Last Sale Price");
+  const[lastSaleText, setLastSaleText] = useState<"Last Sale Price" | "Current Estimation" | "Current Listing Price">("Last Sale Price");
   let lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
-  /*
-  let lastSalePrice = lastSale?.sale_amount.toLocaleString()
-  let lastSaleYear = lastSale?.date_of_sale
-  if(lastSale === null) {
-    lastSalePrice = "—"
-    lastSaleYear = "—"
-  }
-  //else 
-  // if predicted price flag === false
-    setLastSaleText("Last Sale Price")
+  let lastSalePrice =  "—"
+  let lastSaleYear =  "—"
+  
+  // get final entry in salesData if it isnt blank
+  if(lastSale !== null) {
     lastSalePrice = lastSale?.sale_amount.toLocaleString()
     lastSaleYear = lastSale?.date_of_sale
-  // if predicted price flag === true
-    setLastSaleText("Current Estimation")
-    // idk bro
+  } 
+
+  /*
+  if (attributes.current_price !== null && attributes.market_status !== null) {
+    lastSalePrice = attributes.current_price
+    lastSaleYear = "—"
+    if(attributes.market_status === true){
+      setLastSaleText("Current Listing Price")
+    }
+    if(attributes.market_status === false){
+      setLastSaleText("Current Estimation")
+    }
+  }
+  
  */
 
 
@@ -130,14 +136,14 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
           {/* LEFT: photo + attribute table */}
           <section className="pdp-main">
-            <img src={House} alt="Property" className="pdp-photo" />
+              <img src={House} alt="Property" className="pdp-photo" /> 
 
             <div className="pdp-price">
               <h2>{lastSaleText}</h2>
               <p className="price-value">
-                ${lastSale?.sale_amount.toLocaleString()}
+                ${lastSalePrice}
               </p>
-              <p className="price-date">Sold: {lastSale?.date_of_sale}</p>
+              <p className="price-date">Sold: {lastSaleYear}</p>
             </div>
 
             <div className="pdp-attributes">
