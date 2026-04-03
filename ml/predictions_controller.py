@@ -17,7 +17,7 @@ TEST_PCT = 15.0
 df_dataset = pd.read_csv(DATA_PATH)
 
 # TEMPORARY PRE_PREPROCESSING
-df_dataset = df_dataset.drop(columns=["sale_amount", "serial_number", "sale_date", "town_norm", "address_norm", "street_suffix", "style", "street_name", "has_unit"],axis=1,)
+df_dataset = df_dataset.drop(columns=["sale_amount", "serial_number", "sale_date", "town_norm", "address_norm", "street_suffix", "style", "street_name", "has_unit"],axis=1)
 df_dataset = df_dataset.sample(n=1000, random_state=42).reset_index(drop=True)  # subset for faster iteration while developing
 #df_dataset.info()
 
@@ -31,7 +31,6 @@ dataset_components = split_dataset_components(
 )
 y_actual = {"y_train": dataset_components["y_train"],"y_val": dataset_components["y_val"],"y_test": dataset_components["y_test"]}
 
-
 # build model
 MODEL_NAME = "Real_Estate_Price_predictor_2001_2023_CT"
 MODEL_FILE_PATH = f"{MODEL_NAME}_model_cofig.json"
@@ -41,9 +40,12 @@ estimator = Model(MODEL_NAME, MODEL_FILE_PATH, dataset_components)
 print('Starting bayes search')
 estimator.bayesian_search(n_iterations=50, cv_folds=5, verbosity=0)
 debug_model = estimator.model(dataset_components)
-y_predicted = estimator.generate_predictions()
-df_model_metrics = estimator.evaluate_performance(   ["train", "val", "test"], y_actual, y_predicted)
+df_train_pred, df_val_pred, df_test_pred, y_predicted_dict = estimator.generate_predictions(dataset_components)
+df_model_metrics = estimator.evaluate_performance(["train", "val", "test"], y_actual, y_predicted_dict)
 estimator.save_model()
 
 # print evaluation results
 print(df_model_metrics)
+print(df_train_pred)
+print(df_val_pred)
+print(df_test_pred)

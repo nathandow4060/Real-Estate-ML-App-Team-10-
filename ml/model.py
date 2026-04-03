@@ -172,8 +172,8 @@ class Model:
         return self.xgboost_regressor # returns model for debugging
 
     # generates dataframe of predictions using trained model
-    # if generateForAll=T generates preds for train, val, test. If generateForAll=F generates only preds for test
-    def generate_predictions(self):
+    # access indices through the components dict
+    def generate_predictions(self, components):
         train_preds = None
         val_preds = None
         if self.xgboost_regressor is None:
@@ -185,9 +185,24 @@ class Model:
         test_preds = self.xgboost_regressor.predict(self.params['X_test'])
 
         #package
-        preds = {'y_train_pred': train_preds, 'y_val_pred': val_preds, 'y_test_pred': test_preds}
+        y_pred_dict = {'y_train_pred': train_preds, 'y_val_pred': val_preds, 'y_test_pred': test_preds}
 
-        return preds
+        df_train = pd.DataFrame({
+            'index': components['y_train_indices'],
+            'y_train_pred': train_preds
+        })
+
+        df_val = pd.DataFrame({
+            'index': components['y_val_indices'],
+            'y_val_pred': val_preds
+        })
+
+        df_test = pd.DataFrame({
+            'index': components['y_test_indices'],
+            'y_test_pred': test_preds
+        })
+
+        return df_train, df_val, df_test, y_pred_dict
         
         
     # returns performance metrics of model

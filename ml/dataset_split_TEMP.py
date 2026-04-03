@@ -79,4 +79,10 @@ def split_dataset_components(
         "y_val": y_val,
         "X_test": X_test,
         "y_test": y_test,
+        "X_train_indices": X_train.index.to_series(name="X_train_indices"),
+        "y_train_indices": y_train.index.to_series(name="y_train_indices"),
+        "X_val_indices": X_val.index.to_series(name="X_val_indices"),
+        "y_val_indices": y_val.index.to_series(name="y_val_indices"),
+        "X_test_indices": X_test.index.to_series(name="X_test_indices"),
+        "y_test_indices": y_test.index.to_series(name="y_test_indices"),
     }
