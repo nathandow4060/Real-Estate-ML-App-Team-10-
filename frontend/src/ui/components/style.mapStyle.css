@@ -1,0 +1,17 @@
+@import "ol/ol.css";
+
+#map {
+  position: absolute;
+  width: 100%;
+  max-width: 800px;
+  height: 500px;
+  padding: 0;
+  margin: 3rem;
+}
+
+.overlay-container {
+    width: 50px;
+    height: 20px;
+    background-color: darkblue;
+    
+}

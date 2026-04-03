@@ -31,7 +31,6 @@ interface ListingProps {
 }
 
 
-
 function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData}: ListingProps) {
 
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
