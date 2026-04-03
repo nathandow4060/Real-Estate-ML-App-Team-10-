@@ -32,8 +32,7 @@ interface ListingProps {
 
 
 
-function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityData, zipData, stateData}: ListingProps) {
-  const lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
+function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData}: ListingProps) {
 
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
   const housePastY: ChartDataset[] = [{
@@ -54,7 +53,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
     borderWidth: 1
   }]
 
-  const zipPastX: string[]      = zipData.map(d => d.year)
+  const zipPastX: string[] = zipData.map(d => d.year)
   const zipPastY: ChartDataset[] = [{
     label: "Avg Zip-Code Sale Price (USD $)",
     data: zipData.map(d => d.avg_price),
@@ -63,7 +62,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
     borderWidth: 1
   }]
 
-  const cityPastX: string[]      = cityData.map(d => d.year)
+  const cityPastX: string[] = cityData.map(d => d.year)
   const cityPastY: ChartDataset[] = [{
     label: "Avg City Sale Price (USD $)",
     data: cityData.map(d => d.avg_price),
@@ -74,7 +73,7 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
 
   
 
-  const statePastX: string[]      = stateData.map(d => d.year)
+  const statePastX: string[] = stateData.map(d => d.year)
   const statePastY: ChartDataset[] = [{
     label: "Avg State Sale Price (USD $)",
     data: stateData.map(d => d.avg_price),
@@ -82,6 +81,31 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
     borderColor: 'rgba(255,99,132,1)',
     borderWidth: 1
   }]
+
+  const[lastSaleText, setLastSaleText] = useState<"Last Sale Price" | "Current Estimation" | "Current Listing Price">("Last Sale Price");
+  let lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
+  let lastSalePrice =  "—"
+  let lastSaleYear =  "—"
+  
+  // get final entry in salesData if it isnt blank
+  if(lastSale !== null) {
+    lastSalePrice = lastSale?.sale_amount.toLocaleString()
+    lastSaleYear = lastSale?.date_of_sale
+  } 
+
+  /*
+  if (attributes.current_price !== null && attributes.market_status !== null) {
+    lastSalePrice = attributes.current_price
+    lastSaleYear = "—"
+    if(attributes.market_status === true){
+      setLastSaleText("Current Listing Price")
+    }
+    if(attributes.market_status === false){
+      setLastSaleText("Current Estimation")
+    }
+  }
+  
+ */
 
 
   return (
@@ -112,14 +136,14 @@ function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityD
 
           {/* LEFT: photo + attribute table */}
           <section className="pdp-main">
-            <img src={House} alt="Property" className="pdp-photo" />
+              <img src={House} alt="Property" className="pdp-photo" /> 
 
             <div className="pdp-price">
               <h2>{lastSaleText}</h2>
               <p className="price-value">
-                ${lastSale?.sale_amount.toLocaleString()}
+                ${lastSalePrice}
               </p>
-              <p className="price-date">Sold: {lastSale?.date_of_sale}</p>
+              <p className="price-date">Sold: {lastSaleYear}</p>
             </div>
 
             <div className="pdp-attributes">
