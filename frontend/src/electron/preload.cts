@@ -7,4 +7,6 @@ contextBridge.exposeInMainWorld('versions', {
   electron: () => process.versions.electron
 })
 
-contextBridge.exposeInMainWorld('')
+contextBridge.exposeInMainWorld('api', {
+    
+})

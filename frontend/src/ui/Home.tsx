@@ -5,6 +5,7 @@ import House from './assets/house.jpg'
 import './Home.css'
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
+import NavMap from './components/NavMap'
 
 interface HomeProps {
   onPlaceSelected: (feature: any) => void
@@ -33,6 +34,7 @@ function Home({ onPlaceSelected }: HomeProps) {
       <div className="home-hero">
         <img src={House} alt="HomeView" className="home-hero-img" />
       </div>
+      <NavMap />
     </main>
   )
 }
