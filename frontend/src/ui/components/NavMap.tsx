@@ -69,8 +69,7 @@ function NavMap () {
             }),
             strategy: bbox,
             loader: (extent, resolution, projection) => {
-                // setZoomLevel(map.getView().getZoom());
-                let zoomLevel = map.getView().getZoom();
+                setZoomLevel(map.getView().getZoom());
                 if(!zoomLevel || zoomLevel <= 9) return
                 fetch('/data/cogBounds.json')
                     .then(res => res.json())
