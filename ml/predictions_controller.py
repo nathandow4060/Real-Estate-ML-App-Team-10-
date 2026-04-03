@@ -1,22 +1,36 @@
 from pathlib import Path
 import pandas as pd
+import numpy as np
 from dataset_split_TEMP import split_dataset_components
 from model import Model
 
-# preprocess data
+#GLOBAL VARS
 ML_DIR = Path(__file__).resolve().parent
-DATA_PATH = ML_DIR / "data" / "cre22_master_dataset_cleaned.csv"
+#DATA_PATH = ML_DIR / "data" / "cre22_master_dataset_cleaned.csv"
+_DEFAULT_INPUT_CSV_COMPONENTS = ML_DIR / "data"
 
+
+
+
+# Henry data pre-processing
+X_train = np.load(_DEFAULT_INPUT_CSV_COMPONENTS / "x_train.npy") 
+y_train = np.load(_DEFAULT_INPUT_CSV_COMPONENTS / "y_train.npy") 
+X_val = np.load(_DEFAULT_INPUT_CSV_COMPONENTS / "x_val.npy")
+y_val = np.load(_DEFAULT_INPUT_CSV_COMPONENTS / "y_val.npy")
+X_test = np.load(_DEFAULT_INPUT_CSV_COMPONENTS / "x_test.npy") 
+y_test = np.load(_DEFAULT_INPUT_CSV_COMPONENTS / "y_test.npy")
+
+dataset_components = {"X_train": X_train, "y_train": y_train, "X_val": X_val, "y_val": y_val,"X_test": X_test, "y_test": y_test}
+
+# TEMPORARY PRE_PREPROCESSING
+"""
 TARGET_COLUMN = "sale_amount_log1p"
-
 # Train / validation / test split (must sum to 100)
 TRAIN_PCT = 70.0
 VAL_PCT = 15.0
 TEST_PCT = 15.0
 
 df_dataset = pd.read_csv(DATA_PATH)
-
-# TEMPORARY PRE_PREPROCESSING
 df_dataset = df_dataset.drop(columns=["sale_amount", "serial_number", "sale_date", "town_norm", "address_norm", "street_suffix", "style", "street_name", "has_unit"],axis=1)
 df_dataset = df_dataset.sample(n=1000, random_state=42).reset_index(drop=True)  # subset for faster iteration while developing
 #df_dataset.info()
@@ -29,6 +43,8 @@ dataset_components = split_dataset_components(
     test_pct=TEST_PCT,
     random_state=42,
 )
+"""
+
 y_actual = {"y_train": dataset_components["y_train"],"y_val": dataset_components["y_val"],"y_test": dataset_components["y_test"]}
 
 # build model
