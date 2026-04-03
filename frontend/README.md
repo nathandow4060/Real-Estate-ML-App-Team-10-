@@ -10,7 +10,7 @@ npm install
 and the decencies should automatically with no issue. If it does idk.
 
 ## Starting
-Running code has been simplified and reduced to just one simple command
+Running code has been  simplified and reduced to just one simple command
 ```
 npm run dev
 ```
@@ -19,6 +19,7 @@ This will start a local server for React to output the ui portion. changes can b
 What still needs to be worked on: 
  * the ipc between electron and the ui
  * preloading 
+
 
 
 

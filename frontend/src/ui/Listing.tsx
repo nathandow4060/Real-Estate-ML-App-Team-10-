@@ -29,7 +29,6 @@ interface ListingProps {
 }
 
 
-
 function Listing({ onPlaceSelected, attributes, loading, error, salesData, cityData, countyData, stateData}: ListingProps) {
   const lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
 

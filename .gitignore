@@ -1,8 +1,9 @@
 
 # ignore frontend modules
-./frontend/node_modules./frontend/node_modules
-./frontend/node_modules
-./frontend/node_modules/*
+frontend/node_modules
+frontend/node_modules
+frontend/node_modules/*
+frontend/public/data/parcels/*
 
 #ignore back end
 node_modules
@@ -12,3 +13,82 @@ node_modules
 #ignore ml modules
 
 #ignore database files
+
+frontend/node_modules/.bin/electron
+frontend/node_modules/electron/checksums.json
+frontend/node_modules/electron/cli.js
+frontend/node_modules/electron/electron.d.ts
+frontend/node_modules/electron/package.json
+frontend/node_modules/electron/path.txt
+frontend/node_modules/electron/dist/chrome_100_percent.pak
+frontend/node_modules/electron/dist/chrome_200_percent.pak
+frontend/node_modules/electron/dist/d3dcompiler_47.dll
+frontend/node_modules/electron/dist/dxcompiler.dll
+frontend/node_modules/electron/dist/dxil.dll
+frontend/node_modules/electron/dist/electron.exe
+frontend/node_modules/electron/dist/ffmpeg.dll
+frontend/node_modules/electron/dist/libEGL.dll
+frontend/node_modules/electron/dist/libGLESv2.dll
+frontend/node_modules/electron/dist/resources.pak
+frontend/node_modules/electron/dist/snapshot_blob.bin
+frontend/node_modules/electron/dist/v8_context_snapshot.bin
+frontend/node_modules/electron/dist/version
+frontend/node_modules/electron/dist/vk_swiftshader_icd.json
+frontend/node_modules/electron/dist/vk_swiftshader.dll
+frontend/node_modules/electron/dist/vulkan-1.dll
+frontend/node_modules/electron/dist/locales/af.pak
+frontend/node_modules/electron/dist/locales/am.pak
+frontend/node_modules/electron/dist/locales/ar.pak
+frontend/node_modules/electron/dist/locales/bg.pak
+frontend/node_modules/electron/dist/locales/bn.pak
+frontend/node_modules/electron/dist/locales/ca.pak
+frontend/node_modules/electron/dist/locales/cs.pak
+frontend/node_modules/electron/dist/locales/da.pak
+frontend/node_modules/electron/dist/locales/de.pak
+frontend/node_modules/electron/dist/locales/el.pak
+frontend/node_modules/electron/dist/locales/en-GB.pak
+frontend/node_modules/electron/dist/locales/en-US.pak
+frontend/node_modules/electron/dist/locales/es-419.pak
+frontend/node_modules/electron/dist/locales/es.pak
+frontend/node_modules/electron/dist/locales/et.pak
+frontend/node_modules/electron/dist/locales/fa.pak
+frontend/node_modules/electron/dist/locales/fi.pak
+frontend/node_modules/electron/dist/locales/fil.pak
+frontend/node_modules/electron/dist/locales/fr.pak
+frontend/node_modules/electron/dist/locales/gu.pak
+frontend/node_modules/electron/dist/locales/he.pak
+frontend/node_modules/electron/dist/locales/hi.pak
+frontend/node_modules/electron/dist/locales/hr.pak
+frontend/node_modules/electron/dist/locales/hu.pak
+frontend/node_modules/electron/dist/locales/id.pak
+frontend/node_modules/electron/dist/locales/it.pak
+frontend/node_modules/electron/dist/locales/ja.pak
+frontend/node_modules/electron/dist/locales/kn.pak
+frontend/node_modules/electron/dist/locales/ko.pak
+frontend/node_modules/electron/dist/locales/lt.pak
+frontend/node_modules/electron/dist/locales/lv.pak
+frontend/node_modules/electron/dist/locales/ml.pak
+frontend/node_modules/electron/dist/locales/mr.pak
+frontend/node_modules/electron/dist/locales/ms.pak
+frontend/node_modules/electron/dist/locales/nb.pak
+frontend/node_modules/electron/dist/locales/nl.pak
+frontend/node_modules/electron/dist/locales/pl.pak
+frontend/node_modules/electron/dist/locales/pt-BR.pak
+frontend/node_modules/electron/dist/locales/pt-PT.pak
+frontend/node_modules/electron/dist/locales/ro.pak
+frontend/node_modules/electron/dist/locales/ru.pak
+frontend/node_modules/electron/dist/locales/sk.pak
+frontend/node_modules/electron/dist/locales/sl.pak
+frontend/node_modules/electron/dist/locales/sr.pak
+frontend/node_modules/electron/dist/locales/sv.pak
+frontend/node_modules/electron/dist/locales/sw.pak
+frontend/node_modules/electron/dist/locales/ta.pak
+frontend/node_modules/electron/dist/locales/te.pak
+frontend/node_modules/electron/dist/locales/th.pak
+frontend/node_modules/electron/dist/locales/tr.pak
+frontend/node_modules/electron/dist/locales/uk.pak
+frontend/node_modules/electron/dist/locales/ur.pak
+frontend/node_modules/electron/dist/locales/vi.pak
+frontend/node_modules/electron/dist/locales/zh-CN.pak
+frontend/node_modules/electron/dist/locales/zh-TW.pak
+frontend/node_modules/electron/dist/resources/default_app.asar
