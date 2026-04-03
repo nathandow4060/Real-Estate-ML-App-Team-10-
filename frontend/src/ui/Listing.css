@@ -1,0 +1,221 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+/*
+Nate's styling
+*/
+/* ── Page wrapper ── */
+.pdp-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  font-family: sans-serif;
+}
+
+/* ── Header ── */
+.pdp-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.pdp-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  white-space: nowrap;
+  margin: 0;
+}
+
+/* ── Status messages ── */
+.status-msg {
+  text-align: center;
+  padding: 12px;
+  font-size: 15px;
+  color: #555;
+}
+.status-msg.error { color: #c0392b; }
+
+/* ── Two-column body ── */
+.pdp-body {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ── Left: photo + details ── */
+.pdp-photo {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+.pdp-attributes h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+.attr-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.attr-table tr {
+  border-bottom: 1px solid #eee;
+}
+.attr-label {
+  padding: 10px 8px;
+  font-weight: 600;
+  color: #444;
+  width: 40%;
+}
+.attr-value {
+  padding: 10px 8px;
+  color: #222;
+}
+
+/* ── Right: sidebar charts ── */
+.pdp-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.pdp-sidebar h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* ── Empty / hero state ── */
+.pdp-empty {
+  text-align: center;
+  padding: 60px 0;
+  color: #888;
+}
+.pdp-hero {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.attr-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.attr-table tr {
+  border-bottom: 1px solid #444;
+}
+.attr-label {
+  padding: 10px 8px;
+  font-weight: 600;
+  color: #aaaaaa;
+  width: 40%;
+}
+.attr-value {
+  padding: 10px 8px;
+  color: #ffffff;
+}
+
+/* ── Property details heading ── */
+.pdp-attributes h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+/* ── Sidebar chart headings ── */
+.pdp-sidebar h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #dddddd;
+}
+
+/* ── Header ── */
+.pdp-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  white-space: nowrap;
+  margin: 0;
+  color: #ffffff;
+}
+
+.pdp-price {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  border-left: 4px solid #25a244;
+}
+.pdp-price h2 {
+  font-size: 14px;
+  color: #aaaaaa;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.price-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #25a244;
+  margin: 0 0 4px 0;
+}
+.price-date {
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .pdp-body {
+    grid-template-columns: 1fr;
+  }
+  .pdp-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
