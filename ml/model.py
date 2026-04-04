@@ -187,19 +187,26 @@ class Model:
         #package
         y_pred_dict = {'y_train_pred': train_preds, 'y_val_pred': val_preds, 'y_test_pred': test_preds}
 
+        #DEBUG
+        print(f"X_Train indices len: {len(components['X_train_indices'])}")
+        print(f'Training Predictions length self.params[X_train]: {len(train_preds)}')
+
         df_train = pd.DataFrame({
-            'index': components['y_train_indices'],
-            'y_train_pred': train_preds
+            'index': components['X_train_indices'],
+            'actual': self.params['y_train'],
+            'pred': train_preds
         })
 
         df_val = pd.DataFrame({
-            'index': components['y_val_indices'],
-            'y_val_pred': val_preds
+            'index': components['X_val_indices'],
+            'actual': self.params['y_val'],
+            'pred': val_preds
         })
 
         df_test = pd.DataFrame({
-            'index': components['y_test_indices'],
-            'y_test_pred': test_preds
+            'index': components['X_test_indices'],
+            'actual': self.params['y_test'],
+            'pred': test_preds
         })
 
         return df_train, df_val, df_test, y_pred_dict

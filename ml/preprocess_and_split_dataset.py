@@ -125,6 +125,9 @@ def split_processed_dataset(
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # TEMP KEEP ONLY SUBSET OF TRAINING DATA
+    df = df.sample(n=1000, random_state=42).reset_index(drop=True)  # subset for faster iteration while developing
+
     if target_column not in df.columns:
         raise ValueError(f"Target column '{target_column}' was not found in the dataset.")
 
@@ -133,6 +136,9 @@ def split_processed_dataset(
 
     if "row_index" not in df.columns:
         df.insert(0, "row_index", np.arange(len(df)))
+
+    # TEMP save a copy of the dataframe with row indices
+    df.to_csv(output_dir / "df_current_predicitons.csv", index=False, encoding="utf-8")
 
     feature_columns = [col for col in df.columns if col not in (target_column, "row_index")]
 
