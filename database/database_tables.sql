@@ -17,6 +17,8 @@ CREATE TABLE "Property"(
     num_bathrooms INTEGER,
     living_area_sqft INTEGER,
     stories INTEGER,
+	market_status BOOLEAN,
+	current_price INTEGER,
 	CONSTRAINT unique_address UNIQUE (street_address, city, state)
 );
 
@@ -104,3 +106,9 @@ CREATE TABLE "Model_Predictions"(
 	CONSTRAINT "model_predictions_series_id_foreign" FOREIGN KEY("serial_id") REFERENCES "ML_Dataset"("serial_id"),
 	CONSTRAINT "model_predictions_model_name_foreign" FOREIGN KEY("model_name") REFERENCES "ML_Models"("model_name")
 );
+
+CREATE TABLE "Property_Images"(
+	pid 	INTEGER NOT NULL,
+	img_url	TEXT,
+	CONSTRAINT "prop_images_foreign" FOREIGN KEY("pid") REFERENCES "Property"("pid")
+)
