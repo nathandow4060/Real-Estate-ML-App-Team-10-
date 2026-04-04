@@ -41,26 +41,26 @@ function NavMap () {
             }),
         });
 
-        fetch(STATE_BOUNDARY_GEOJSON)
-            .then(res => res.json)
-            .then(data => {
-                console.log(data)
-                const format = new GeoJSON()
-                const features = format.readFeatures(data,{featureProjection:'EPSG:3857'})
-                const ctGeom = features[0].getGeometry() as Polygon
+        // fetch(STATE_BOUNDARY_GEOJSON)
+        //     .then(res => res.json)
+        //     .then(data => {
+        //         console.log(data)
+        //         const format = new GeoJSON()
+        //         const features = format.readFeatures(data,{featureProjection:'EPSG:3857'})
+        //         const ctGeom = features[0].getGeometry() as Polygon
 
-                // forms a polygon excluding connecticut
-                const worldExtent = [-20037508, -20037508, 20037508, 20037508]
-                const worldPolygon = fromExtent(worldExtent)
+        //         // forms a polygon excluding connecticut
+        //         const worldExtent = [-20037508, -20037508, 20037508, 20037508]
+        //         const worldPolygon = fromExtent(worldExtent)
 
-                const maskPolygon = new Polygon([
-                    worldPolygon.getCoordinates()[0],
-                    ...ctGeom.getCoordinates(),
-                ])
-                const maskFeature = new Feature(maskPolygon)
+        //         const maskPolygon = new Polygon([
+        //             worldPolygon.getCoordinates()[0],
+        //             ...ctGeom.getCoordinates(),
+        //         ])
+        //         const maskFeature = new Feature(maskPolygon)
 
-                maskLayer.getSource()?.addFeature(maskFeature)
-        });
+        //         maskLayer.getSource()?.addFeature(maskFeature)
+        // });
 
         const parcelSource = new VectorSource({
             format: new GeoJSON({
@@ -104,7 +104,7 @@ function NavMap () {
                         )
                     })
             }
-        })
+        });
 
         const parcelLayer = new VectorLayer({
             source: parcelSource,
@@ -120,7 +120,7 @@ function NavMap () {
             layers: [
                 new TileLayer({source: new OSM()}),
                 parcelLayer,
-                maskLayer
+                // maskLayer
             ],
             view: new View({
                 center: fromLonLat([-72.7,41.6]),
@@ -129,7 +129,7 @@ function NavMap () {
                 ,
                 }),
             overlays: [
-                 zoomOverlay
+                //  zoomOverlay
             ]
         });
         return () => map.setTarget(undefined)
@@ -140,7 +140,7 @@ function NavMap () {
             <div className="overlay-container">
                 <span className="otext" id="zoom-level"></span>
             </div>
-            <div id="map">{zoomLevel}</div>
+            <div id="map"></div>
         </>
     )
 }
