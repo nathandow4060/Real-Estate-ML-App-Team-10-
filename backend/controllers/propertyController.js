@@ -20,11 +20,15 @@ exports.getPropertyAttributes = async (req, res, next) => {
                 num_bedrooms,
                 num_bathrooms,
                 living_area_sqft,
-                stories
+                stories,
+                current_price,
+                market_status
             FROM public."Property" WHERE 
             street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
             [street_addr, city, state, zipcode]
         )
+
+        console.log('raw row:', result.rows[0])
         if (result.rowCount === 0) {
             return res.status(404).json({ status: 'error', message: 'Property not found' })
         }
@@ -36,7 +40,9 @@ exports.getPropertyAttributes = async (req, res, next) => {
             { label: "Bedrooms",    value: prop.num_bedrooms },
             { label: "Bathrooms",   value: prop.num_bathrooms },
             { label: "Sq Ft",       value: prop.living_area_sqft },
-            { label: "Stories",     value: prop.stories }
+            { label: "Stories",     value: prop.stories }, 
+            { label: "Current Price", value: prop.current_price },
+            { label: "On the Market", value: prop.market_status }
         ]
 
         nonNull = attributes.filter(attr => 
@@ -45,6 +51,8 @@ exports.getPropertyAttributes = async (req, res, next) => {
             attr.value !== '' && 
             String(attr.value) !== 'NaN'
         )
+
+        console.log('raw row:', result.rows[0])
         
         res.json({ status: 'success', data: nonNull })
     } catch (err) {

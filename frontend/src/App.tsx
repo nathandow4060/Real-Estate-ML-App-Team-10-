@@ -108,7 +108,7 @@ function App() {
   }
 
 
-  const onSubmit = async (feature: any) => {
+  const onSubmit = async () => {
     setLoading(true)
     setError(null)
 
@@ -126,6 +126,7 @@ function App() {
       const json = await res.json()
 
       if (json.status === 'success') {
+        console.log(json)
         setAttributes(json.data)
 
         const salesRes = await fetch(`${BASE_URL}/property-sales`, {
@@ -181,8 +182,6 @@ function App() {
       setLoading(false)
     }
   }
-
-  
 
   return (
     <>
