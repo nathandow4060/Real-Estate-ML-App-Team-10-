@@ -79,10 +79,12 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
-  const[lastSaleText, setLastSaleText] = useState<"Last Sale Price" | "Current Estimation" | "Current Listing Price">("Last Sale Price");
+  let lastSaleText = "Last Sale Price";
   let lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
   let lastSalePrice =  "—"
   let lastSaleYear =  "—"
+  
+  
   
   // get final entry in salesData if it isnt blank
   if(lastSale !== null) {
@@ -90,17 +92,20 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     lastSaleYear = lastSale?.date_of_sale
   } 
 
-  if (attributes.find(a =>a.label === "Current Price")?.value !== undefined && attributes.find(a =>a.label === "On the Market")?.value !== undefined) {
-    lastSalePrice = attributes.find(a =>a.label === "current_price")?.value
+
+
+  if (attributes.find(a =>a.label === "Current Price")?.value !== null && attributes.find(a =>a.label === "On the Market")?.value !== null) {
+    lastSalePrice = attributes.find(a =>a.label === "Current Price")?.value.toLocaleString()
     lastSaleYear = "—"
     if(attributes.find(a =>a.label === "On the Market")?.value === true){
-      setLastSaleText("Current Listing Price")
+      lastSaleText = "Current Listing Price"
     }
-    if(attributes.find(a =>a.label === "On the Market")?.value === false){
-      setLastSaleText("Current Estimation")
+    else if(attributes.find(a =>a.label === "On the Market")?.value === false){
+      lastSaleText = "Current Estimation"
     }
   }
-
+ 
+  
 
   return (
     <main className="pdp-wrapper">
