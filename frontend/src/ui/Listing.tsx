@@ -31,7 +31,6 @@ interface ListingProps {
 }
 
 
-
 function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData}: ListingProps) {
 
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
@@ -71,8 +70,6 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
-  
-
   const statePastX: string[] = stateData.map(d => d.year)
   const statePastY: ChartDataset[] = [{
     label: "Avg State Sale Price (USD $)",
@@ -93,19 +90,16 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     lastSaleYear = lastSale?.date_of_sale
   } 
 
-  /*
-  if (attributes.current_price !== null && attributes.market_status !== null) {
-    lastSalePrice = attributes.current_price
+  if (attributes.find(a =>a.label === "Current Price")?.value !== undefined && attributes.find(a =>a.label === "On the Market")?.value !== undefined) {
+    lastSalePrice = attributes.find(a =>a.label === "current_price")?.value
     lastSaleYear = "—"
-    if(attributes.market_status === true){
+    if(attributes.find(a =>a.label === "On the Market")?.value === true){
       setLastSaleText("Current Listing Price")
     }
-    if(attributes.market_status === false){
+    if(attributes.find(a =>a.label === "On the Market")?.value === false){
       setLastSaleText("Current Estimation")
     }
   }
-  
- */
 
 
   return (
@@ -189,8 +183,6 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 futureX={houseFutureX} futureY={houseFutureY}
               />
             </div>
-
-            
 
             <div className="chart-block">
               <h2>State Price History</h2>
