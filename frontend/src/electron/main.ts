@@ -5,10 +5,12 @@ import { getPreloadPath } from './pathResolver.js'
 
 const createWindow = () => {
   const mainWin = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
     webPreferences: {
-      preload: getPreloadPath()
+      preload: getPreloadPath(),
+      contextIsolation:true,
+      nodeIntegration:false,
     }
   })
   
