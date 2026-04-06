@@ -1,11 +1,15 @@
 from pathlib import Path
 import pandas as pd
 import numpy as np
-from dataset_split_TEMP import split_dataset_components
 from model import Model
+import time
+
+# track runtime
+start_time = time.perf_counter()
 
 #GLOBAL VARS
 ML_DIR = Path(__file__).resolve().parent
+TARGET_FEATURE = "log_1p_price" # other option is "price"
 #DATA_PATH = ML_DIR / "data" / "cre22_master_dataset_cleaned.csv"
 _DEFAULT_INPUT_CSV_COMPONENTS = ML_DIR / "data"
 _PREDICTIONS_DIR = ML_DIR / "data" / "predictions"
@@ -64,25 +68,56 @@ estimator = Model(MODEL_NAME, MODEL_FILE_PATH, dataset_components)
 # load model here when desired
 # estimator.load_model()
 print('Starting bayes search')
-estimator.bayesian_search(n_iterations=50, cv_folds=5, verbosity=0)
+best_hyper_parameters_dict, df_bayes_runs = estimator.bayesian_search(n_iterations=50, cv_folds=5, verbosity=0)
 debug_model = estimator.model(dataset_components)
 df_train_pred, df_val_pred, df_test_pred, y_predicted_dict = estimator.generate_predictions(dataset_components)
 df_model_metrics = estimator.evaluate_performance(["train", "val", "test"], y_actual, y_predicted_dict)
 estimator.save_model()
 
+# print bayes search best hyper-parameters
+print("BEST HYPERPARAMS")
+for key, val in zip(best_hyper_parameters_dict.keys(), best_hyper_parameters_dict.values()):
+    print(f'{key}: {val}')
+#df_hyperparams = pd.DataFrame(hyper_parameters, columns=hyper_parameters.keys(), index=[0])
+
+print("ALL Bayes runs HYPERPARAMS")
+print(df_bayes_runs)
+
 # convert predictions from log price to actual price
-for df in [df_train_pred, df_val_pred, df_test_pred]:\
+for df in [df_train_pred, df_val_pred, df_test_pred]:
     # exponentiate prediction and actual vals to convert back to raw prices
-    df["pred"] = np.exp(df["pred"])
-    df["actual"] = np.exp(df["actual"])
+    if TARGET_FEATURE == "log_1p_price":
+        df["pred"] = round(np.exp(df["pred"]))
+        df["actual"] = round(np.exp(df["actual"]))
+    elif TARGET_FEATURE == "price":
+        df["pred"] = round(f["pred"])
+        df["actual"] = round(df["actual"])
 
 # Save predictions results
 df_train_pred.to_csv(_PREDICTIONS_DIR / "y_train_preds.csv", index=False, encoding="utf-8")
 df_val_pred.to_csv(_PREDICTIONS_DIR / "y_val_preds.csv", index=False, encoding="utf-8")
 df_test_pred.to_csv(_PREDICTIONS_DIR / "y_test_preds.csv", index=False, encoding="utf-8")
 
+# save model metrics
+df_model_metrics.to_csv(_PREDICTIONS_DIR / "model_performance_metrics.csv")
+
+# save model config
+df_model = pd.DataFrame([{
+    'model_name': MODEL_NAME,
+    'model_coverage': "2001-2020",
+    'mode_of_prediction': "regression",
+    'target_feature': "log_1p_price"
+}])
+df_model.to_csv(_PREDICTIONS_DIR / "model_details.csv")
+
 # print evaluation results
+print()
 print(df_model_metrics)
-print(df_train_pred)
-print(df_val_pred)
-print(df_test_pred)
+#print(df_train_pred)
+#print(df_val_pred)
+#print(df_test_pred)
+
+# print runtime
+end_time = time.perf_counter()
+runtime = end_time - start_time
+print(f"Runtime: {runtime:.4f} seconds")

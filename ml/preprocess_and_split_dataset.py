@@ -5,6 +5,14 @@ from pathlib import Path
 
 import numpy as np
 
+#GLOBAL VARS
+# years are inclusive
+TRAIN_START_YEAR = 2004
+TRAIN_END_YEAR = 2017
+HOLDOUT_START_YEAR = 2018
+HOLDOUT_END_YEAR = 2020
+
+
 # Paths relative to this file (works no matter what directory you run the script from)
 _ML_DIR = Path(__file__).resolve().parent
 _DEFAULT_INPUT_CSV = _ML_DIR / "data" / "cre22_master_dataset_cleaned.csv"
@@ -61,8 +69,22 @@ def preprocess_dataset(
 ) -> pd.DataFrame:
     df = pd.read_csv(input_csv)
 
+    # add index to dataset for predictions context
+    df.insert(0, "index", np.arange(len(df)))
+
     print(f"Loaded dataset shape: {df.shape}")
     print_null_percentages(df)
+
+    rows_before = len(df)
+    df = df.dropna(subset=[target_column]).copy()
+    print(f"\nDropped {rows_before - len(df)} rows with null target values in '{target_column}'")
+
+    rows_before = len(df)
+    df = df.dropna(subset=REQUIRED_NON_NULL_COLUMNS).copy()
+    print(f"Dropped {rows_before - len(df)} rows with null values in required feature columns")
+
+    # save a copy of the dataframe with row indices; save after row drops, before column drops
+    df.to_csv(output_csv.parent / "df_predicitons_context.csv", index=False, encoding="utf-8")
 
     columns_to_drop = TEXT_COLUMNS + LEAKAGE_COLUMNS + IDENTIFIER_COLUMNS
     columns_to_drop = [col for col in columns_to_drop if col in df.columns]
@@ -72,14 +94,6 @@ def preprocess_dataset(
         print(f"  - {col}")
 
     df = df.drop(columns=columns_to_drop).copy()
-
-    rows_before = len(df)
-    df = df.dropna(subset=[target_column]).copy()
-    print(f"\nDropped {rows_before - len(df)} rows with null target values in '{target_column}'")
-
-    rows_before = len(df)
-    df = df.dropna(subset=REQUIRED_NON_NULL_COLUMNS).copy()
-    print(f"Dropped {rows_before - len(df)} rows with null values in required feature columns")
 
     df = df.select_dtypes(include=[np.number]).copy()
 
@@ -117,16 +131,17 @@ def split_processed_dataset(
     input_csv: str | Path,
     output_dir: str | Path,
     target_column: str = TARGET_COLUMN,
-    train_start_year: int = 2001,
-    train_end_year: int = 2019, # change to 2022
-    holdout_year: int = 2020, # change to 2023
+    train_start_year: int = TRAIN_START_YEAR,
+    train_end_year: int = TRAIN_END_YEAR, 
+    holdout_start_year: int = HOLDOUT_START_YEAR,
+    holdout_end_year: int = HOLDOUT_END_YEAR, 
 ) -> dict[str, np.ndarray]:
     df = pd.read_csv(input_csv)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # TEMP KEEP ONLY SUBSET OF TRAINING DATA
-    df = df.sample(n=1000, random_state=42).reset_index(drop=True)  # subset for faster iteration while developing
+    #df = df.sample(n=1000, random_state=42).reset_index(drop=True)  # subset for faster iteration while developing
 
     if target_column not in df.columns:
         raise ValueError(f"Target column '{target_column}' was not found in the dataset.")
@@ -134,31 +149,33 @@ def split_processed_dataset(
     if "sale_year" not in df.columns:
         raise ValueError("The dataset must contain a 'sale_year' column for temporal splitting.")
 
-    if "row_index" not in df.columns:
-        df.insert(0, "row_index", np.arange(len(df)))
-
-    # TEMP save a copy of the dataframe with row indices
-    df.to_csv(output_dir / "df_current_predicitons.csv", index=False, encoding="utf-8")
-
-    feature_columns = [col for col in df.columns if col not in (target_column, "row_index")]
+    feature_columns = [col for col in df.columns if col not in (target_column, "index")]
 
     train_mask = (df["sale_year"] >= train_start_year) & (df["sale_year"] <= train_end_year)
-    holdout_mask = df["sale_year"] == holdout_year
+    #holdout_mask = df["sale_year"] == holdout_year
 
     train_df = df.loc[train_mask].copy()
-    holdout_df = df.loc[holdout_mask].copy()
+    #holdout_df = df.loc[holdout_mask].copy()
 
     sort_columns = [
-        col for col in ["sale_year", "sale_month", "sale_day"] if col in holdout_df.columns
+        col for col in ["sale_year", "sale_month", "sale_day"] if col in df.columns
     ]
-    if sort_columns:
-        holdout_df = holdout_df.sort_values(sort_columns, kind="stable").reset_index(drop=True)
-    else:
-        holdout_df = holdout_df.reset_index(drop=True)
+    # For each year in the holdout range, sort chronologically and split in half
+    # The earlier half goes to validation, the later half goes to test. Idea is to attempt to balance testing capability of validation and test set
+    validation_parts = []
+    test_parts = []
+    for year in range(holdout_start_year, holdout_end_year + 1):
+        year_df = df.loc[df["sale_year"] == year].copy()
+        if sort_columns:
+            year_df = year_df.sort_values(sort_columns, kind="stable").reset_index(drop=True)
+        else:
+            year_df = year_df.reset_index(drop=True)
+        split_index = (len(year_df) + 1) // 2
+        validation_parts.append(year_df.iloc[:split_index].copy())
+        test_parts.append(year_df.iloc[split_index:].copy())
 
-    split_index = (len(holdout_df) + 1) // 2
-    validation_df = holdout_df.iloc[:split_index].copy()
-    test_df = holdout_df.iloc[split_index:].copy()
+    validation_df = pd.concat(validation_parts, ignore_index=True) if validation_parts else pd.DataFrame(columns=df.columns)
+    test_df = pd.concat(test_parts, ignore_index=True) if test_parts else pd.DataFrame(columns=df.columns)
 
     x_train = train_df[feature_columns].to_numpy()
     y_train = train_df[target_column].to_numpy()
@@ -169,12 +186,12 @@ def split_processed_dataset(
     x_test = test_df[feature_columns].to_numpy()
     y_test = test_df[target_column].to_numpy()
 
-    X_train_indices = train_df["row_index"].to_numpy()
-    y_train_indices = train_df["row_index"].to_numpy()
-    X_val_indices = validation_df["row_index"].to_numpy()
-    y_val_indices = validation_df["row_index"].to_numpy()
-    X_test_indices = test_df["row_index"].to_numpy()
-    y_test_indices = test_df["row_index"].to_numpy()
+    X_train_indices = train_df["index"].to_numpy()
+    y_train_indices = train_df["index"].to_numpy()
+    X_val_indices = validation_df["index"].to_numpy()
+    y_val_indices = validation_df["index"].to_numpy()
+    X_test_indices = test_df["index"].to_numpy()
+    y_test_indices = test_df["index"].to_numpy()
 
     arrays = {
         "x_train": x_train,
@@ -214,22 +231,23 @@ def split_processed_dataset(
     )
     print(f"Saved index arrays to {indices_path}")
 
+    total_rows = len(df)
     print("\nSplit summary:")
-    print(f"  Train rows ({train_start_year}-{train_end_year}): {len(train_df)}")
+    print(f"  Train rows ({train_start_year}-{train_end_year}): {len(train_df)}    {(len(train_df) / total_rows)*100:.2f}%")
     print(
-        f"  Validation rows ({holdout_year}, first half after chronological split): "
-        f"{len(validation_df)}"
+        f"  Validation rows ({holdout_start_year}-{holdout_end_year}, first half after chronological split): "
+        f"{len(validation_df)}     {(len(validation_df) / total_rows)*100:.2f}%"
     )
     print(
-        f"  Test rows ({holdout_year}, second half after chronological split): {len(test_df)}"
+        f"  Test rows ({holdout_start_year}-{holdout_end_year}, second half after chronological split): {len(test_df)}     {(len(test_df) / total_rows)*100:.2f}%"
     )
 
     available_years = sorted(df["sale_year"].dropna().astype(int).unique().tolist())
     print(f"  Available sale_year range in input file: {available_years[0]} to {available_years[-1]}")
 
-    if len(holdout_df) == 0:
+    if len(validation_df) and len(test_df) == 0:
         print(
-            f"\nWARNING: No rows were found for {holdout_year}. "
+            f"\nWARNING: No rows were found for {holdout_start_year}-{holdout_end_year}. "
             "Validation and test arrays were saved as empty arrays."
         )
 
@@ -242,9 +260,10 @@ def run_pipeline(
     output_dir: str | Path = ".",
     processed_filename: str = "master_dataset_processed_numeric.csv",
     target_column: str = TARGET_COLUMN,
-    train_start_year: int = 2001,
-    train_end_year: int = 2019, #change to 2022
-    holdout_year: int = 2020, # change to 2023
+    train_start_year: int = TRAIN_START_YEAR,
+    train_end_year: int = TRAIN_END_YEAR, 
+    holdout_start_year: int = HOLDOUT_START_YEAR,
+    holdout_end_year: int = HOLDOUT_END_YEAR,
 ) -> dict[str, np.ndarray]:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -269,7 +288,8 @@ def run_pipeline(
         target_column=target_column,
         train_start_year=train_start_year,
         train_end_year=train_end_year,
-        holdout_year=holdout_year,
+        holdout_start_year=holdout_start_year,
+        holdout_end_year=holdout_end_year,
     )
 
     print("\nPipeline complete.")
@@ -305,9 +325,20 @@ def parse_args() -> argparse.Namespace:
         default=TARGET_COLUMN,
         help="Target column to predict.",
     )
-    parser.add_argument("--train_start_year", type=int, default=2001)
-    parser.add_argument("--train_end_year", type=int, default=2019) #change to 2022
-    parser.add_argument("--holdout_year", type=int, default=2020) #change to 2023
+    parser.add_argument("--train_start_year", type=int, default=TRAIN_START_YEAR)
+    parser.add_argument("--train_end_year", type=int, default=TRAIN_END_YEAR) 
+    parser.add_argument(
+        "--holdout_start_year",
+        type=int,
+        default=HOLDOUT_START_YEAR,  
+        help="First year (inclusive) of the holdout range used for validation and test splits.",
+    )
+    parser.add_argument(
+        "--holdout_end_year",
+        type=int,
+        default=HOLDOUT_END_YEAR,  
+        help="Last year (inclusive) of the holdout range used for validation and test splits.",
+    )
     return parser.parse_args()
 # Note: Change the years so that test and validation are 2023 and training it 2001-2022 once the scrape is complete
 
@@ -320,5 +351,6 @@ if __name__ == "__main__":
         target_column=args.target_column,
         train_start_year=args.train_start_year,
         train_end_year=args.train_end_year,
-        holdout_year=args.holdout_year,
+        holdout_start_year=args.holdout_start_year,
+        holdout_end_year=args.holdout_end_year
     )

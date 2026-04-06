@@ -50,13 +50,13 @@ class Model:
         Returns optimal values in the same order as keys in ``param_space``.
         """
         param_space = {
-            "n_estimators": Integer(50, 220),
-            "max_depth": Integer(2, 20),
-            "learning_rate": Real(0.01, 0.5, prior="log-uniform"),
-            "subsample": Real(0.7, 1.0),
-            "colsample_bytree": Real(0.1, 1.0),
-            "gamma": Real(0, 10),
-            "reg_lambda": Real(5, 100.0, prior="log-uniform"),
+            "n_estimators": Integer(100, 1000),
+            "max_depth": Integer(2, 12),
+            "learning_rate": Real(1e-3, 0.3, prior="log-uniform"),
+            "subsample": Real(0.5, 1.0),
+            "colsample_bytree": Real(0.3, 1.0),
+            "gamma": Real(0.0, 5.0),
+            "reg_lambda": Real(1e-2, 100.0, prior="log-uniform"),
         }
 
         X_train = self.params["X_train"]
@@ -84,6 +84,9 @@ class Model:
         search.fit(X_train, y_train)
 
         self.hyper_parameters = search.best_params_ # save found optimal hyper_params
+        df_bayes_runs = pd.DataFrame(search.cv_results_) # save hyper-params found on every run
+
+        return search.best_params_ , df_bayes_runs  # return found hyperparameters
 
     def __buildBooster(src_model_path: str, X_target, y_target, prediction_mode: str, hyper_params: dict, num_class: int = None):
         # 1) refresh leaf weights (native booster)

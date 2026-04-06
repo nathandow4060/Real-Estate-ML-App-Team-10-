@@ -1,16 +1,16 @@
 [
   {
     "join_name": "primary_sales_loaded",
-    "rows": 103557,
+    "rows": 129745,
     "duplicate_key_rows": 0,
-    "duplicate_serial_number_rows": 59450,
+    "duplicate_serial_number_rows": 85624,
     "sale_date_min": "2001-08-01",
     "sale_date_max": "2020-09-30"
   },
   {
     "join_name": "mortgage30us",
-    "rows_before": 103557,
-    "rows_after": 103557,
+    "rows_before": 129745,
+    "rows_after": 129745,
     "row_count_ok": true,
     "duplicate_key_rows_after": 0,
     "match_rates": {
@@ -19,8 +19,8 @@
   },
   {
     "join_name": "cpi",
-    "rows_before": 103557,
-    "rows_after": 103557,
+    "rows_before": 129745,
+    "rows_after": 129745,
     "row_count_ok": true,
     "duplicate_key_rows_after": 0,
     "match_rates": {
@@ -29,8 +29,8 @@
   },
   {
     "join_name": "unemployment",
-    "rows_before": 103557,
-    "rows_after": 103557,
+    "rows_before": 129745,
+    "rows_after": 129745,
     "row_count_ok": true,
     "duplicate_key_rows_after": 0,
     "match_rates": {
@@ -39,28 +39,28 @@
   },
   {
     "join_name": "housing_supply",
-    "rows_before": 103557,
-    "rows_after": 103557,
+    "rows_before": 129745,
+    "rows_after": 129745,
     "row_count_ok": true,
     "duplicate_key_rows_after": 0,
     "match_rates": {
-      "housing_supply_actliscouct": 39.06
+      "housing_supply_actliscouct": 37.05
     }
   },
   {
     "join_name": "mill_rates",
-    "rows_before": 103557,
-    "rows_after": 103557,
+    "rows_before": 129745,
+    "rows_after": 129745,
     "row_count_ok": true,
     "duplicate_key_rows_after": 0,
     "match_rates": {
-      "mill_rate": 35.39
+      "mill_rate": 34.32
     }
   },
   {
     "join_name": "gdp_real_estate",
-    "rows_before": 103557,
-    "rows_after": 103557,
+    "rows_before": 129745,
+    "rows_after": 129745,
     "row_count_ok": true,
     "duplicate_key_rows_after": 0,
     "match_rates": {
