@@ -1,0 +1,2 @@
+,model_name,model_coverage,mode_of_prediction,target_feature
+0,Real_Estate_Price_predictor_2001_2023_CT,2001-2020,regression,log_1p_price
