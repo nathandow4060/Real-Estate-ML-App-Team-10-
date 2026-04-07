@@ -135,7 +135,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
             FROM public."Property"`
         )
 
-        console.log('raw row:', result.rows[0])
+        //console.log('raw row:', result.rows[0])
         if (result.rowCount === 0) {
             return res.status(404).json({ status: 'error', message: 'Property not found' })
         }
@@ -155,7 +155,6 @@ exports.getPropertiesForMap = async (req, res, next) => {
                 { label: "State",    value: prop.state },
                 { label: "Longitude",   value: prop.longitude },
                 { label: "Latitude",       value: prop.latitude },
-
             ]
 
             nonNull = attributes.filter(attr => 
@@ -167,7 +166,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
 
             attrArray[i] = nonNull
         }
-
+        console.log(attrArray)
 
         //console.log('raw row:', result.rows[0])
         
