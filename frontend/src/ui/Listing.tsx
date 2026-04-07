@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import House from './assets/house.jpg'
 import './Listing.css'
-import DynamicLineChart from "./assets/dynamicLineChart.tsx"
+import DynamicLineChart from "./components/DynamicLineChart.tsx"
+import PropertyListCard from "./components/PropertyListCard.tsx"
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
 
@@ -84,15 +85,11 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
   let lastSalePrice =  "—"
   let lastSaleYear =  "—"
   
-  
-  
   // get final entry in salesData if it isnt blank
   if(lastSale !== null) {
     lastSalePrice = lastSale?.sale_amount.toLocaleString()
     lastSaleYear = lastSale?.date_of_sale
   } 
-
-
 
   if (attributes.find(a =>a.label === "Current Price")?.value !== null && attributes.find(a =>a.label === "On the Market")?.value !== null) {
     lastSalePrice = attributes.find(a =>a.label === "Current Price")?.value.toLocaleString()
@@ -105,7 +102,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     }
   }
  
-  
+  const displayAttributes = attributes.slice(0,7)
 
   return (
     <main className="pdp-wrapper">
@@ -147,16 +144,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
             <div className="pdp-attributes">
               <h2>Property Details</h2>
-              <table className="attr-table">
-                <tbody>
-                  {attributes.map((attr: Attribute, i: number) => (
-                    <tr key={i}>
-                      <td className="attr-label">{attr.label}</td>
-                      <td className="attr-value">{attr.value ?? '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <PropertyListCard
+              attributes = {attributes}
+              />
             </div>
           </section>
 
