@@ -117,7 +117,7 @@ exports.getPropertiesByCityState = async (req, res, next) => {
     }
 }
 
-exports.getPropertiesForMap = async ( res, next) => {
+exports.getPropertiesForMap = async (req, res, next) => {
     try {
         const street_addr = req.body.address
         const city = req.body.city
