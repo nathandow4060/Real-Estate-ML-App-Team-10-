@@ -143,7 +143,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
         var prop = []
         var attrArray = []
 
-        for(var i =  0; i < result.rows.length(); i++ ){
+        for(var i =  0; i < result.rowCount; i++ ){
 
             prop = result.rows[i]
 
@@ -162,7 +162,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
             attr.value !== undefined && 
             attr.value !== '' && 
             String(attr.value) !== 'NaN'
-        )
+            )
 
             attrArray[i] = nonNull
         }
