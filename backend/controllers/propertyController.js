@@ -181,5 +181,5 @@ module.exports = {
     getPropertyByAddr: exports.getPropertyByAddr,
     getPropertiesByCityState: exports.getPropertiesByCityState,
     getPropertyAttributes:    exports.getPropertyAttributes,
-    getPropertyForMap: exports.getPropertyForMap
+    getPropertiesForMap: exports.getPropertiesForMap
 }
