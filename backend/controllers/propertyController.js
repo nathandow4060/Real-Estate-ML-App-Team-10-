@@ -117,12 +117,12 @@ exports.getPropertiesByCityState = async (req, res, next) => {
     }
 }
 
-exports.getPropertiesForMap = async (req res, next) => {
+exports.getPropertiesForMap = async (res, next) => {
     try {
         //const street_addr = req.body.address
         //const city = req.body.city
         //const zipcode = req.body.zipcode
-        //const state = req.body.state
+        const state = req.body.state
         const result = await db.query(
             `SELECT 
                 pid,
