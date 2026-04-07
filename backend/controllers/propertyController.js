@@ -28,7 +28,7 @@ exports.getPropertyAttributes = async (req, res, next) => {
             [street_addr, city, state, zipcode]
         )
 
-        console.log('raw row:', result.rows[0])
+        //console.log('raw row:', result.rows[0])
         if (result.rowCount === 0) {
             return res.status(404).json({ status: 'error', message: 'Property not found' })
         }
@@ -116,9 +116,59 @@ exports.getPropertiesByCityState = async (req, res, next) => {
         next(err)
     }
 }
+
+exports.getPropertiesForMap = async ( res, next) => {
+    try {
+        //const street_addr = req.body.address
+        //const city = req.body.city
+        //const zipcode = req.body.zipcode
+        //const state = req.body.state
+        const result = await db.query(
+            `SELECT 
+                pid,
+                street_address,
+                city,
+                state,
+                zipcode,
+                longitude,
+                latitude
+            FROM public."Property"`
+        )
+
+        console.log('raw row:', result.rows[0])
+        if (result.rowCount === 0) {
+            return res.status(404).json({ status: 'error', message: 'Property not found' })
+        }
+        const prop = result.rows[0]
+        const attributes = [
+            { label: "Display Address",     value: `${prop.street_address}, ${prop.city}, ${prop.state} ${prop.zipcode}` },
+            { label: "Address", value: prop.street_address},
+            { label: "City",  value: prop.city },
+            { label: "Zip",       value: prop.zipcode },
+            { label: "State",    value: prop.state },
+            { label: "Longitude",   value: prop.longitude },
+            { label: "Latitude",       value: prop.latitude },
+
+        ]
+
+        nonNull = attributes.filter(attr => 
+            attr.value !== null && 
+            attr.value !== undefined && 
+            attr.value !== '' && 
+            String(attr.value) !== 'NaN'
+        )
+
+        //console.log('raw row:', result.rows[0])
+        
+        res.json({ status: 'success', data: nonNull })
+    } catch (err) {
+        next(err)
+    }
+}
 module.exports = {
     getAllPropertiesByState: exports.getAllPropertiesByState,
     getPropertyByAddr: exports.getPropertyByAddr,
     getPropertiesByCityState: exports.getPropertiesByCityState,
-    getPropertyAttributes:    exports.getPropertyAttributes
+    getPropertyAttributes:    exports.getPropertyAttributes,
+    getPropertyForMap: exports.getPropertyForMap
 }

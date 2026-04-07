@@ -22,8 +22,6 @@ function PropertyListCard({attributes}: {attributes: any[]}){
                   ))}
                 </tbody>
               </table>
-
     );
-
 }
 export default PropertyListCard;
