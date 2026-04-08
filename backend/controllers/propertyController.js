@@ -60,6 +60,21 @@ exports.getPropertyAttributes = async (req, res, next) => {
     }
 }
 
+exports.getPropertiesByCity = async (req, res, next) => {
+  try {
+        const city = req.body.city
+        //add error checks here
+        const result = await db.query(
+            `SELECT *
+            FROM public."Property"
+            WHERE city = $1`,
+            [city]
+        )
+        res.json({ status: 'success', count: result.rowCount, data: result.rows })
+  } catch (err) {
+    next(err)
+  }
+}
 
 
 //Search Gets
@@ -177,6 +192,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
 }
 module.exports = {
     getAllPropertiesByState: exports.getAllPropertiesByState,
+    getPropertiesByCity: exports.getPropertiesByCity,
     getPropertyByAddr: exports.getPropertyByAddr,
     getPropertiesByCityState: exports.getPropertiesByCityState,
     getPropertyAttributes:    exports.getPropertyAttributes,
