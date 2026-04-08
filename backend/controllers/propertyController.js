@@ -181,7 +181,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
             String(attr.value) !== 'NaN'
             )
 
-            if(nonNull.length = 8){
+            if(nonNull.length === 8){
                 attrArray[k] = nonNull
                 k++
             }
