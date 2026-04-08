@@ -158,7 +158,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
 
         var prop = []
         var attrArray = []
-
+        var k = 0; //counter for json reply array
         for(var i =  0; i < result.rowCount; i++ ){
 
             prop = result.rows[i]
@@ -181,7 +181,10 @@ exports.getPropertiesForMap = async (req, res, next) => {
             String(attr.value) !== 'NaN'
             )
 
-            attrArray[i] = nonNull
+            if(nonNull.length = 8){
+                attrArray[k] = nonNull
+                k++
+            }
         }
         console.log(attrArray)
 
