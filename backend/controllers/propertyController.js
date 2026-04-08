@@ -181,7 +181,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
             String(attr.value) !== 'NaN'
             )
 
-            if(attributes.length === 8 || (attributes.find(a =>a.label === "Current Price")?.value === null && nonNull.length === 7)){
+            if(nonNull.length === 8 || (attributes.find(a =>a.label === "Current Price")?.value === null && nonNull.length === 7)){
                 attrArray[k] = attributes
                 k++
             }
