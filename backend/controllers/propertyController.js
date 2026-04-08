@@ -146,7 +146,8 @@ exports.getPropertiesForMap = async (req, res, next) => {
                 state,
                 zipcode,
                 longitude,
-                latitude
+                latitude,
+                current_price
             FROM public."Property"`
         )
 
@@ -170,6 +171,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
                 { label: "State",    value: prop.state },
                 { label: "Longitude",   value: prop.longitude },
                 { label: "Latitude",       value: prop.latitude },
+                {label: "Current Price", value: prop.current_price},
             ]
 
             nonNull = attributes.filter(attr => 
