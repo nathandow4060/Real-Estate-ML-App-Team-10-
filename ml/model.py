@@ -196,20 +196,20 @@ class Model:
 
         df_train = pd.DataFrame({
             'index': components['X_train_indices'],
-            'actual': self.params['y_train'],
-            'pred': train_preds
+            'actual_value': self.params['y_train'],
+            'predicted_value': train_preds
         })
 
         df_val = pd.DataFrame({
             'index': components['X_val_indices'],
-            'actual': self.params['y_val'],
-            'pred': val_preds
+            'actual_value': self.params['y_val'],
+            'predicted_value': val_preds
         })
 
         df_test = pd.DataFrame({
             'index': components['X_test_indices'],
-            'actual': self.params['y_test'],
-            'pred': test_preds
+            'actual_value': self.params['y_test'],
+            'predicted_value': test_preds
         })
 
         return df_train, df_val, df_test, y_pred_dict
@@ -236,7 +236,7 @@ class Model:
             rmse = root_mean_squared_error(y_actual, y_pred)
             mape = MAPE(y_actual, y_pred) * 100
             mae = mean_absolute_error(y_actual, y_pred)
-            data_entry =  {"model_name": self.model_name, "dataset": dataset, "r_squared": r2, "root_mean_squared_error": rmse, "mean_average_percent_error": mape, "mean_average_actual_error": mae}
+            data_entry =  {"model_name": self.model_name, "dataset": dataset, "r_squared": r2, "root_mean_sq_error": rmse, "mean_avg_percent_err": mape, "mean_avg_actual_err": mae}
             data.append(data_entry)
 
         df_metrics_regression = pd.concat([df_metrics_regression, pd.DataFrame(data, columns=regression_headers)], ignore_index=True, axis=0)

@@ -99,16 +99,16 @@ df_val_pred.to_csv(_PREDICTIONS_DIR / "y_val_preds.csv", index=False, encoding="
 df_test_pred.to_csv(_PREDICTIONS_DIR / "y_test_preds.csv", index=False, encoding="utf-8")
 
 # save model metrics
-df_model_metrics.to_csv(_PREDICTIONS_DIR / "model_performance_metrics.csv")
+df_model_metrics.to_csv(_PREDICTIONS_DIR / "model_performance_metrics.csv", index=False)
 
 # save model config
 df_model = pd.DataFrame([{
     'model_name': MODEL_NAME,
     'model_coverage': "2001-2020",
     'mode_of_prediction': "regression",
-    'target_feature': "log_1p_price"
+    'target_feature': TARGET_FEATURE
 }])
-df_model.to_csv(_PREDICTIONS_DIR / "model_details.csv")
+df_model.to_csv(_PREDICTIONS_DIR / "model_details.csv", index=False)
 
 # print evaluation results
 print()
