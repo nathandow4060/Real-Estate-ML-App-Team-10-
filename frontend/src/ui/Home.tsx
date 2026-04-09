@@ -1,6 +1,4 @@
 //Nathan Dow
-
-
 import House from './assets/house.jpg'
 import './Home.css'
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
@@ -30,11 +28,7 @@ function Home({ onPlaceSelected }: HomeProps) {
           />
         </GeoapifyContext>
       </div>
-
-      <div className="home-hero">
-        <img src={House} alt="HomeView" className="home-hero-img" />
-      </div>
-      <NavMap />
+      <NavMap onPlaceSelected={onPlaceSelected}/>
     </main>
   )
 }
