@@ -108,7 +108,7 @@ function App() {
   }
 
 
-  const onSubmit = async (feature: any) => {
+  const onSubmit = async () => {
     setLoading(true)
     setError(null)
 
@@ -125,7 +125,22 @@ function App() {
       })
       const json = await res.json()
 
+      const returndata = await fetch(`${BASE_URL}/property/map`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address: normalizeAddress(savedAutocomplete.address_line1),  // ← normalize before sending
+          city:    savedAutocomplete.city.toUpperCase(),               // ← DB has uppercase cities
+          zipcode: savedAutocomplete.postcode,
+          state:   savedAutocomplete.state_code
+        })
+      })
+      const jsondata = await returndata.json()
+
+      console.log(jsondata)
+
       if (json.status === 'success') {
+        console.log(json)
         setAttributes(json.data)
 
         const salesRes = await fetch(`${BASE_URL}/property-sales`, {
@@ -181,8 +196,6 @@ function App() {
       setLoading(false)
     }
   }
-
-  
 
   return (
     <>

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import House from './assets/house.jpg'
 import './Listing.css'
-import DynamicLineChart from "./assets/dynamicLineChart.tsx"
+import DynamicLineChart from "./components/DynamicLineChart.tsx"
+import PropertyListCard from "./components/PropertyListCard.tsx"
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
 
@@ -29,7 +30,6 @@ interface ListingProps {
   zipData: {year: string, avg_price: number}[]
   stateData:  {year: string, avg_price: number}[]
 }
-
 
 
 function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData}: ListingProps) {
@@ -71,8 +71,6 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
-  
-
   const statePastX: string[] = stateData.map(d => d.year)
   const statePastY: ChartDataset[] = [{
     label: "Avg State Sale Price (USD $)",
@@ -82,7 +80,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
-  const[lastSaleText, setLastSaleText] = useState<"Last Sale Price" | "Current Estimation" | "Current Listing Price">("Last Sale Price");
+  let lastSaleText = "Last Sale Price";
   let lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
   let lastSalePrice =  "—"
   let lastSaleYear =  "—"
@@ -93,20 +91,18 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     lastSaleYear = lastSale?.date_of_sale
   } 
 
-  /*
-  if (attributes.current_price !== null && attributes.market_status !== null) {
-    lastSalePrice = attributes.current_price
+  if (attributes.find(a =>a.label === "Current Price")?.value !== null && attributes.find(a =>a.label === "On the Market")?.value !== null) {
+    lastSalePrice = attributes.find(a =>a.label === "Current Price")?.value.toLocaleString()
     lastSaleYear = "—"
-    if(attributes.market_status === true){
-      setLastSaleText("Current Listing Price")
+    if(attributes.find(a =>a.label === "On the Market")?.value === true){
+      lastSaleText = "Current Listing Price"
     }
-    if(attributes.market_status === false){
-      setLastSaleText("Current Estimation")
+    else if(attributes.find(a =>a.label === "On the Market")?.value === false){
+      lastSaleText = "Current Estimation"
     }
   }
-  
- */
-
+ 
+  const displayAttributes = attributes.slice(0,7)
 
   return (
     <main className="pdp-wrapper">
@@ -148,16 +144,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
             <div className="pdp-attributes">
               <h2>Property Details</h2>
-              <table className="attr-table">
-                <tbody>
-                  {attributes.map((attr: Attribute, i: number) => (
-                    <tr key={i}>
-                      <td className="attr-label">{attr.label}</td>
-                      <td className="attr-value">{attr.value ?? '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <PropertyListCard
+              attributes = {attributes}
+              />
             </div>
           </section>
 
@@ -189,8 +178,6 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 futureX={houseFutureX} futureY={houseFutureY}
               />
             </div>
-
-            
 
             <div className="chart-block">
               <h2>State Price History</h2>
