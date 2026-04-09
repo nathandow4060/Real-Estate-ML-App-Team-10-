@@ -84,7 +84,7 @@ def preprocess_dataset(
     print(f"Dropped {rows_before - len(df)} rows with null values in required feature columns")
 
     # save a copy of the dataframe with row indices; save after row drops, before column drops
-    df.to_csv(output_csv.parent / "df_predicitons_context.csv", index=False, encoding="utf-8")
+    df.to_csv(_DEFAULT_OUTPUT_DIR / "predictions" / "df_predictions_context.csv", index=False, encoding="utf-8")
 
     columns_to_drop = TEXT_COLUMNS + LEAKAGE_COLUMNS + IDENTIFIER_COLUMNS
     columns_to_drop = [col for col in columns_to_drop if col in df.columns]
