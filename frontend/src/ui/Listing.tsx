@@ -137,7 +137,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
           {/* LEFT: photo + attribute table */}
           <section className="pdp-main">
               <Carousel></Carousel>
-              <img src={House} alt="Property" className="pdp-photo" /> 
+              {/* <img src={House} alt="Property" className="pdp-photo" />  */}
 
             <div className="pdp-price">
               <h2>{lastSaleText}</h2>
