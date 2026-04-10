@@ -104,9 +104,16 @@ exports.getPropertyByAddr = async (req, res, next) => {
         const state = req.body.state
 
         const result = await db.query(
-            `SELECT * FROM public."Property" WHERE 
-            street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
-            [street_addr, city, state, zipcode]
+            `
+                SELECT * FROM public."Property"
+                WHERE 
+                    similarity(street_address, $1) > 0.3
+                    AND p.city ILIKE $2
+                    AND p.zipcode = $3
+                    AND p.state ILIKE $4
+                ORDER BY similarity(street_address, $1) DESC
+                LIMIT 1
+            `, [street_addr, city, zipcode, state]
         )
         if (result.rowCount === 0) throw new Error('Multiple records found for address')
         res.json({ status: 'success', data: result.rows[0]})
