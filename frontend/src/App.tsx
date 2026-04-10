@@ -125,23 +125,22 @@ function App() {
       })
       const json = await res.json()
 
-      const returndata = await fetch(`${BASE_URL}/property/map`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          address: normalizeAddress(savedAutocomplete.address_line1),  // ← normalize before sending
-          city:    savedAutocomplete.city.toUpperCase(),               // ← DB has uppercase cities
-          zipcode: savedAutocomplete.postcode,
-          state:   savedAutocomplete.state_code
-        })
-      })
-      const jsondata = await returndata.json()
-
-      console.log(jsondata)
+      
+      
 
       if (json.status === 'success') {
         console.log(json)
         setAttributes(json.data)
+
+         //testing query
+        /* const returndata = await fetch(`${BASE_URL}/property/map`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+        })
+        const mapJson = await returndata.json()
+        console.log(mapJson.data)
+        */
 
         const salesRes = await fetch(`${BASE_URL}/property-sales`, {
           method: "POST",
@@ -164,7 +163,12 @@ function App() {
           state: savedAutocomplete.state_code
         })
         if (zipJson.status === 'success') setZipData(zipJson.data)
-        else setZipData([])
+        else {
+          setZipData([])
+          setError('No properties found in this city')
+        }
+        console.log(zipJson.data)
+
 
 
        // City
@@ -174,6 +178,7 @@ function App() {
         })
         if (cityJson.status === 'success') setCityData(cityJson.data)
         else setCityData([])
+        
 
         
         // State
