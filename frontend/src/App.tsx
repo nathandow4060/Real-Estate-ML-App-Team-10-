@@ -74,7 +74,7 @@ function App() {
   const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
 
   const [cityData,   setCityData]   = useState<{year: string, avg_price: number}[]>([])
-  const [countyData, setCountyData] = useState<{year: string, avg_price: number}[]>([])
+  const [zipData, setZipData] = useState<{year: string, avg_price: number}[]>([])
   const [stateData,  setStateData]  = useState<{year: string, avg_price: number}[]>([])
 
   /*Testing:

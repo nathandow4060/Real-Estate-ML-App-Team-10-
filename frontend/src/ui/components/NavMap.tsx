@@ -150,61 +150,6 @@ function NavMap({ onPlaceSelected }: NavMapProps) {
           'EPSG:4326'
         )
 
-<<<<<<< HEAD
-        //         // forms a polygon excluding connecticut
-        //         const worldExtent = [-20037508, -20037508, 20037508, 20037508]
-        //         const worldPolygon = fromExtent(worldExtent)
-
-        //         const maskPolygon = new Polygon([
-        //             worldPolygon.getCoordinates()[0],
-        //             ...ctGeom.getCoordinates(),
-        //         ])
-        //         const maskFeature = new Feature(maskPolygon)
-
-        //         maskLayer.getSource()?.addFeature(maskFeature)
-        // });
-
-        const parcelSource = new VectorSource({
-            format: new GeoJSON({
-                dataProjection: 'EPSG:4326',
-                featureProjection:'EPSG:3857'
-            }),
-            strategy: bbox,
-            loader: (extent, resolution, projection) => {
-                setZoomLevel(map.getView().getZoom());
-                if(!zoomLevel || zoomLevel <= 9) return
-                fetch('/data/cogBounds.json')
-                    .then(res => res.json())
-                    .then((cogBounds: Record<string, number[]>) => {
-                        Object.entries(cogBounds).forEach(
-                            ([cog, bounds4326]) => {
-                                if (loadedCogs.has(cog)) return
-                                const bounds3857 = transformExtent(bounds4326,
-                                    'EPSG:4326',
-                                    'EPSG:3857');
-
-                                if (!intersects(extent, bounds3857)) return
-
-                                loadedCogs.add(cog)
-                                console.log(`Loading COG: ${cog}`)
-                                fetch(`/data/parcels/${cog}.geojson`)
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        const features = parcelSource.getFormat()?.readFeatures(
-                                            data,
-                                            {featureProjection: projection}
-                                        );undefined
-                                        if (features) {
-                                            parcelSource.addFeatures(features)
-                                        }
-                                    })
-                                    .catch(err =>
-                                        console.error(`Failed ${cog}`, err)
-                                    )
-                            }
-                        )
-                    })
-=======
         fetch(`${BASE_URL}/property/map`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -238,7 +183,6 @@ function NavMap({ onPlaceSelected }: NavMapProps) {
                 propertySourceRef.current?.addFeatures(features)
                 setLoadedCount(features.length)
               }
->>>>>>> 94b136c (new map implementation)
             }
           })
           .catch(err => {

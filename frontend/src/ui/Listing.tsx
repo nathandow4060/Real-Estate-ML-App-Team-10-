@@ -4,6 +4,7 @@ import './Listing.css'
 import DynamicLineChart from "./assets/dynamicLineChart.tsx"
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
+import Carousel from "./components/Carousel.tsx";
 
 interface Attribute {
   label: string
@@ -135,6 +136,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
           {/* LEFT: photo + attribute table */}
           <section className="pdp-main">
+              <Carousel></Carousel>
               <img src={House} alt="Property" className="pdp-photo" /> 
 
             <div className="pdp-price">
