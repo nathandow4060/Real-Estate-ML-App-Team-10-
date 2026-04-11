@@ -5,6 +5,8 @@ import DynamicLineChart from "./components/DynamicLineChart.tsx"
 import PropertyListCard from "./components/PropertyListCard.tsx"
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
 interface Attribute {
   label: string
@@ -102,7 +104,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     }
   }
  
-  const displayAttributes = attributes.slice(0,7)
+  //const displayAttributes = attributes.slice(0,7)
+
+  const [open, setOpen] = useState(false);
 
   return (
     <main className="pdp-wrapper">
@@ -132,7 +136,20 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
           {/* LEFT: photo + attribute table */}
           <section className="pdp-main">
-              <img src={House} alt="Property" className="pdp-photo" /> 
+              <img src={House} alt="Property" className="pdp-photo" onClick={() => setOpen(true)}/> 
+
+              <Lightbox 
+                open={open} 
+                close={() => setOpen(false)} 
+                controller={{ closeOnBackdropClick: true }}
+                carousel={{ finite: true }}
+                slides={[{ src: House }]} 
+                render={{
+                  buttonPrev: () => null,
+                  buttonNext: () => null,
+                  buttonClose: () => null,
+                }}
+              />
 
             <div className="pdp-price">
               <h2>{lastSaleText}</h2>
