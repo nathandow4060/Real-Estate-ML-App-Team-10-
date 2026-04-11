@@ -163,12 +163,7 @@ function App() {
           state: savedAutocomplete.state_code
         })
         if (zipJson.status === 'success') setZipData(zipJson.data)
-        else {
-          setZipData([])
-          setError('No properties found in this city')
-        }
-        console.log(zipJson.data)
-
+        else setZipData([])
 
 
        // City
