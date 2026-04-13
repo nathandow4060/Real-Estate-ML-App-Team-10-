@@ -102,7 +102,7 @@ CREATE TABLE "Model_Performance"(
     mean_avg_actual_err DOUBLE PRECISION NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	CONSTRAINT "model_performance_model_name_foreign" FOREIGN KEY("model_name") REFERENCES "ML_Models"("model_name"),
+	CONSTRAINT "model_performance_model_name_foreign" FOREIGN KEY("model_name") REFERENCES "ML_Models"("model_name") ON DELETE CASCADE,
 	UNIQUE(model_name, dataset, pid, sid)
 );
 
@@ -115,10 +115,10 @@ CREATE TABLE "Model_Predictions"(
     "predicted_value" INTEGER NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	CONSTRAINT "model_predictions_model_name_foreign" FOREIGN KEY("model_name") REFERENCES "ML_Models"("model_name"),
+	CONSTRAINT "model_predictions_model_name_foreign" FOREIGN KEY("model_name") REFERENCES "ML_Models"("model_name") ON DELETE CASCADE,
 	CONSTRAINT "pid_context_foreign" FOREIGN KEY("pid") REFERENCES "Property"("pid"),
 	CONSTRAINT "sid_context_foreign" FOREIGN KEY("sid") REFERENCES "Property_Sale"("sid"),
-	UNIQUE(pid, sid) --compositional key
+	UNIQUE(pid, sid, "model_name") --compositional key
 );
 
 --create trigger for updated at field

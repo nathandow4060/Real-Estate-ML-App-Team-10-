@@ -7,14 +7,17 @@ import time
 # track runtime
 start_time = time.perf_counter()
 
+# MODEL PARAMS TO CHANGE
+MODEL_NAME = "Real_Estate_log1p_Price_predictor_2004_2020_CT"
+TARGET_FEATURE = "sale_amount_log1p" # other option is "sale_amount_log1p"
+MODEL_COVERAGE = "2004-2020"
+
 #GLOBAL VARS
 ML_DIR = Path(__file__).resolve().parent
-TARGET_FEATURE = "log_1p_price" # other option is "price"
 #DATA_PATH = ML_DIR / "data" / "cre22_master_dataset_cleaned.csv"
 _DEFAULT_INPUT_CSV_COMPONENTS = ML_DIR / "data"
 _PREDICTIONS_DIR = ML_DIR / "data" / "predictions"
-
-
+MODEL_FILE_PATH = f"{MODEL_NAME}_model_cofig.json"
 
 
 # Henry data pre-processing
@@ -62,13 +65,11 @@ dataset_components = split_dataset_components(
 y_actual = {"y_train": dataset_components["y_train"],"y_val": dataset_components["y_val"],"y_test": dataset_components["y_test"]}
 
 # build model
-MODEL_NAME = "Real_Estate_Price_predictor_2001_2023_CT"
-MODEL_FILE_PATH = f"{MODEL_NAME}_model_cofig.json"
 estimator = Model(MODEL_NAME, MODEL_FILE_PATH, dataset_components)
 # load model here when desired
 # estimator.load_model()
 print('Starting bayes search')
-best_hyper_parameters_dict, df_bayes_runs = estimator.bayesian_search(n_iterations=50, cv_folds=5, verbosity=0)
+best_hyper_parameters_dict, df_bayes_runs = estimator.bayesian_search(n_iterations=100, cv_folds=5, verbosity=0)
 debug_model = estimator.model(dataset_components)
 df_train_pred, df_val_pred, df_test_pred, y_predicted_dict = estimator.generate_predictions(dataset_components)
 df_model_metrics = estimator.evaluate_performance(["train", "val", "test"], y_actual, y_predicted_dict)
@@ -86,12 +87,12 @@ print(df_bayes_runs)
 # convert predictions from log price to actual price
 for df in [df_train_pred, df_val_pred, df_test_pred]:
     # exponentiate prediction and actual vals to convert back to raw prices
-    if TARGET_FEATURE == "log_1p_price":
-        df["pred"] = round(np.exp(df["pred"]))
-        df["actual"] = round(np.exp(df["actual"]))
-    elif TARGET_FEATURE == "price":
-        df["pred"] = round(f["pred"])
-        df["actual"] = round(df["actual"])
+    if TARGET_FEATURE == "sale_amount_log1p":
+        df["predicted_value"] = round(np.exp(df["predicted_value"]))
+        df["actual_value"] = round(np.exp(df["actual_value"]))
+    elif TARGET_FEATURE == "sale_amount":
+        df["predicted_value"] = round(df["predicted_value"])
+        df["actual_value"] = round(df["actual_value"])
 
 # Save predictions results
 df_train_pred.to_csv(_PREDICTIONS_DIR / "y_train_preds.csv", index=False, encoding="utf-8")
@@ -104,7 +105,7 @@ df_model_metrics.to_csv(_PREDICTIONS_DIR / "model_performance_metrics.csv", inde
 # save model config
 df_model = pd.DataFrame([{
     'model_name': MODEL_NAME,
-    'model_coverage': "2001-2020",
+    'model_coverage': MODEL_COVERAGE,
     'mode_of_prediction': "regression",
     'target_feature': TARGET_FEATURE
 }])
