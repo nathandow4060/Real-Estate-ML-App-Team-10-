@@ -3,15 +3,16 @@ import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile.js'
 import { OSM } from 'ol/source'
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { fromLonLat, transformExtent } from 'ol/proj'
+import { fromLonLat, Projection, transformExtent } from 'ol/proj'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Fill, Stroke, Style, Circle as CircleStyle, RegularShape, Icon } from 'ol/style'
 import { bbox } from 'ol/loadingstrategy'
-import { Select, Pointer as PointerInteraction } from 'ol/interaction'
-import { pointerMove } from 'ol/events/condition'
+import { Select, Pointer as PointerInteraction, Extent } from 'ol/interaction'
+import { pointerMove, singleClick } from 'ol/events/condition'
 import Feature from 'ol/Feature'
 import { Point } from 'ol/geom'
+import { normalizeAddress } from '../../App'
 import Overlay from 'ol/Overlay'
 import './style.mapStyle.css'
 
@@ -24,7 +25,9 @@ interface PropertyDataItem {
 }
 
 interface NavMapProps {
-  onPlaceSelected: (feature: any) => void
+  onPlaceSelected: (feature: any) => void,
+  address: string,
+  setAddress: (addy:string) => void
 }
 
 const STARTING_ZOOM = 9
@@ -38,7 +41,7 @@ const pinSvg = encodeURIComponent(`
   </svg>
 `)
 
-function NavMap({ onPlaceSelected }: NavMapProps) {
+function NavMap({ onPlaceSelected, address, setAddress}: NavMapProps) {
   const mapRef = useRef<Map | null>(null)
   const propertySourceRef = useRef<VectorSource | null>(null)
   const hoveredFeatureRef = useRef<Feature<Point> | null>(null)
@@ -152,7 +155,7 @@ function NavMap({ onPlaceSelected }: NavMapProps) {
 
         fetch(`${BASE_URL}/property/map`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json'},
           body: JSON.stringify({
             bbox: [minLon, minLat, maxLon, maxLat],
             zoom: Math.round(zoom)
@@ -216,6 +219,9 @@ function NavMap({ onPlaceSelected }: NavMapProps) {
         zoom: STARTING_ZOOM,
         minZoom: 9,
         maxZoom: 20,
+        // extent: [40.998972, -73.817139, 42.104744, -71.630859], not working for some reason
+        showFullExtent:true,
+
       }),
     })
 
@@ -249,11 +255,8 @@ function NavMap({ onPlaceSelected }: NavMapProps) {
     // Click interaction - separate from hover to handle clicks
     const clickInteraction = new Select({
       layers: [propertyLayer],
-      condition: (e) => {
-        // Only trigger on single click
-        return e.type === 'click'
-      },
-      style: hoverStyle, // Keep pin style when selected
+      condition: singleClick,
+      style: pinStyle, // Keep pin style when selected
       multi: false,
     })
 
@@ -268,15 +271,16 @@ function NavMap({ onPlaceSelected }: NavMapProps) {
         const { geometry, ...propertyData } = properties
         console.log(propertyData)
         
+        console.log(propertyData)
         // Transform to expected format
         const transformedFeature = transformToGeoapifyFormat(propertyData)
         
-        console.log(transformedFeature)
         // Call handler via ref to avoid React rerender
         onPlaceSelectedRef.current(transformedFeature)
+        setAddress(normalizeAddress(propertyData["Displayed Address"]))
         
         // Keep pin style on selected feature
-        selected.setStyle(hoverStyle)
+        selected.setStyle(pinStyle)
       }
     })
 
