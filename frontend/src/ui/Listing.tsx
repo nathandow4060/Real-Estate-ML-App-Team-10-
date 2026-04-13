@@ -5,6 +5,7 @@ import DynamicLineChart from "./components/DynamicLineChart.tsx"
 import PropertyListCard from "./components/PropertyListCard.tsx"
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
+import PropertySearch from "./components/PropertySearch.tsx";
 
 interface Attribute {
   label: string
@@ -110,16 +111,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
       {/*Header with search bar*/}
       <header className="pdp-header">
         <h1>HomeView</h1>
-        <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
-          <GeoapifyGeocoderAutocomplete
-            placeholder="Enter an address..."
-            lang="en"
-            limit={9}
-            filterByPlace="512b2c5d66fd2e52c0590f9fcfdb33d34440f00101f901a287020000000000c0020a"
-            placeSelect={onPlaceSelected}
-          />
-        </GeoapifyContext>
-        <button onClick = {onSubmit}>Submit</button>
+        <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected}/>
       </header>
 
       {/*Loading / Error states*/}
