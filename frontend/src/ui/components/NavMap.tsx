@@ -15,6 +15,7 @@ import { Point } from 'ol/geom'
 import { normalizeAddress } from '../../App'
 import Overlay from 'ol/Overlay'
 import './style.mapStyle.css'
+import type { Coordinate } from 'ol/coordinate'
 
 const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
@@ -26,8 +27,10 @@ interface PropertyDataItem {
 
 interface NavMapProps {
   onPlaceSelected: (feature: any) => void,
-  address: string,
   setAddress: (addy:string) => void
+  address: string,
+//   coordinates to be centered at [lon,lat]
+  centerAt: Coordinate
 }
 
 const STARTING_ZOOM = 9
@@ -41,7 +44,7 @@ const pinSvg = encodeURIComponent(`
   </svg>
 `)
 
-function NavMap({ onPlaceSelected, address, setAddress}: NavMapProps) {
+function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}: NavMapProps) {
   const mapRef = useRef<Map | null>(null)
   const propertySourceRef = useRef<VectorSource | null>(null)
   const hoveredFeatureRef = useRef<Feature<Point> | null>(null)
@@ -215,7 +218,7 @@ function NavMap({ onPlaceSelected, address, setAddress}: NavMapProps) {
         propertyLayer,
       ],
       view: new View({
-        center: fromLonLat([-72.7, 41.6]),
+        center: fromLonLat(centerAt),
         zoom: STARTING_ZOOM,
         minZoom: 9,
         maxZoom: 20,
