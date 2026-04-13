@@ -33,9 +33,6 @@ class Model:
     def load_model(self):
         self.xgboost_regressor = xgb.XGBRegressor()
         self.xgboost_regressor.load_model(self.file_save_path)
-        #load booster 
-        booster = __buildBooster(self.file_save_path, self.params['X_train'], self.params['y_train'], hyper_params=self.hyperparameters, num_class=1)
-        xgb._Booster = booster   # attach trained booster
     
     # saves model to initialized file path
     def save_model(self):
@@ -43,20 +40,38 @@ class Model:
             raise ValueError("Model is not initialized")
         else:
             self.xgboost_regressor.save_model(self.file_save_path)
+    
+    # returns booster externally
+    def get_booster(self):
+        return self.xgboost_regressor.get_booster()
+
 
     def bayesian_search(self, n_iterations: int = 50, cv_folds: int = 5, verbosity: int = 0) -> list[float | int]:
         """
         Bayesian optimization over XGBoost hyperparameters via BayesSearchCV.
         Returns optimal values in the same order as keys in ``param_space``.
         """
+        #Param space for 50 iteration trial
+        """
         param_space = {
-            "n_estimators": Integer(100, 1000),
-            "max_depth": Integer(2, 12),
+            "n_estimators": Integer(20, 500),
+            "max_depth": Integer(1, 10),
             "learning_rate": Real(1e-3, 0.3, prior="log-uniform"),
             "subsample": Real(0.5, 1.0),
-            "colsample_bytree": Real(0.3, 1.0),
+            "colsample_bytree": Real(0.1, 1.0),
             "gamma": Real(0.0, 5.0),
             "reg_lambda": Real(1e-2, 100.0, prior="log-uniform"),
+        }
+        """
+        # Param space for 100 iteration trial
+        param_space = {
+            "n_estimators": Integer(50, 5000),
+            "max_depth": Integer(2, 12),
+            "learning_rate": Real(1e-3, 0.3, prior="log-uniform"),
+            "subsample": Real(0.3, 1.0),
+            "colsample_bytree": Real(0.1, 1.0),
+            "gamma": Real(0.0, 5.0),
+            "reg_lambda": Real(1e-9, 100.0, prior="log-uniform"),
         }
 
         X_train = self.params["X_train"]
@@ -87,70 +102,6 @@ class Model:
         df_bayes_runs = pd.DataFrame(search.cv_results_) # save hyper-params found on every run
 
         return search.best_params_ , df_bayes_runs  # return found hyperparameters
-
-    def __buildBooster(src_model_path: str, X_target, y_target, prediction_mode: str, hyper_params: dict, num_class: int = None):
-        # 1) refresh leaf weights (native booster)
-        booster = __refresh_leaf_weights(
-            src_model_path=src_model_path,
-            X_target=X_target,
-            y_target=y_target,
-            prediction_mode=prediction_mode,
-            num_class=num_class,
-            hyper_params=hyper_params,
-            n_refresh_rounds=1
-        )
-
-        return booster
-
-    def __refresh_leaf_weights(src_model_path: str, X_target, y_target, num_class: int = None, hyper_params: dict = None, n_refresh_rounds: int = 1,):
-        """
-        Load a source model, then refresh its leaf weights on target data
-        while keeping tree structure fixed.
-        Returns a Booster.
-        """
-        if hyper_params is None:
-            hyper_params = {}
-
-        # ---- Build DMatrix ----
-        dtrain = XGB.DMatrix(X_target, label=y_target)
-
-        # ---- Load source booster ----
-        booster = XGB.Booster()
-        booster.load_model(src_model_path)
-
-        # ---- Set objective & required params ----
-        params = dict(hyper_params)  # copy
-
-        
-        params.update({
-            "objective": "reg:squarederror",
-            "eval_metric": params.get("eval_metric", "rmse"),
-        })
-
-        # ---- refresh updater ----
-        # process_type=update tells XGBoost we are updating an existing model
-        # updater=refresh recomputes stats / optionally leaf weights
-        # refresh_leaf=True updates leaf values without changing structure
-        params.update({
-            "process_type": "update",
-            "updater": "refresh",
-            "refresh_leaf": True,
-            # keep tree method consistent with your setup
-            #"tree_method": params.get("tree_method", "hist"),
-        })
-
-        # ---- Run refresh passes ----
-        # num_boost_round here means "how many update passes" over existing trees
-        booster = XGB.train(
-            params=params,
-            dtrain=dtrain,
-            num_boost_round=n_refresh_rounds,
-            xgb_model=booster,     # start from the loaded model
-            verbose_eval=False
-        )
-
-        return booster
-    # end def refresh_leaf_weights
 
 
 
@@ -223,7 +174,7 @@ class Model:
             print("Error: Model must be initialized before evaluation.")
 
         # setup df to hold performance metrics
-        regression_headers = ["model_name", "dataset", "r_squared", "root_mean_squared_error", "mean_average_percent_error", "mean_average_actual_error"]
+        regression_headers = ["model_name", "dataset", "r_squared", "root_mean_sq_error", "mean_avg_percent_err", "mean_avg_actual_err"]
         data = []
         df_metrics_regression = pd.DataFrame(columns=regression_headers)
 

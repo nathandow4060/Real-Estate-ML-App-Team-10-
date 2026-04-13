@@ -19,7 +19,7 @@ _DEFAULT_INPUT_CSV = _ML_DIR / "data" / "cre22_master_dataset_cleaned.csv"
 _DEFAULT_OUTPUT_DIR = _ML_DIR / "data"
 import pandas as pd
 
-
+# MODIFIED TO TEST RAW PRICE PREDICTION
 TARGET_COLUMN = "sale_amount_log1p"
 
 TEXT_COLUMNS = [
@@ -30,12 +30,14 @@ TEXT_COLUMNS = [
     "street_name",
     "style",
 ]
-
+# MODIFIED TO TEST RAW PRICE PREDICTION
 LEAKAGE_COLUMNS = [
     "sale_amount",
     "sales_ratio",
     "assessed_value",
     "assessed_value_log1p",
+    "living_area_sqft",
+    "has_unit"
 ]
 
 IDENTIFIER_COLUMNS = ["serial_number"]
