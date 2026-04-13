@@ -1,6 +1,7 @@
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
-import "../Home.css"
+// import "../Home.css"
+import "./style/searchStyle.css"
 import { useState } from 'react'
 
 interface searchProp {
@@ -14,11 +15,11 @@ function PropertySearch({onPlaceSelected, onSubmit, setAddress, address}:searchP
     const [loading, setLoading] = useState(false)
 
     return (
-    <div className="home-search" style={{display:'inline'}}>
+    <div className="search-wrap">
         {loading && 
             <div className="loading-spinner">Loading...</div>
         }
-        <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
+        <GeoapifyContext className="search-bar" apiKey="c56847c51cc54d77a23f9d4caed09c74">
             {address && setAddress &&
                 <GeoapifyGeocoderAutocomplete
                 placeholder="Enter an address..."
@@ -45,7 +46,7 @@ function PropertySearch({onPlaceSelected, onSubmit, setAddress, address}:searchP
             
             }
         </GeoapifyContext>
-        <button style={{display:'inline'}} onClick = {onSubmit}>Submit</button> 
+        <button onClick = {onSubmit}>Submit</button> 
     </div>
     )
 }
