@@ -145,6 +145,11 @@ exports.getPropertiesForMap = async (req, res, next) => {
         //const city = req.body.city
         //const zipcode = req.body.zipcode
         //const state = req.body.state
+        if (!req.body.bbox) {
+            return res.status(404).json({ status: 'error', message: 'invalid bbox' })
+        }
+        const [minLon, minLat, maxLon, maxLat] = req.body.bbox;
+
         const result = await db.query(
             `SELECT 
                 pid,
@@ -155,7 +160,10 @@ exports.getPropertiesForMap = async (req, res, next) => {
                 longitude,
                 latitude,
                 current_price
-            FROM public."Property"`
+            FROM public."Property"
+            WHERE longitude BETWEEN $1 AND $3
+                AND latitude BETWEEN $2 AND $4`,
+                [minLon, minLat, maxLon, maxLat]
         )
 
         //console.log('raw row:', result.rows[0])
