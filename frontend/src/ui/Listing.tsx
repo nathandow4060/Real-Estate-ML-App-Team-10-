@@ -46,10 +46,10 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
   }]
 
   //Still needs to be predicted
-  const houseFutureX: string[] = ["2025", "2026", "2027"]
-  const houseFutureY: ChartDataset[] = [{
+  const houseFutureX: string[] = ["21", "2026", "2027"]
+  let houseFutureY: ChartDataset[] = [{
     label: "Price Prediction (USD $)",
-    data: [100, 200, 600],
+    data: [0, 0, 0],
     backgroundColor: 'rgba(255, 26, 104, 0.2)',
     borderColor: 'rgba(255, 26, 104, 1)',
     borderWidth: 1
@@ -82,6 +82,8 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
+  const currentYear = new Date().getFullYear();
+
   let lastSaleText = "Last Sale Price";
   let lastSale = salesData.length > 0 ? salesData[salesData.length - 1] : null
   let lastSalePrice =  "—"
@@ -93,17 +95,20 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     lastSaleYear = lastSale?.date_of_sale
   } 
 
-  if (attributes.find(a =>a.label === "Current Price")?.value !== null && attributes.find(a =>a.label === "On the Market")?.value !== null) {
-    lastSalePrice = attributes.find(a =>a.label === "Current Price")?.value.toLocaleString()
+  const checkCurrentPrice = attributes.find(a =>a.label === "Current Price")?.value
+  const checkMarketStatus = attributes.find(a =>a.label === "On the Market")?.value
+
+  if (checkCurrentPrice !== null && checkMarketStatus !== null &&
+    checkCurrentPrice !== undefined && checkMarketStatus !== undefined) {
+    lastSalePrice = checkCurrentPrice.toLocaleString()
     lastSaleYear = "—"
-    if(attributes.find(a =>a.label === "On the Market")?.value === true){
-      lastSaleText = "Current Listing Price"
-    }
-    else if(attributes.find(a =>a.label === "On the Market")?.value === false){
-      lastSaleText = "Current Estimation"
-    }
+    houseFutureY[0].data[0] = parseInt(lastSalePrice.replaceAll(',', ''))
+    houseFutureX[0] = currentYear.toString()
+
+    if(checkMarketStatus === true) lastSaleText = "Current Listing Price"
+    else if(checkMarketStatus === false) lastSaleText = "Current Estimation"
   }
- 
+
   //const displayAttributes = attributes.slice(0,7)
 
   const [open, setOpen] = useState(false);
@@ -142,8 +147,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 open={open} 
                 close={() => setOpen(false)} 
                 controller={{ closeOnBackdropClick: true }}
-                carousel={{ finite: true }}
+                carousel={{ finite: true , padding:70}}
                 slides={[{ src: House }]} 
+                styles={{ container: { backgroundColor: "rgba(0, 0, 0, .6)"} }}
                 render={{
                   buttonPrev: () => null,
                   buttonNext: () => null,
@@ -173,34 +179,34 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
             <p>Disclaimer: prediction data is experimental and should not be used solely to make any financial decisions</p>
 
             <div className="chart-block">
-              <h2>Property Price History</h2>
               <DynamicLineChart
                 pastX={housePastX} pastY={housePastY}
                 futureX={houseFutureX} futureY={houseFutureY}
+                name = {"Property Price"}
               />
             </div>
 
             <div className="chart-block">
-              <h2>Zip-Code Price History</h2>
               <DynamicLineChart
                 pastX={zipPastX} pastY={zipPastY}
                 futureX={houseFutureX} futureY={houseFutureY}
+                name = {"Zip-Code Price"}
               />
             </div>
 
             <div className="chart-block">
-              <h2>City Price History</h2>
               <DynamicLineChart
                 pastX={cityPastX} pastY={cityPastY}
                 futureX={houseFutureX} futureY={houseFutureY}
+                name = {"City Price"}
               />
             </div>
 
             <div className="chart-block">
-              <h2>State Price History</h2>
               <DynamicLineChart
                 pastX={statePastX} pastY={statePastY}
                 futureX={houseFutureX} futureY={houseFutureY}
+                name = {"State Price"}
               />
             </div>
           </aside>
