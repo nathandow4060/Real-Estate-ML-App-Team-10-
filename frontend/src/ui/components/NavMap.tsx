@@ -27,7 +27,7 @@ interface PropertyDataItem {
 
 interface NavMapProps {
   onPlaceSelected: (feature: any) => void,
-  setAddress: (addy:string) => void
+  setAddress: React.Dispatch<React.SetStateAction<string>>
   address: string,
 //   coordinates to be centered at [lon,lat]
   centerAt?: Coordinate
@@ -267,20 +267,20 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
 
     // Handle pin click - navigate to listing
     clickInteraction.on('select', (e) => {
-      const selected = e.selected[0] as Feature<Point> | undefined
+      const selected = e.selected[0] as Feature<Point> | undefined;
       
       if (selected) {
-        const properties = selected.getProperties()
-        const { geometry, ...propertyData } = properties
+        const properties = selected.getProperties();
+        const { geometry, ...propertyData } = properties;
         // Transform to expected format
-        const transformedFeature = transformToGeoapifyFormat(propertyData)
+        const transformedFeature = transformToGeoapifyFormat(propertyData);
         
         // Call handler via ref to avoid React rerender
-        onPlaceSelectedRef.current(transformedFeature)
-        setAddress(normalizeAddress(propertyData["Displayed Address"]))
+        onPlaceSelectedRef.current(transformedFeature);
+        setAddress(normalizeAddress(propertyData["Displayed Address"]));
         
         // Keep pin style on selected feature
-        selected.setStyle(pinStyle)
+        selected.setStyle(pinStyle);
       }
     })
 
