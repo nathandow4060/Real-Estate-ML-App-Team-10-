@@ -24,7 +24,7 @@ function Home({ onPlaceSelected, onSubmit }: HomeProps) {
       {/* <div>
         <button onClick = {onSubmit}>Submit</button> 
       </div> */}
-      <NavMap onPlaceSelected={onPlaceSelected}/>
+      <NavMap onPlaceSelected={onPlaceSelected} address={address} setAddress={setAddress} />
     </main>
   )
 }

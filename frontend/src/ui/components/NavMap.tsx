@@ -30,7 +30,7 @@ interface NavMapProps {
   setAddress: (addy:string) => void
   address: string,
 //   coordinates to be centered at [lon,lat]
-  centerAt: Coordinate
+  centerAt?: Coordinate
 }
 
 const STARTING_ZOOM = 9
