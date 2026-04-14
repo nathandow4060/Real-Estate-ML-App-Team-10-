@@ -78,9 +78,12 @@ function App() {
   const [attributes, setAttributes] = useState<Attribute[]>([])
   const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
 
-  const [cityData,   setCityData]   = useState<{year: string, avg_price: number}[]>([])
-  const [zipData,    setZipData] = useState<{year: string, avg_price: number}[]>([])
-  const [stateData,  setStateData]  = useState<{year: string, avg_price: number}[]>([])
+  const [cityData,  setCityData]  = useState<{year: string, avg_price: number}[]>([])
+  const [zipData,   setZipData]   = useState<{year: string, avg_price: number}[]>([])
+  const [stateData, setStateData] = useState<{year: string, avg_price: number}[]>([])
+
+  // Street View image URL — must be state so updates trigger a re-render
+  const [streetViewUrl, setStreetViewUrl] = useState<string | null>(null)
 
   /*Testing:
   const [page, setPage] = useState<'home' | 'listing'>('listing')
@@ -97,10 +100,8 @@ function App() {
   ])
   */
 
-  const [loading, setLoading]       = useState<boolean>(false)
-  const [error, setError]           = useState<string | null>(null)
-
-  
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError]     = useState<string | null>(null)
 
   let savedAutocomplete = {
     address_line1: "",
@@ -123,6 +124,7 @@ function App() {
   const onSubmit = async () => {
     setLoading(true)
     setError(null)
+    setStreetViewUrl(null)
 
     const normalizedAddress = normalizeAddress(savedAutocomplete.address_line1)
     const city    = savedAutocomplete.city.toUpperCase()
@@ -156,6 +158,27 @@ function App() {
       if (json.status === 'success') {
         console.log(json)
         setAttributes(json.data)
+
+        // --- Google Street View ---
+        const superSecretKey = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
+        const lat = json.data.find((a: Attribute) => a.label === "Latitude")?.value
+        const lon = json.data.find((a: Attribute) => a.label === "Longitude")?.value
+
+        if (lat && lon) {
+          const metadataUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lon}&source=outdoor&key=${superSecretKey}`
+          const metadataRes = await fetch(metadataUrl)
+          const metadataJson = await metadataRes.json()
+          console.log(metadataJson)
+
+          const panoId = metadataJson.pano_id
+          if (panoId) {
+            const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x250&pano=${panoId}&source=outdoor&key=${superSecretKey}`
+            const imageRes = await fetch(imageUrl)
+            const imageBlob = await imageRes.blob()
+            setStreetViewUrl(window.URL.createObjectURL(imageBlob))
+          }
+        }
+        // --- End Google Street View ---
 
         const [salesJson, zipJson, cityJson, stateJson] = await Promise.all([
           fetch(`${BASE_URL}/property-sales`, {
@@ -205,6 +228,7 @@ function App() {
           cityData={cityData}
           zipData={zipData}
           stateData={stateData}
+          streetViewUrl={streetViewUrl}
         />
       )}
     </>
