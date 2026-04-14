@@ -43,11 +43,7 @@ def insertDB(connection_url, table_name, duplicate_cols, df):
 
 #USAGE
 # Use henrys cre22 merge pipeline and prepare_dataset to build the merged and cleaned ml dataset
-<<<<<<< HEAD
-# from this dataset, delete the columns not relevant to prop or prop_sale.
-=======
 # from this dataset, add state column after city column with value 'CT' for all rows.
->>>>>>> origin/Merge-4/14
 # -(ie dataset should only have cols in COLS_ORDERED var)
 # -add state column with value CT for all rows
 # run this file with the "cre22_master_dataset_cleaned.csv" in the same dir
@@ -62,16 +58,11 @@ df_scrape = pd.read_csv(SCRAPE_DATA_PATH, thousands=',')
 # ----------------------------------------------------------------------
 # Start of property data format for upload to server
 
-<<<<<<< HEAD
-# Re-order columns for data upload
-COLS_ORDERED = ["sale_date", "sale_amount", "year_built", "address_norm", "zipcode", "town_norm", "state", "longitude", "latitude", "style", "total_bedrms", "total_bthrms", "living_area_sqft", "stories"]
-=======
 # drop irrelavant columns that are not going to be uploaded
 df_scrape = df_scrape.drop(columns=['sale_year', 'sale_month', 'sale_day', 'sale_quarter', 'list_year', 'city_code', 'house_number', 'has_unit', 'street_suffix', 'street_name', 'assessed_value', 'sales_ratio', 'fiscal_year_end_june30', 'mortgage30us', 'cpi_cuur0100sa0', 'unemployment_rate', 'housing_supply_actliscouct', 'mill_rate', 'gdp_real_estate', 'home_age_at_sale', 'living_area_sqft_log1p', 'assessed_value_log1p', 'sale_amount_log1p'])
 
 # Re-order columns for data upload
 COLS_ORDERED = ["sale_date", "sale_amount", "year_built", "address_norm", "zipcode", "city", "state", "longitude", "latitude", "style", "total_bedrms", "total_bthrms", "living_area_sqft", "stories"]
->>>>>>> origin/Merge-4/14
 df_scrape = df_scrape[COLS_ORDERED]
 
 # rename columns to match database columns
@@ -87,10 +78,7 @@ df_property_upload = df_scrape.drop(columns=["date_of_sale", "sale_amount"], axi
 int_columns = ['year_built', 'zipcode', 'num_bedrooms', 'num_bathrooms', 'living_area_sqft']
 for col in int_columns:
     df_property_upload[col] = pd.to_numeric(df_property_upload[col], errors='coerce')  # converts bad values to NaN
-<<<<<<< HEAD
-=======
     df_property_upload[col] = round(df_property_upload[col]) # round stories to nearest integer
->>>>>>> origin/Merge-4/14
     df_property_upload[col] = df_property_upload[col].astype('Int64')
 
 #print(df_property_upload.info()) # debug confirm datatypes of cols
