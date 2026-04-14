@@ -55,7 +55,7 @@ async function cachedFetch(url: string, body: object) {
 
 
 // Needs to be normalized so the backend can read
-function normalizeAddress(address: string): string {
+export function normalizeAddress(address: string): string {
   // parse-address parses and normalizes the street suffix (Road→Rd, Street→St, etc.)
   // without over-abbreviating words that are part of the street name
   const parsed = addr.parseLocation(address)
@@ -109,6 +109,35 @@ function App() {
     postcode: "",
     state_code: "",
   }
+
+function App() {
+  const [page, setPage] = useState<'home' | 'listing'>('home')
+  const [attributes, setAttributes] = useState<Attribute[]>([])
+  const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
+
+  const [cityData,   setCityData]   = useState<{year: string, avg_price: number}[]>([])
+  const [zipData, setZipData] = useState<{year: string, avg_price: number}[]>([])
+  const [stateData,  setStateData]  = useState<{year: string, avg_price: number}[]>([])
+
+  /*Testing:
+  const [page, setPage] = useState<'home' | 'listing'>('listing')
+  const [attributes, setAttributes] = useState<Attribute[]>([
+    { label: "Address",    value: "14 DOWNS RD, Monroe, CT 6468" },
+    { label: "Year Built", value: 1951 },
+    { label: "Style",      value: "Colonial" },
+    { label: "Bedrooms",   value: 4 },
+    { label: "Bathrooms",  value: 2 },
+    { label: "Sq Ft",      value: 1908 },
+    { label: "Stories",    value: 2 },
+    { label: "Latitude",   value: 41.3857335 },
+    { label: "Longitude",  value: -73.1862192 },
+  ])
+  */
+
+  const [loading, setLoading]       = useState<boolean>(false)
+  const [error, setError]           = useState<string | null>(null)
+
+  // Needs to be normalized so the backend can read
 
   const onPlaceSelected = async (feature: any) => {
     if (feature?.properties.result_type !== "building") return

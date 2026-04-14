@@ -5,6 +5,8 @@ import DynamicLineChart from "./components/DynamicLineChart.tsx"
 import PropertyListCard from "./components/PropertyListCard.tsx"
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
+import Carousel from "./components/Carousel.tsx";
+import PropertySearch from "./components/PropertySearch.tsx";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
@@ -119,7 +121,8 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
       {/*Header with search bar*/}
       <header className="pdp-header">
         <h1>HomeView</h1>
-        <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
+        <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected}/>
+        {/* <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
           <GeoapifyGeocoderAutocomplete
             placeholder="Enter an address..."
             lang="en"
@@ -128,7 +131,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
             placeSelect={onPlaceSelected}
           />
         </GeoapifyContext>
-        <button onClick = {onSubmit}>Submit</button>
+        <button onClick = {onSubmit}>Submit</button> */}
       </header>
 
       {/*Loading / Error states*/}
@@ -141,7 +144,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
           {/* LEFT: photo + attribute table */}
           <section className="pdp-main">
-              <img src="https://maps.googleapis.com/maps/api/streetview?size=640x640&pano=zVlgKG1os5SqSbzP0beWxA&source=outdoor&key=AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4" alt="Property" className="pdp-photo" onClick={() => setOpen(true)} /> 
+<!--               <Carousel></Carousel> -->
+              {/* <img src={House} alt="Property" className="pdp-photo" />  */}
+              <img src={House} alt="Property" className="pdp-photo" onClick={() => setOpen(true)}/> 
 
               <Lightbox 
                 open={open} 
