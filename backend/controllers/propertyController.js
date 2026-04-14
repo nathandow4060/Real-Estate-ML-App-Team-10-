@@ -60,6 +60,46 @@ exports.getPropertyAttributes = async (req, res, next) => {
     }
 }
 
+exports.getPropertyCoordinates = async (req, res, next) => {
+    try {
+        const street_addr = req.body.address
+        const city = req.body.city
+        const zipcode = req.body.zipcode
+        const state = req.body.state
+        const result = await db.query(
+            `SELECT 
+                latitiude,
+                longitude
+            FROM public."Property" WHERE 
+            street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
+            [street_addr, city, state, zipcode]
+        )
+
+        //console.log('raw row:', result.rows[0])
+        if (result.rowCount === 0) {
+            return res.status(404).json({ status: 'error', message: 'Property not found' })
+        }
+        const prop = result.rows[0]
+        const attributes = [
+            { label: "Longitude",  value: prop.longitude },
+            { label: "Latitude",       value: prop.latitude }
+        ]
+
+        nonNull = attributes.filter(attr => 
+            attr.value !== null && 
+            attr.value !== undefined && 
+            attr.value !== '' && 
+            String(attr.value) !== 'NaN'
+        )
+
+        console.log('raw row:', result.rows[0])
+        
+        res.json({ status: 'success', data: nonNull })
+    } catch (err) {
+        next(err)
+    }
+}
+
 exports.getPropertiesByCity = async (req, res, next) => {
   try {
         const city = req.body.city
@@ -201,5 +241,6 @@ module.exports = {
     getPropertyByAddr: exports.getPropertyByAddr,
     getPropertiesByCityState: exports.getPropertiesByCityState,
     getPropertyAttributes:    exports.getPropertyAttributes,
-    getPropertiesForMap: exports.getPropertiesForMap
+    getPropertiesForMap: exports.getPropertiesForMap,
+    getPropertyCoordinates: exports.getPropertyCoordinates
 }
