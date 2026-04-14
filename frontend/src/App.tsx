@@ -55,7 +55,7 @@ async function cachedFetch(url: string, body: object) {
 
 
 // Needs to be normalized so the backend can read
-function normalizeAddress(address: string): string {
+export function normalizeAddress(address: string): string {
   // parse-address parses and normalizes the street suffix (Road→Rd, Street→St, etc.)
   // without over-abbreviating words that are part of the street name
   const parsed = addr.parseLocation(address)
