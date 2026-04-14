@@ -42,7 +42,11 @@ exports.getPropertyAttributes = async (req, res, next) => {
             { label: "Bedrooms",    value: prop.num_bedrooms },
             { label: "Bathrooms",   value: prop.num_bathrooms },
             { label: "Sq Ft",       value: prop.living_area_sqft },
-            { label: "Stories",     value: prop.stories }
+            { label: "Stories",     value: prop.stories }, 
+            { label: "Current Price", value: prop.current_price },
+            { label: "On the Market", value: prop.market_status },
+            { label: "Longitude", value: prop.longitude },
+            { label: "Latitude", value: prop.latitude }
         ]
 
         nonNull = attributes.filter(attr => 
@@ -247,5 +251,7 @@ module.exports = {
     getPropertiesByCity: exports.getPropertiesByCity,
     getPropertyByAddr: exports.getPropertyByAddr,
     getPropertiesByCityState: exports.getPropertiesByCityState,
-    getPropertyAttributes:    exports.getPropertyAttributes
+    getPropertyAttributes:    exports.getPropertyAttributes,
+    getPropertiesForMap: exports.getPropertiesForMap,
+    getPropertyCoordinates: exports.getPropertyCoordinates
 }
