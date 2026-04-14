@@ -1,0 +1,2 @@
+model_name,model_coverage,mode_of_prediction,target_feature
+Real_Estate_log1p_Price_predictor_2004_2020_CT,2004-2020,regression,sale_amount_log1p

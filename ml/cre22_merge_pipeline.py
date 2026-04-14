@@ -8,21 +8,22 @@ import numpy as np
 import pandas as pd
 
 
-# put this python file in the same directory as all the data
-# Or replace the path with the path to the files on your machine
+# Data files are expected in ml/data by default.
+# You can still replace these paths with machine-specific locations if needed.
 
 # also run this in command prompt "pip install pandas numpy openpyxl"
 
 ROOT = Path(__file__).resolve().parent
+DATA_DIR = ROOT / 'data' # filepath is effectively ml/data
 
 FILES = {
-    'sales': ROOT / 'Real_Estate_Sales_2001-2023_with_scrape_data.csv',
-    'mortgage': ROOT / 'MORTGAGE30US.csv',
-    'cpi': ROOT / 'CPI_CUUR0100SA0.csv',
-    'housing_supply': ROOT / 'housing_supply_ACTLISCOUCT.csv',
-    'mill_rates': ROOT / 'Mill_Rates_for_FY_2014-2026_20260304.csv',
-    'gdp_real_estate': ROOT / 'FRED_ctrerenleargsp.xlsx',
-    'unemployment': ROOT / 'BLS_unemployment_2001-2023.csv',
+    'sales': DATA_DIR / 'Real_Estate_Sales_2001-2023_with_scrape_data.csv',
+    'mortgage': DATA_DIR / 'MORTGAGE30US.csv',
+    'cpi': DATA_DIR / 'CPI_CUUR0100SA0.csv',
+    'housing_supply': DATA_DIR / 'housing_supply_ACTLISCOUCT.csv',
+    'mill_rates': DATA_DIR / 'Mill_Rates_for_FY_2014-2026_20260304.csv',
+    'gdp_real_estate': DATA_DIR / 'FRED_ctrerenleargsp.xlsx',
+    'unemployment': DATA_DIR / 'BLS_unemployment_2001-2023.csv',
 }
 
 for name, path in FILES.items():
@@ -380,8 +381,8 @@ def build_master_dataset() -> tuple[pd.DataFrame, list[dict[str, Any]]]:
 
 if __name__ == '__main__':
     merged_df, checks = build_master_dataset()
-    out_csv = ROOT / 'cre22_master_dataset_test_output.csv'
-    out_json = ROOT / 'cre22_merge_validation.json'
+    out_csv = DATA_DIR / 'cre22_master_dataset_test_output.csv'
+    out_json = DATA_DIR / 'cre22_merge_validation.json'
     merged_df.to_csv(out_csv, index=False)
     out_json.write_text(json.dumps(checks, indent=2), encoding='utf-8')
     print(f'Wrote {out_csv}')

@@ -17,6 +17,8 @@ CREATE TABLE "Property"(
     num_bathrooms INTEGER,
     living_area_sqft INTEGER,
     stories INTEGER,
+	market_status BOOLEAN,
+	current_price INTEGER,
 	CONSTRAINT unique_address UNIQUE (street_address, city, state)
 );
 
@@ -49,7 +51,6 @@ CREATE TABLE "Timeseries_Data_Points" (
     UNIQUE (timeseries_set_id, date_of_data_sample, data_location)
 );
 
-
 CREATE TABLE "ML_Dataset"(
     serial_id BIGSERIAL PRIMARY KEY,
     year_built INTEGER,
@@ -79,28 +80,75 @@ CREATE TABLE "ML_Dataset"(
 	
 );
 
+DROP TABLE "ML_Models"
+DROP TABLE "Model_Performance"
+DROP TABLE "Model_Predictions"
+
 CREATE TABLE "ML_Models"(
     model_name TEXT PRIMARY KEY,
     model_coverage TEXT,
     mode_of_prediction TEXT,
     target_feature TEXT,
-    created_at TIMESTAMP(0) WITHOUT TIME ZONE,
-    updated_at TIMESTAMP(0) WITHOUT TIME ZONE
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE "Model_Performance"(
     model_name TEXT NOT NULL,
-    r_squared DOUBLE PRECISION,
-    mean_average_percent_error DOUBLE PRECISION NOT NULL,
-    mean_average_actual_error DOUBLE PRECISION NOT NULL,
-	CONSTRAINT "model_performance_model_name_foreign" FOREIGN KEY("model_name") REFERENCES "ML_Models"("model_name")
+	dataset TEXT NOT NULL,
+    r_squared DOUBLE PRECISION NOT NULL,
+	root_mean_sq_error DOUBLE PRECISION NOT NULL,
+    mean_avg_percent_err DOUBLE PRECISION NOT NULL,
+    mean_avg_actual_err DOUBLE PRECISION NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT "model_performance_model_name_foreign" FOREIGN KEY("model_name") REFERENCES "ML_Models"("model_name") ON DELETE CASCADE,
+	UNIQUE(model_name, dataset, pid, sid)
 );
 
 CREATE TABLE "Model_Predictions"(
-    "model_name" TEXT PRIMARY KEY,
-    "serial_id" INTEGER NOT NULL,
+	pid	INTEGER NOT NULL,
+	sid INTEGER NOT NULL,
+    "model_name" TEXT,
+	dataset TEXT,
     "actual_value" INTEGER NOT NULL,
     "predicted_value" INTEGER NOT NULL,
-	CONSTRAINT "model_predictions_series_id_foreign" FOREIGN KEY("serial_id") REFERENCES "ML_Dataset"("serial_id"),
-	CONSTRAINT "model_predictions_model_name_foreign" FOREIGN KEY("model_name") REFERENCES "ML_Models"("model_name")
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT "model_predictions_model_name_foreign" FOREIGN KEY("model_name") REFERENCES "ML_Models"("model_name") ON DELETE CASCADE,
+	CONSTRAINT "pid_context_foreign" FOREIGN KEY("pid") REFERENCES "Property"("pid"),
+	CONSTRAINT "sid_context_foreign" FOREIGN KEY("sid") REFERENCES "Property_Sale"("sid"),
+	UNIQUE(pid, sid, "model_name") --compositional key
 );
+
+--create trigger for updated at field
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+--attach trigger to tables: "ML_Models", "Model_Predictions", "Model_Performance"
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON "ML_Models"
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON "Model_Predictions"
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON "Model_Performance"
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+
+CREATE TABLE "Property_Images"(
+	pid 	INTEGER NOT NULL,
+	img_url	TEXT,
+	CONSTRAINT "prop_images_foreign" FOREIGN KEY("pid") REFERENCES "Property"("pid")
+)
