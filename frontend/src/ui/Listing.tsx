@@ -141,7 +141,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
           {/* LEFT: photo + attribute table */}
           <section className="pdp-main">
-              <img src={House} alt="Property" className="pdp-photo" onClick={() => setOpen(true)}/> 
+              <img src="https://maps.googleapis.com/maps/api/streetview?size=640x640&pano=zVlgKG1os5SqSbzP0beWxA&source=outdoor&key=AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4" alt="Property" className="pdp-photo" onClick={() => setOpen(true)} /> 
 
               <Lightbox 
                 open={open} 
