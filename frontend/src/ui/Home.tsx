@@ -35,12 +35,7 @@ function Home({ onPlaceSelected, onSubmit }: HomeProps) {
       <div>
         <button onClick = {onSubmit}>Submit</button> 
       </div>
-
-      <div className="home-hero">
-        <img src={House} alt="HomeView" className="home-hero-img" />
-      </div>
-      <NavMap /> */}
-      <NavMap onPlaceSelected={onPlaceSelected} address={address} setAddress={setAddress} />
+      <NavMap onPlaceSelected={onPlaceSelected}/>
     </main>
   )
 }
