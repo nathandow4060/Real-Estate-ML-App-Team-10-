@@ -22,7 +22,9 @@ exports.getPropertyAttributes = async (req, res, next) => {
                 living_area_sqft,
                 stories,
                 current_price,
-                market_status
+                market_status,
+                longitude,
+                latitude
             FROM public."Property" WHERE 
             street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
             [street_addr, city, state, zipcode]
@@ -40,9 +42,47 @@ exports.getPropertyAttributes = async (req, res, next) => {
             { label: "Bedrooms",    value: prop.num_bedrooms },
             { label: "Bathrooms",   value: prop.num_bathrooms },
             { label: "Sq Ft",       value: prop.living_area_sqft },
-            { label: "Stories",     value: prop.stories }, 
-            { label: "Current Price", value: prop.current_price },
-            { label: "On the Market", value: prop.market_status }
+            { label: "Stories",     value: prop.stories }
+        ]
+
+        nonNull = attributes.filter(attr => 
+            attr.value !== null && 
+            attr.value !== undefined && 
+            attr.value !== '' && 
+            String(attr.value) !== 'NaN'
+        )
+
+        console.log('raw row:', result.rows[0])
+        
+        res.json({ status: 'success', data: nonNull })
+    } catch (err) {
+        next(err)
+    }
+}
+
+exports.getPropertyCoordinates = async (req, res, next) => {
+    try {
+        const street_addr = req.body.address
+        const city = req.body.city
+        const zipcode = req.body.zipcode
+        const state = req.body.state
+        const result = await db.query(
+            `SELECT 
+                latitiude,
+                longitude,
+            FROM public."Property" WHERE 
+            street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
+            [street_addr, city, state, zipcode]
+        )
+
+        //console.log('raw row:', result.rows[0])
+        if (result.rowCount === 0) {
+            return res.status(404).json({ status: 'error', message: 'Property not found' })
+        }
+        const prop = result.rows[0]
+        const attributes = [
+            { label: "Longitude",  value: prop.longitude },
+            { label: "Latitude",       value: prop.latitude }
         ]
 
         nonNull = attributes.filter(attr => 
@@ -145,11 +185,6 @@ exports.getPropertiesForMap = async (req, res, next) => {
         //const city = req.body.city
         //const zipcode = req.body.zipcode
         //const state = req.body.state
-        if (!req.body.bbox) {
-            return res.status(404).json({ status: 'error', message: 'invalid bbox' })
-        }
-        const [minLon, minLat, maxLon, maxLat] = req.body.bbox;
-
         const result = await db.query(
             `SELECT 
                 pid,
@@ -160,10 +195,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
                 longitude,
                 latitude,
                 current_price
-            FROM public."Property"
-            WHERE longitude BETWEEN $1 AND $3
-                AND latitude BETWEEN $2 AND $4`,
-                [minLon, minLat, maxLon, maxLat]
+            FROM public."Property"`
         )
 
         //console.log('raw row:', result.rows[0])
@@ -215,6 +247,5 @@ module.exports = {
     getPropertiesByCity: exports.getPropertiesByCity,
     getPropertyByAddr: exports.getPropertyByAddr,
     getPropertiesByCityState: exports.getPropertiesByCityState,
-    getPropertyAttributes:    exports.getPropertyAttributes,
-    getPropertiesForMap: exports.getPropertiesForMap
+    getPropertyAttributes:    exports.getPropertyAttributes
 }

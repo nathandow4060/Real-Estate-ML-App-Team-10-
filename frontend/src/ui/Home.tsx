@@ -21,9 +21,25 @@ function Home({ onPlaceSelected, onSubmit }: HomeProps) {
       </header>
       <PropertySearch onPlaceSelected={onPlaceSelected} onSubmit={onSubmit} address={address} setAddress={setAddress} />
       
-      {/* <div>
+      {/* <div className="home-search">
+        <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
+          <GeoapifyGeocoderAutocomplete
+            placeholder="Enter an address..."
+            lang="en"
+            limit={9}
+            filterByPlace="512b2c5d66fd2e52c0590f9fcfdb33d34440f00101f901a287020000000000c0020a"
+            placeSelect={onPlaceSelected}
+          />
+        </GeoapifyContext>
+      </div>
+      <div>
         <button onClick = {onSubmit}>Submit</button> 
-      </div> */}
+      </div>
+
+      <div className="home-hero">
+        <img src={House} alt="HomeView" className="home-hero-img" />
+      </div>
+      <NavMap /> */}
       <NavMap onPlaceSelected={onPlaceSelected} address={address} setAddress={setAddress} />
     </main>
   )

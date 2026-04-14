@@ -19,7 +19,7 @@ fetch(`${BASE_URL}/property-sales/state-history`, {
 
 const cache: Record<string, any> = {}
 
-//Used to catche the calculated average sales for zipcode, city, and state
+//Used to cache the calculated average sales for zipcode, city, and state
 async function cachedFetch(url: string, body: object) {
   const key = url + JSON.stringify(body)
   
@@ -55,7 +55,7 @@ async function cachedFetch(url: string, body: object) {
 
 
 // Needs to be normalized so the backend can read
-export function normalizeAddress(address: string): string {
+function normalizeAddress(address: string): string {
   // parse-address parses and normalizes the street suffix (Road→Rd, Street→St, etc.)
   // without over-abbreviating words that are part of the street name
   const parsed = addr.parseLocation(address)
@@ -108,7 +108,6 @@ function App() {
     postcode: "",
     state_code: "",
   }
-  // Needs to be normalized so the backend can read
 
   const onPlaceSelected = async (feature: any) => {
     if (feature?.properties.result_type !== "building") return
@@ -132,7 +131,7 @@ function App() {
 
     console.log('Sending to backend:', { address: normalizedAddress, city, zipcode, state })
 
-     try {
+    try {
       const fetchPromises: Promise<any>[] = [
         fetch(`${BASE_URL}/property/attributes`, {
           method: "POST",
