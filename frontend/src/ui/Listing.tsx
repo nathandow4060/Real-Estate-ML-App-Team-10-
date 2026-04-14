@@ -5,6 +5,7 @@ import DynamicLineChart from "./components/DynamicLineChart.tsx"
 import PropertyListCard from "./components/PropertyListCard.tsx"
 import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
+import Carousel from "./components/Carousel.tsx";
 import PropertySearch from "./components/PropertySearch.tsx";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -143,7 +144,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
           {/* LEFT: photo + attribute table */}
           <section className="pdp-main">
-              <img src="https://maps.googleapis.com/maps/api/streetview?size=640x640&pano=zVlgKG1os5SqSbzP0beWxA&source=outdoor&key=AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4" alt="Property" className="pdp-photo" onClick={() => setOpen(true)} /> 
+<!--               <Carousel></Carousel> -->
+              {/* <img src={House} alt="Property" className="pdp-photo" />  */}
+              <img src={House} alt="Property" className="pdp-photo" onClick={() => setOpen(true)}/> 
 
               <Lightbox 
                 open={open} 
