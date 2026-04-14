@@ -107,6 +107,8 @@ function App() {
     console.log('Selected:', savedAutocomplete.address_line1, savedAutocomplete.city, savedAutocomplete.postcode, savedAutocomplete.state_code)
   }
 
+  let url3 = null
+
 
   const onSubmit = async () => {
     setLoading(true)
@@ -126,7 +128,6 @@ function App() {
       const json = await res.json()
 
       
-      
 
       if (json.status === 'success') {
         console.log(json)
@@ -141,6 +142,28 @@ function App() {
         const mapJson = await returndata.json()
         console.log(mapJson.data)
         */
+          
+            const superSecretKey = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
+            const lat = json.data.find(a =>a.label === "Latitude")?.value
+            const lon = json.data.find(a =>a.label === "Longitude")?.value
+
+            const url = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lon}&source=outdoor&key=${superSecretKey}`;
+
+
+            const res = await fetch(url);
+            const data = await res.json();
+            console.log(data)
+            const panoId = data.pano_id
+            console.log()
+
+           const url2 = `https://maps.googleapis.com/maps/api/streetview?size=400x250&pano=${panoId}]&source=outdoor&key=${superSecretKey}`
+           const res2 = await fetch(url2);
+          const data2 = await res2.blob();
+          url3 = window.URL.createObjectURL(data2);
+          console.log(data2)
+
+        
+
 
         const salesRes = await fetch(`${BASE_URL}/property-sales`, {
           method: "POST",
@@ -152,9 +175,12 @@ function App() {
             state:   savedAutocomplete.state_code
           })
         })
+
         const salesJson = await salesRes.json()
         if (salesJson.status === 'success') setSalesData(salesJson.data)
         else setSalesData([])
+
+        console.log(salesJson.data)
 
 
         //  Zip Code
@@ -218,6 +244,8 @@ function App() {
           stateData={stateData}
         />
       )}
+
+      <img src = {url3} />
     </>
   )
 }
