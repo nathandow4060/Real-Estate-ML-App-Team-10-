@@ -22,7 +22,9 @@ exports.getPropertyAttributes = async (req, res, next) => {
                 living_area_sqft,
                 stories,
                 current_price,
-                market_status
+                market_status,
+                longitude,
+                latitude
             FROM public."Property" WHERE 
             street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
             [street_addr, city, state, zipcode]
@@ -42,7 +44,9 @@ exports.getPropertyAttributes = async (req, res, next) => {
             { label: "Sq Ft",       value: prop.living_area_sqft },
             { label: "Stories",     value: prop.stories }, 
             { label: "Current Price", value: prop.current_price },
-            { label: "On the Market", value: prop.market_status }
+            { label: "On the Market", value: prop.market_status },
+            { label: "Longitude", value: prop.longitude },
+            { label: "Latitude", value: prop.latitude }
         ]
 
         nonNull = attributes.filter(attr => 
@@ -69,7 +73,7 @@ exports.getPropertyCoordinates = async (req, res, next) => {
         const result = await db.query(
             `SELECT 
                 latitiude,
-                longitude
+                longitude,
             FROM public."Property" WHERE 
             street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
             [street_addr, city, state, zipcode]
