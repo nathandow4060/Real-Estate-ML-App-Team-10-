@@ -19,7 +19,7 @@ fetch(`${BASE_URL}/property-sales/state-history`, {
 
 const cache: Record<string, any> = {}
 
-//Used to catche the calculated average sales for zipcode, city, and state
+//Used to cache the calculated average sales for zipcode, city, and state
 async function cachedFetch(url: string, body: object) {
   const key = url + JSON.stringify(body)
   
@@ -131,7 +131,7 @@ function App() {
 
     console.log('Sending to backend:', { address: normalizedAddress, city, zipcode, state })
 
-     try {
+    try {
       const fetchPromises: Promise<any>[] = [
         fetch(`${BASE_URL}/property/attributes`, {
           method: "POST",
