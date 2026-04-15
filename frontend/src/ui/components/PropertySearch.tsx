@@ -9,14 +9,15 @@ interface searchProp {
     onSubmit: (feature: any) => void,
     setAddress?: React.Dispatch<React.SetStateAction<string>>,
     address?: string,
+    disabled?: boolean
 }
 
-function PropertySearch({onPlaceSelected, onSubmit, setAddress, address}:searchProp) {
+function PropertySearch({onPlaceSelected, onSubmit, setAddress, address, disabled}:searchProp) {
     const [loading, setLoading] = useState(false)
 
     return (
     <div className="search-wrap">
-        {loading && 
+        {(loading || disabled ) && 
             <div className="loading-spinner">Loading...</div>
         }
         <GeoapifyContext className="search-bar" apiKey="c56847c51cc54d77a23f9d4caed09c74">
@@ -46,7 +47,7 @@ function PropertySearch({onPlaceSelected, onSubmit, setAddress, address}:searchP
             
             }
         </GeoapifyContext>
-        <button onClick = {onSubmit}>Submit</button> 
+        <button onClick = {onSubmit} disabled={disabled || loading}>Submit</button> 
     </div>
     )
 }

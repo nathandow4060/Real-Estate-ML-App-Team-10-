@@ -218,6 +218,7 @@ function App() {
         <Home
           onPlaceSelected={onPlaceSelected}
           onSubmit={onSubmit}
+          loading={loading}
         />
       )}
       {page === 'listing' && (

@@ -8,9 +8,10 @@ import { useState } from 'react'
 interface HomeProps {
   onPlaceSelected: (feature: any) => void
   onSubmit: () => void
+  loading: boolean
 }
 
-function Home({ onPlaceSelected, onSubmit }: HomeProps) {
+function Home({ onPlaceSelected, onSubmit, loading }: HomeProps) {
     const [address, setAddress] = useState<string>('')
   return (
     <main className="home-wrapper">
@@ -18,7 +19,7 @@ function Home({ onPlaceSelected, onSubmit }: HomeProps) {
         <h1>HomeView</h1>
         <p className="home-subtitle">Search any property to view price history and predictions</p>
       </header>
-      <PropertySearch onPlaceSelected={onPlaceSelected} onSubmit={onSubmit} address={address} setAddress={setAddress} />
+      <PropertySearch onPlaceSelected={onPlaceSelected} onSubmit={onSubmit} address={address} setAddress={setAddress} disabled={loading}/>
       
       {/*<div className="home-search">
         <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
@@ -31,9 +32,6 @@ function Home({ onPlaceSelected, onSubmit }: HomeProps) {
           />
         </GeoapifyContext>
       </div>*/}
-      <div>
-        <button onClick = {onSubmit}>Submit</button> 
-      </div>
       <NavMap
         onPlaceSelected = {onPlaceSelected}
         address={address}

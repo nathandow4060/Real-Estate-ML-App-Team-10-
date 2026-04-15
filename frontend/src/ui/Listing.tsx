@@ -122,7 +122,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
       {/*Header with search bar*/}
       <header className="pdp-header">
         <h1>HomeView</h1>
-        <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected}/>
+        <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading}/>
         {/* <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
           <GeoapifyGeocoderAutocomplete
             placeholder="Enter an address..."
