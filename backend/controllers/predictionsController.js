@@ -41,7 +41,12 @@ exports.getModelDetailsByName = async (req, res, next) => {
             `SELECT model_name, model_coverage, mode_of_prediction, target_feature FROM public."ML_Models"
             WHERE model_name = $1
         `, [model_name])
-        res.json(result.rows)
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ status: 'error', message: 'Model Details not found' })
+        }
+
+        res.json({ status: 'success', data: result.rows[0]})
     } catch (error) {
         next(error)
     }
@@ -54,10 +59,15 @@ exports.getModelMetricsByName = async (req, res, next) => {
     try {
         const model_name = req.params.model_name
         const result = await db.query(
-            `SELECT model_name, dataset, r_squared, root_mean_sq_error, mean_avg_actual_err FROM public."Model_Performance"
+            `SELECT model_name, dataset, r_squared, root_mean_sq_error, mean_avg_percent_err, mean_avg_actual_err FROM public."Model_Performance"
             WHERE model_name = $1
         `, [model_name])
-        res.json(result.rows)
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ status: 'error', message: 'Model Performance metrics not found' })
+        }
+
+        res.json({ status: 'success', data: result.rows})
     } catch (error) {
         next(error)
     }
