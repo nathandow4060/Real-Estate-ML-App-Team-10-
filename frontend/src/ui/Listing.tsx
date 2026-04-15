@@ -3,7 +3,6 @@ import House from './assets/house.jpg'
 import './Listing.css'
 import DynamicLineChart from "./components/DynamicLineChart.tsx"
 import PropertyListCard from "./components/PropertyListCard.tsx"
-import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
 import Carousel from "./components/Carousel.tsx";
 import PropertySearch from "./components/PropertySearch.tsx";
@@ -33,10 +32,12 @@ interface ListingProps {
   cityData:   {year: string, avg_price: number}[]
   zipData: {year: string, avg_price: number}[]
   stateData:  {year: string, avg_price: number}[]
+  streetViewUrl: string | null
+
 }
 
 
-function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData}: ListingProps) {
+function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl}: ListingProps) {
 
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
   const housePastY: ChartDataset[] = [{
@@ -144,9 +145,14 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
           {/* LEFT: photo + attribute table */}
           <section className="pdp-main">
-<!--               <Carousel></Carousel> -->
+              {/*<Carousel></Carousel>/}              
               {/* <img src={House} alt="Property" className="pdp-photo" />  */}
-              <img src={House} alt="Property" className="pdp-photo" onClick={() => setOpen(true)}/> 
+              <img 
+                src={streetViewUrl || House} 
+                alt="Property" 
+                className="pdp-photo" 
+                onClick={() => setOpen(true)}
+              /> 
 
               <Lightbox 
                 open={open} 

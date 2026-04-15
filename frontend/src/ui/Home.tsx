@@ -1,5 +1,4 @@
 //Nathan Dow
-import House from './assets/house.jpg'
 import './Home.css'
 
 import NavMap from './components/NavMap'
@@ -8,7 +7,7 @@ import { useState } from 'react'
 
 interface HomeProps {
   onPlaceSelected: (feature: any) => void
-  onSubmit: (feature: any) => void
+  onSubmit: () => void
 }
 
 function Home({ onPlaceSelected, onSubmit }: HomeProps) {
@@ -21,7 +20,7 @@ function Home({ onPlaceSelected, onSubmit }: HomeProps) {
       </header>
       <PropertySearch onPlaceSelected={onPlaceSelected} onSubmit={onSubmit} address={address} setAddress={setAddress} />
       
-      {/* <div className="home-search">
+      {/*<div className="home-search">
         <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
           <GeoapifyGeocoderAutocomplete
             placeholder="Enter an address..."
@@ -31,11 +30,15 @@ function Home({ onPlaceSelected, onSubmit }: HomeProps) {
             placeSelect={onPlaceSelected}
           />
         </GeoapifyContext>
-      </div>
+      </div>*/}
       <div>
         <button onClick = {onSubmit}>Submit</button> 
       </div>
-      <NavMap onPlaceSelected={onPlaceSelected}/>
+      <NavMap
+        onPlaceSelected = {onPlaceSelected}
+        address={address}
+        setAddress={setAddress}
+      />
     </main>
   )
 }
