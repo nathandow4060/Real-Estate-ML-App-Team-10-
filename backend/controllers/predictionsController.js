@@ -36,7 +36,7 @@ exports.getPropertyPrediction = async (req, res, next) => {
 //OUTPUT: model details: model_name, range of years modeled, target feature
 exports.getModelDetailsByName = async (req, res, next) => {
     try {
-        const model_name = req.params.model_name
+        const model_name = req.body.model_name
         const result = await db.query(
             `SELECT model_name, model_coverage, mode_of_prediction, target_feature FROM public."ML_Models"
             WHERE model_name = $1
@@ -57,7 +57,7 @@ exports.getModelDetailsByName = async (req, res, next) => {
 //OUTPUT: model performance metrics: model_name, rmse, r2_score
 exports.getModelMetricsByName = async (req, res, next) => {
     try {
-        const model_name = req.params.model_name
+        const model_name = req.body.model_name
         const result = await db.query(
             `SELECT model_name, dataset, r_squared, root_mean_sq_error, mean_avg_percent_err, mean_avg_actual_err FROM public."Model_Performance"
             WHERE model_name = $1
