@@ -1,5 +1,4 @@
 //Nathan Dow
-import House from './assets/house.jpg'
 import './Home.css'
 
 import NavMap from './components/NavMap'
@@ -8,7 +7,7 @@ import { useState } from 'react'
 
 interface HomeProps {
   onPlaceSelected: (feature: any) => void
-  onSubmit: (feature: any) => void
+  onSubmit: () => void
 }
 
 function Home({ onPlaceSelected, onSubmit }: HomeProps) {
@@ -35,7 +34,11 @@ function Home({ onPlaceSelected, onSubmit }: HomeProps) {
       <div>
         <button onClick = {onSubmit}>Submit</button> 
       </div>
-      <NavMap onPlaceSelected={onPlaceSelected}/>
+      <NavMap
+        onPlaceSelected = {onPlaceSelected}
+        address={address}
+        setAddress={setAddress}
+      />
     </main>
   )
 }
