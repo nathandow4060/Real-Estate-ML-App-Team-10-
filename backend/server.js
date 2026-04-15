@@ -16,4 +16,8 @@ app.use('/property',propRoutes)
 const propSalesRoutes = require('./routes/propertySalesRoutes')
 app.use('/property-sales',propSalesRoutes)
 
+// predictions routes
+const predictionsRoutes = require('./routes/predictionsRoutes')
+app.use('/predictions', predictionsRoutes)
+
 app.listen(5000, () => {console.log("Server started on port 5000")}) //This should be last after routes
