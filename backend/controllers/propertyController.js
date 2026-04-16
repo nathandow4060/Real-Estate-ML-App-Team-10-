@@ -46,7 +46,8 @@ exports.getPropertyAttributes = async (req, res, next) => {
             { label: "Current Price", value: prop.current_price },
             { label: "On the Market", value: prop.market_status },
             { label: "Longitude", value: prop.longitude },
-            { label: "Latitude", value: prop.latitude }
+            { label: "Latitude", value: prop.latitude },
+            {label: "pid", value: prop.pid}
         ]
 
         nonNull = attributes.filter(attr => 
