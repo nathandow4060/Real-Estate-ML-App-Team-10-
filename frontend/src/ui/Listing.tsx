@@ -159,7 +159,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 close={() => setOpen(false)} 
                 controller={{ closeOnBackdropClick: true }}
                 carousel={{ finite: true , padding:70}}
-                slides={[{ src: House }]} 
+                slides={[{ src: streetViewUrl || House}]} 
                 styles={{ container: { backgroundColor: "rgba(0, 0, 0, .6)"} }}
                 render={{
                   buttonPrev: () => null,
