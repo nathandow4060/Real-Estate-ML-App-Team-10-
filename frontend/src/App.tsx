@@ -83,6 +83,8 @@ function App() {
   const [zipData,   setZipData]   = useState<{year: string, avg_price: number}[]>([])
   const [stateData, setStateData] = useState<{year: string, avg_price: number}[]>([])
 
+  const[propertyPrediction, setPropertyPrediction] = useState <number | null>(null)
+
   // Street View image URL — must be state so updates trigger a re-render
   const [streetViewUrl, setStreetViewUrl] = useState<string | null>(null)
 
@@ -199,6 +201,18 @@ function App() {
         setCityData(cityJson.status    === 'success' ? cityJson.data   : [])
         setStateData(stateJson.status  === 'success' ? stateJson.data  : [])
 
+
+        const pid = json.data.find((a: Attribute) => a.label === "pid")?.value
+        const predictionPropertyJson = await fetch(`${BASE_URL}/predictions/property-predictions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ model_name: "Real_Estate_Price_predictor_2004_2020_CT", pid: pid })
+        }).then(r => r.json())
+
+        console.log("predictionProperties: ", predictionPropertyJson[0].predicted_value)
+
+        setPropertyPrediction(predictionPropertyJson !== undefined ? predictionPropertyJson[0].predicted_value : null)
+
         setPage('listing')
       } else {
         setError('Property not found in database.')
@@ -233,6 +247,7 @@ function App() {
           zipData={zipData}
           stateData={stateData}
           streetViewUrl={streetViewUrl}
+          propertyPrediction = {propertyPrediction}
         />
       )}
     </>

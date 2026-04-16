@@ -33,11 +33,12 @@ interface ListingProps {
   zipData: {year: string, avg_price: number}[]
   stateData:  {year: string, avg_price: number}[]
   streetViewUrl: string | null
+  propertyPrediction: number | null
 
 }
 
 
-function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl}: ListingProps) {
+function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl, propertyPrediction}: ListingProps) {
 
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
   const housePastY: ChartDataset[] = [{
@@ -49,10 +50,10 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
   }]
 
   //Still needs to be predicted
-  const houseFutureX: string[] = ["21", "2026", "2027"]
+  const houseFutureX: string[] = []
   let houseFutureY: ChartDataset[] = [{
     label: "Price Prediction (USD $)",
-    data: [0, 0, 0],
+    data: [],
     backgroundColor: 'rgba(255, 26, 104, 0.2)',
     borderColor: 'rgba(255, 26, 104, 1)',
     borderWidth: 1
@@ -85,6 +86,8 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
+  const [open, setOpen] = useState(false);
+
   const currentYear = new Date().getFullYear();
 
   let lastSaleText = "Last Sale Price";
@@ -101,6 +104,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
   const checkCurrentPrice = attributes.find(a =>a.label === "Current Price")?.value
   const checkMarketStatus = attributes.find(a =>a.label === "On the Market")?.value
 
+  
   if (checkCurrentPrice !== null && checkMarketStatus !== null &&
     checkCurrentPrice !== undefined && checkMarketStatus !== undefined) {
     lastSalePrice = checkCurrentPrice.toLocaleString()
@@ -112,9 +116,21 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     else if(checkMarketStatus === false) lastSaleText = "Current Estimation"
   }
 
-  //const displayAttributes = attributes.slice(0,7)
+  // append prediction price to houseFuture
+  if(propertyPrediction !==null){
+    houseFutureY[0].data.push(propertyPrediction)
+    houseFutureX.push((currentYear+1).toString() + " (prediction)")
 
-  const [open, setOpen] = useState(false);
+  }
+
+
+  const displayAttributes = attributes.filter(attr => 
+    attr.label !== "Current Price" && 
+    attr.label !== "On the Market" && 
+    attr.label !== "Longitude" && 
+    attr.label !== "Latitude" &&
+    attr.label !== "pid"
+  )
 
   return (
     <main className="pdp-wrapper">
@@ -179,7 +195,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
             <div className="pdp-attributes">
               <h2>Property Details</h2>
               <PropertyListCard
-              attributes = {attributes}
+              attributes = {displayAttributes}
               />
             </div>
           </section>
