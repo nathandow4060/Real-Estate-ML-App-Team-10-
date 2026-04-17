@@ -1,14 +1,54 @@
+.search-bar {
+    flex: 1;
+    min-width: 0;
+}
 
 .search-wrap {
     display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-    margin: 0;
+    flex-direction: row;
+    align-items: left;
+    width: 100%;
+    gap: 8%;
 }
 
-.search-bar {
-    flex-grow: 4;
-    width: 80%;
-    /* margin: auto; */
+.search-wrap .geoapify-autocomplete-container {
+    flex: 1;
+    min-width: 0;
 }
 
+.search-wrap .geoapify-autocomplete-input {
+    flex: 1;
+    width: 100%;
+}
+
+.search-wrap button {
+    white-space: nowrap;
+    min-width: 13ch;
+    text-align: center;
+}
+
+/*Mobile View*/
+@media (max-width: 775px) {
+
+     .search-wrap {
+        flex-direction: column;
+        align-items: center;
+        gap: 1em 0;
+    }
+    .search-bar {
+        width: 100%;
+    }
+    .search-wrap .geoapify-autocomplete-container {
+        min-width: 0;
+        width: 100%;
+    }
+    .search-wrap .geoapify-autocomplete-input {
+        flex: 1;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .search-wrap button {
+        width: 100%;
+    }
+
+}
