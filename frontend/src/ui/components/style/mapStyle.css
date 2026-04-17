@@ -1,3 +1,5 @@
+@import "node_modules/ol/ol.css";
+
 /* NavMap Container */
 .navmap-container {
   width: 100%;
@@ -129,22 +131,37 @@
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .map-controls {
+    .map-controls {
     background: rgba(40, 40, 40, 0.95);
     color: #eee;
-  }
+    }
 
-  .zoom-indicator strong,
-  .selected-address strong {
+    .zoom-indicator strong,
+    .selected-address strong {
     color: #fff;
-  }
+    }
 
-  .zoom-hint,
-  .selected-address {
+    .zoom-hint,
+    .selected-address {
     color: #ccc;
-  }
+    }
 
-  .map-instruction {
+    .map-instruction {
     color: #999;
-  }
+    }
+
+    .ol-zoom button{
+    --ol-background-color: rgb(60,60,60,0.95);
+    background-color: var(--ol-background-color);
+    --ol-subtle-foreground-color: #e6e6e6;
+    color: var(--ol-subtle-foreground-color);
+    }
+    .ol-zoom button:hover {
+        --ol-foreground-color: #e6e6e6;
+        color: var(--ol-foreground-color);
+        --ol-background-color: rgb(30,30,30,0.99);
+        background-color: var(--ol-background-color);
+        outline-color: #e6e6e6;
+    }
+
 }
