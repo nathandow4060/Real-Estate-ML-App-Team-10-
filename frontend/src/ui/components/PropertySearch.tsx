@@ -11,11 +11,25 @@ interface searchProp {
     disabled?: boolean
 }
 
+
+
 function PropertySearch({onPlaceSelected, onSubmit, setAddress, address, disabled}: searchProp) {
     const [loading, setLoading] = useState(false)
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            const firstSuggestion = document.querySelector('.geoapify-autocomplete-items .geoapify-autocomplete-item') as HTMLElement
+            if (firstSuggestion) {
+                firstSuggestion.click()
+            } else {
+                onSubmit(e)
+            }
+        }
+    }
+
     return (
         <div className="search-wrap">
-            <div className="search-bar">
+            <div className="search-bar" onKeyDown={handleKeyDown}>
                 <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
                     {address && setAddress &&
                         <GeoapifyGeocoderAutocomplete
