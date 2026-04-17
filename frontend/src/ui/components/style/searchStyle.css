@@ -23,7 +23,7 @@
 
 .search-wrap button {
     white-space: nowrap;
-    min-width: 13ch;
+    min-width: 13ch; /*scales with loading...*/
     text-align: center;
 }
 
