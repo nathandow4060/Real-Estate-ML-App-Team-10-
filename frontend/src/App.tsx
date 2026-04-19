@@ -147,7 +147,6 @@ function App() {
         }).then(r => r.json())
       ]
 
-      // Only fetch map data if we're on the home page
       const [json, mapJson] = await Promise.all(fetchPromises)
       if (mapJson) console.log(mapJson)
 
