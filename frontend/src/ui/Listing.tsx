@@ -207,8 +207,8 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
             <p>Disclaimer: prediction data is experimental and should not be used solely to make any financial decisions</p>
 
             <div className="chart-block">
-              {propertyPrediction ?
 
+              {propertyPrediction ?
               <DynamicLineChart
                 pastX={housePastX} pastY={housePastY}
                 futureX={houseFutureX} futureY={houseFutureY}
