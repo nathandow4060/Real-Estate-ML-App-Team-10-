@@ -200,8 +200,8 @@ function App() {
           body: JSON.stringify({ model_name: "Real_Estate_Price_predictor_2004_2020_CT", pid: pid })
         }).then(r => r.json())
 
-        console.log("predictionProperties: ", predictionPropertyJson[0].predicted_value)
-        setPropertyPrediction(predictionPropertyJson !== undefined ? predictionPropertyJson[0].predicted_value : null)
+        console.log("predictionProperties: ", predictionPropertyJson)
+        setPropertyPrediction(predictionPropertyJson !== undefined && predictionPropertyJson.length !== 0 ? predictionPropertyJson[0].predicted_value : null)
 
         setPage('listing')
       } else {
