@@ -35,9 +35,10 @@ Y format: [
     ]
 */
 
-function LineChart({X, Y}: {
+function LineChart({X, Y, name}: {
   X: string[]
   Y: any[]
+  name: string
 
 }) 
   // the DynamicLineChart will take X and Y data for 2 graphs 
@@ -49,7 +50,9 @@ function LineChart({X, Y}: {
 
   return (
     <div>
+      <h2>{name + " History"}</h2>
       <Line data={chartData} />
+      <p>no prediction data available</p>
     </div>
   );
 }
