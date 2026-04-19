@@ -246,6 +246,32 @@ exports.getPropertiesForMap = async (req, res, next) => {
         next(err)
     }
 }
+
+
+//Get The City List
+exports.getCityListingProperties = async (req, res) => {
+  const { city, state } = req.query;
+
+  if (!city || !state) {
+    return res.status(400).json({ error: 'city and state query params are required' });
+  }
+
+  try {
+    const result = await db.query(
+        `SELECT pid, street_address, zipcode, city, living_area_sqft, num_bedrooms, num_bathrooms, market_status, current_price
+        FROM "Property"
+        WHERE city ILIKE $1
+        AND state ILIKE $2`,
+        [city, state]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching properties by city/state:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 module.exports = {
     getAllPropertiesByState: exports.getAllPropertiesByState,
     getPropertiesByCity: exports.getPropertiesByCity,
@@ -253,5 +279,6 @@ module.exports = {
     getPropertiesByCityState: exports.getPropertiesByCityState,
     getPropertyAttributes:    exports.getPropertyAttributes,
     getPropertiesForMap: exports.getPropertiesForMap,
-    getPropertyCoordinates: exports.getPropertyCoordinates
+    getPropertyCoordinates: exports.getPropertyCoordinates,
+    getCityListingProperties: exports.getCityListingProperties
 }
