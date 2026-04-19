@@ -249,7 +249,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
 
 
 //Get The City List
-const getCityListingProperties = async (req, res) => {
+exports.getCityListingProperties = async (req, res) => {
   const { city, state } = req.query;
 
   if (!city || !state) {
