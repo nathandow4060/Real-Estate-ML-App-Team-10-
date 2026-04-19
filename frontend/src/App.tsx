@@ -147,16 +147,6 @@ function App() {
         }).then(r => r.json())
       ]
 
-      // Only fetch map data if we're on the home page
-      if (page === 'home') {
-        fetchPromises.push(
-          fetch(`${BASE_URL}/property/map`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ address: normalizedAddress, city, zipcode, state })
-          }).then(r => r.json())
-        )
-      }
       const [json, mapJson] = await Promise.all(fetchPromises)
       if (mapJson) console.log(mapJson)
 
@@ -209,9 +199,7 @@ function App() {
           body: JSON.stringify({ model_name: "Real_Estate_Price_predictor_2004_2020_CT", pid: pid })
         }).then(r => r.json())
 
-        console.log("predictionProperties: ", predictionPropertyJson[0].predicted_value)
-
-        setPropertyPrediction(predictionPropertyJson !== undefined ? predictionPropertyJson[0].predicted_value : null)
+        setPropertyPrediction(predictionPropertyJson !== undefined && predictionPropertyJson.length !== 0? predictionPropertyJson[0].predicted_value : null)
 
         setPage('listing')
       } else {
