@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import House from './assets/house.jpg'
 import './Listing.css'
 import DynamicLineChart from "./components/DynamicLineChart.tsx"
+import LineChart from "./components/LineChart.tsx"
 import PropertyListCard from "./components/PropertyListCard.tsx"
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
 import Carousel from "./components/Carousel.tsx";
@@ -206,11 +207,19 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
             <p>Disclaimer: prediction data is experimental and should not be used solely to make any financial decisions</p>
 
             <div className="chart-block">
+              {propertyPrediction ?
+
               <DynamicLineChart
                 pastX={housePastX} pastY={housePastY}
                 futureX={houseFutureX} futureY={houseFutureY}
                 name = {"Property Price"}
               />
+              :
+              <LineChart
+                X={housePastX} Y={housePastY}
+                name = {"Property Price"}
+              />
+                }
             </div>
 
             <div className="chart-block">
