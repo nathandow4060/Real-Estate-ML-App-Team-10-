@@ -13,9 +13,9 @@ import { pointerMove, singleClick } from 'ol/events/condition'
 import Feature from 'ol/Feature'
 import { Point } from 'ol/geom'
 import { normalizeAddress } from '../../App'
-import './style/mapStyle.css'
+import Overlay from 'ol/Overlay'
+import './style.mapStyle.css'
 import type { Coordinate } from 'ol/coordinate'
-import { Control } from 'ol/control'
 
 const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
@@ -208,14 +208,13 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
     })
 
     // Initialize map
-    const mainLayer = new TileLayer({
-        source: new OSM(),
-        zIndex:0,
-    })
     mapRef.current = new Map({
       target: 'map',
       layers: [
-        mainLayer,
+        new TileLayer({ 
+          source: new OSM(),
+          zIndex: 0,
+        }),
         propertyLayer,
       ],
       view: new View({
@@ -225,25 +224,9 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
         maxZoom: 20,
         // extent: [40.998972, -73.817139, 42.104744, -71.630859], not working for some reason
         showFullExtent:true,
+
       }),
     })
-
-    // for dark theme 
-    // mainLayer.on('prerender', (evt) => {
-    // // return
-    // if (evt.context) {
-    //     const context = evt.context as CanvasRenderingContext2D;
-    //     context.filter = 'grayscale(50%) invert(100%) ';
-    //     context.globalCompositeOperation = 'source-over';
-    // }
-    // });
-
-    // mainLayer.on('postrender', (evt) => {
-    // if (evt.context) {
-    //     const context = evt.context as CanvasRenderingContext2D;
-    //     context.filter = 'none';
-    // }
-    // });
 
     // Hover interaction - changes circle to pin on hover
     const hoverInteraction = new Select({
