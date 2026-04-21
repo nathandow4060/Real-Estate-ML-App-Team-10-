@@ -7,5 +7,6 @@ router.post('/property-predictions', ctrl.getPropertyPrediction)
 router.post('/model-details', ctrl.getModelDetailsByName)
 router.post('/model-perf', ctrl.getModelMetricsByName)
 router.post('/zipcode-averages', ctrl.getAveragePredictionsByZipcode)
+router.post('/city-averages', ctrl.getAveragePredictionsByCity)
 
 module.exports = router
