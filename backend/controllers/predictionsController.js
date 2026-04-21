@@ -138,12 +138,6 @@ exports.getAveragePredictionsByZipcode = async (req, res, next) => {
     }
 }
 
-module.exports = {
-    getPropertyPrediction: exports.getPropertyPrediction,
-    getModelDetailsByName: exports.getModelDetailsByName,
-    getModelMetricsByName: exports.getModelMetricsByName,
-    getAveragePredictionsByZipcode: exports.getAveragePredictionsByZipcode
-}
 exports.getAveragePredictionsByCity = async (req, res, next) => {
     try {
         const model_name = req.body.model_name
@@ -211,4 +205,11 @@ exports.getAveragePredictionsByCity = async (req, res, next) => {
     } catch (error) {
         next(error)
     }
+}
+
+module.exports = {
+    getPropertyPrediction: exports.getPropertyPrediction,
+    getModelDetailsByName: exports.getModelDetailsByName,
+    getModelMetricsByName: exports.getModelMetricsByName,
+    getAveragePredictionsByZipcode: exports.getAveragePredictionsByZipcode
 }
