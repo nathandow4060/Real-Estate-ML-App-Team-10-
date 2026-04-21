@@ -52,7 +52,7 @@ function DynamicLineChart({pastX, pastY, futureX, futureY, name, append}: {
     datasets: pastY,
   });
   const[buttonText, setButtonText] = useState<'view prediction' | 'view history'>("view prediction");
-  const[headerText, setHeaderText] = useState(name + " History")
+  const[headerText, setHeaderText] = useState(append? name + " History: " + append : name + " History")
 
   const switchData = () => {
     if(buttonText === "view prediction"){
