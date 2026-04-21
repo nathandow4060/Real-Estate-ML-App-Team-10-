@@ -93,6 +93,7 @@ exports.getAveragePredictionsByZipcode = async (req, res, next) => {
         }
 
         const zipcode = String(rawZipcode).trim().padStart(5, '0')
+        console.log("zipcode input: " + zipcode)
 
         const result = await db.query(
             `WITH latest_prediction_per_property AS (
