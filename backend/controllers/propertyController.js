@@ -37,6 +37,9 @@ exports.getPropertyAttributes = async (req, res, next) => {
         const prop = result.rows[0]
         const attributes = [
             { label: "Address",     value: `${prop.street_address}, ${prop.city}, ${prop.state} ${prop.zipcode}` },
+            {label: "City",         value: prop.city },
+            {label: "State",        value: prop.state },
+            {label: "Zip Code",     value: prop.zipcode },
             { label: "Year Built",  value: prop.year_built },
             { label: "Style",       value: prop.house_style },
             { label: "Bedrooms",    value: prop.num_bedrooms },
