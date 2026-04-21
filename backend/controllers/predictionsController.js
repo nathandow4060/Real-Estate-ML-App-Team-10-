@@ -73,8 +73,64 @@ exports.getModelMetricsByName = async (req, res, next) => {
     }
 }
 
+exports.getAveragePredictionsByZipcode = async (req, res, next) => {
+    try {
+        const model_name = req.body.model_name
+
+        if (!model_name) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'model_name is required'
+            })
+        }
+
+        const result = await db.query(
+            `WITH latest_prediction_per_property AS (
+                SELECT DISTINCT ON (mp.pid)
+                    mp.pid,
+                    mp.sid,
+                    mp.model_name,
+                    mp.dataset,
+                    mp.predicted_value
+                FROM public."Model_Predictions" mp
+                JOIN public."Property_Sale" ps
+                    ON ps.sid = mp.sid
+                WHERE mp.model_name = $1
+                ORDER BY mp.pid, ps.date_of_sale DESC, mp.updated_at DESC
+            )
+            SELECT
+                LPAD(p.zipcode::text, 5, '0') AS zipcode,
+                COUNT(*) AS parcel_count,
+                ROUND(AVG(lpp.predicted_value))::integer AS avg_predicted_value
+            FROM latest_prediction_per_property lpp
+            JOIN public."Property" p
+                ON p.pid = lpp.pid
+            WHERE p.zipcode IS NOT NULL
+            GROUP BY p.zipcode
+            ORDER BY p.zipcode;
+            `,
+            [model_name]
+        )
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'No zipcode averages found for that model'
+            })
+        }
+
+        res.json({
+            status: 'success',
+            data: result.rows
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     getPropertyPrediction: exports.getPropertyPrediction,
     getModelDetailsByName: exports.getModelDetailsByName,
-    getModelMetricsByName: exports.getModelMetricsByName
+    getModelMetricsByName: exports.getModelMetricsByName,
+    getAveragePredictionsByZipcode: exports.getAveragePredictionsByZipcode
 }
