@@ -211,5 +211,6 @@ module.exports = {
     getPropertyPrediction: exports.getPropertyPrediction,
     getModelDetailsByName: exports.getModelDetailsByName,
     getModelMetricsByName: exports.getModelMetricsByName,
-    getAveragePredictionsByZipcode: exports.getAveragePredictionsByZipcode
+    getAveragePredictionsByZipcode: exports.getAveragePredictionsByZipcode,
+    getAveragePredictionsByCity: exports.getAveragePredictionsByCity
 }
