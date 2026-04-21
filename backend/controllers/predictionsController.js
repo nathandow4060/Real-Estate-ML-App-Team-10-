@@ -76,6 +76,7 @@ exports.getModelMetricsByName = async (req, res, next) => {
 exports.getAveragePredictionsByZipcode = async (req, res, next) => {
     try {
         const model_name = req.body.model_name
+        const rawZipcode = req.body.zipcode || req.query.zipcode
 
         if (!model_name) {
             return res.status(400).json({
@@ -83,6 +84,15 @@ exports.getAveragePredictionsByZipcode = async (req, res, next) => {
                 message: 'model_name is required'
             })
         }
+
+        if (!rawZipcode) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'zipcode is required'
+            })
+        }
+
+        const zipcode = String(rawZipcode).trim().padStart(5, '0')
 
         const result = await db.query(
             `WITH latest_prediction_per_property AS (
@@ -106,22 +116,22 @@ exports.getAveragePredictionsByZipcode = async (req, res, next) => {
             JOIN public."Property" p
                 ON p.pid = lpp.pid
             WHERE p.zipcode IS NOT NULL
-            GROUP BY p.zipcode
-            ORDER BY p.zipcode;
+              AND LPAD(p.zipcode::text, 5, '0') = $2
+            GROUP BY p.zipcode;
             `,
-            [model_name]
+            [model_name, zipcode]
         )
 
         if (result.rowCount === 0) {
             return res.status(404).json({
                 status: 'error',
-                message: 'No zipcode averages found for that model'
+                message: `No zipcode average found for zipcode ${zipcode} and model ${model_name}`
             })
         }
 
         res.json({
             status: 'success',
-            data: result.rows
+            data: result.rows[0]
         })
     } catch (error) {
         next(error)
