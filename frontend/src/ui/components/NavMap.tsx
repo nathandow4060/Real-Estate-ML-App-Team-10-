@@ -28,7 +28,7 @@ interface PropertyDataItem {
 interface NavMapProps {
   onPlaceSelected: (feature: any) => void,
   setAddress: React.Dispatch<React.SetStateAction<string>>
-  address: string,
+  address?: string,
 //   coordinates to be centered at [lon,lat]
   centerAt?: Coordinate
 }
@@ -49,6 +49,7 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
   const propertySourceRef = useRef<VectorSource | null>(null)
   const hoveredFeatureRef = useRef<Feature<Point> | null>(null)
   const onPlaceSelectedRef = useRef(onPlaceSelected)
+  let overLayRef = useRef<HTMLDivElement | null>(null);
   
   onPlaceSelectedRef.current = onPlaceSelected
   
@@ -207,7 +208,7 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
       minZoom: MIN_PIN_ZOOM
     })
 
-    // Initialize map
+    // Initialize mapRestricting layer rendering to a limited extent.
     const mainLayer = new TileLayer({
         source: new OSM(),
         zIndex:0,
@@ -290,11 +291,14 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
         const properties = selected.getProperties();
         const { geometry, ...propertyData } = properties;
         // Transform to expected format
+        console.log(propertyData)
         const transformedFeature = transformToGeoapifyFormat(propertyData);
         
         // Call handler via ref to avoid React rerender
         onPlaceSelectedRef.current(transformedFeature);
         setAddress(normalizeAddress(propertyData["Displayed Address"]));
+        // address = 
+        console.log(`this is the address: ${address}`)
         
         // Keep pin style on selected feature
         selected.setStyle(pinStyle);
@@ -352,6 +356,7 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
             </div>
           )}
         </div>
+        <div className="overlay" ref={overLayRef}></div>
         <div id="map" className="map-view"></div>
       </div>
       <p className="map-instruction">
