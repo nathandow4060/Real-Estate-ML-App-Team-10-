@@ -75,7 +75,7 @@ export function normalizeAddress(address: string): string {
 
 
 function App() {
-  const [page, setPage] = useState<'home' | 'listing'>('home')
+  const [page, setPage] = useState<'home' | 'listing' | 'city'>('home')
   const [attributes, setAttributes] = useState<Attribute[]>([])
   const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
 
@@ -108,6 +108,7 @@ function App() {
     city: "",
     postcode: "",
     state_code: "",
+    result_type: ""
   }
 
   const [loading, setLoading]       = useState<boolean>(false)
@@ -116,14 +117,16 @@ function App() {
   // Needs to be normalized so the backend can read
 
   const onPlaceSelected = async (feature: any) => {
-    if (feature?.properties.result_type !== "building") return
+
+    if (feature?.properties.result_type !== "building" && feature?.properties.result_type !== "city") return
 
     savedAutocomplete.address_line1 = feature.properties.address_line1
     savedAutocomplete.city          = feature.properties.city
     savedAutocomplete.postcode      = feature.properties.postcode
     savedAutocomplete.state_code    = feature.properties.state_code
+    savedAutocomplete.result_type = feature.properties.result_type
 
-    console.log('Selected:', savedAutocomplete.address_line1, savedAutocomplete.city, savedAutocomplete.postcode, savedAutocomplete.state_code)
+    console.log('Selected:', savedAutocomplete.address_line1, savedAutocomplete.city, savedAutocomplete.postcode, savedAutocomplete.state_code, savedAutocomplete.result_type)
   }
 
   const onSubmit = async () => {
@@ -131,127 +134,162 @@ function App() {
     setError(null)
     setStreetViewUrl(null)
 
-    const normalizedAddress = normalizeAddress(savedAutocomplete.address_line1)
-    const city    = savedAutocomplete.city.toUpperCase()
-    const zipcode = savedAutocomplete.postcode.padStart(5, '0')  // fixes "6468" → "06468"
-    const state   = savedAutocomplete.state_code
+    const type = savedAutocomplete.result_type
 
-    console.log('Sending to backend:', { address: normalizedAddress, city, zipcode, state })
 
-    try {
-      const fetchPromises: Promise<any>[] = [
-        fetch(`${BASE_URL}/property/attributes`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address: normalizedAddress, city, zipcode, state })
+    if(type == "city"){
+
+      const normalizedAddress = normalizeAddress(savedAutocomplete.address_line1)
+      const city    = savedAutocomplete.city.toUpperCase()
+      const state   = savedAutocomplete.state_code
+
+      console.log('Sending to backend:', { address: normalizedAddress, city, state })
+
+      try{
+
+        const responseCity = await fetch(`${BASE_URL}/property/city`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            city: city
+          })
         }).then(r => r.json())
-      ]
 
-      const [json, mapJson] = await Promise.all(fetchPromises)
-      if (mapJson) console.log(mapJson)
+        console.log("properties: ", responseCity)
 
-      if (json.status === 'success') {
-        console.log(json)
-        setAttributes(json.data)
+        // setpage('city')
 
-            const responseZip = await fetch(`${BASE_URL}/predictions/zipcode-averages`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model_name: "Real_Estate_Price_predictor_2004_2020_CT",
-                    zipcode: savedAutocomplete.postcode
-                })
-            })
+      }catch (err) {
+        setError('Failed to connect to server.')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
 
-            const result = await responseZip.json()
+    }
 
-            console.log("Zip avg: "+ JSON.stringify(result.data))
+    if(type == "building") {
+      const normalizedAddress = normalizeAddress(savedAutocomplete.address_line1)
+      const city    = savedAutocomplete.city.toUpperCase()
+      const zipcode = savedAutocomplete.postcode.padStart(5, '0')  // fixes "6468" → "06468"
+      const state   = savedAutocomplete.state_code
+      console.log('Sending to backend:', { address: normalizedAddress, city, zipcode, state })
 
-            if (!responseZip.ok) {
-                throw new Error(result.message || 'Request failed')
-            }
-
-            const responseCity = await fetch(`${BASE_URL}/predictions/city-averages`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model_name: "Real_Estate_Price_predictor_2004_2020_CT",
-                    city: savedAutocomplete.city
-                })
-            })
-
-            const result2 = await responseCity.json()
-
-            console.log("City avg: "+ JSON.stringify(result2.data))
-
-            if (!responseZip.ok) {
-                throw new Error(result.message || 'Request failed')
-            }
-
-
-
-        // --- Google Street View ---
-        const superSecretKey = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
-        const lat = json.data.find((a: Attribute) => a.label === "Latitude")?.value
-        const lon = json.data.find((a: Attribute) => a.label === "Longitude")?.value
-
-        if (lat && lon) {
-          const metadataUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lon}&source=outdoor&key=${superSecretKey}`
-          const metadataRes = await fetch(metadataUrl)
-          const metadataJson = await metadataRes.json()
-          console.log(metadataJson)
-
-          const panoId = metadataJson.pano_id
-          if (panoId) {
-            const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x250&pano=${panoId}&source=outdoor&key=${superSecretKey}`
-            const imageRes = await fetch(imageUrl)
-            const imageBlob = await imageRes.blob()
-            setStreetViewUrl(window.URL.createObjectURL(imageBlob))
-          }
-        }
-        // --- End Google Street View ---
-
-        const [salesJson, zipJson, cityJson, stateJson] = await Promise.all([
-          fetch(`${BASE_URL}/property-sales`, {
+      try {
+        const fetchPromises: Promise<any>[] = [
+          fetch(`${BASE_URL}/property/attributes`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ address: normalizedAddress, city, zipcode, state })
-          }).then(r => r.json()),
-          cachedFetch(`${BASE_URL}/property-sales/zipcode-history`, { zipcode, state }),
-          cachedFetch(`${BASE_URL}/property-sales/city-history`,    { city, state }),
-          cachedFetch(`${BASE_URL}/property-sales/state-history`,   { state }),
-        ])
+          }).then(r => r.json())
+        ]
 
-        setSalesData(salesJson.status  === 'success' ? salesJson.data  : [])
-        setZipData(zipJson.status      === 'success' ? zipJson.data    : [])
-        setCityData(cityJson.status    === 'success' ? cityJson.data   : [])
-        setStateData(stateJson.status  === 'success' ? stateJson.data  : [])
+        const [json, mapJson] = await Promise.all(fetchPromises)
+        if (mapJson) console.log(mapJson)
+
+        if (json.status === 'success') {
+          console.log(json)
+          setAttributes(json.data)
+
+          const responseZip = await fetch(`${BASE_URL}/predictions/zipcode-averages`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model_name: "Real_Estate_Price_predictor_2004_2020_CT",
+              zipcode: savedAutocomplete.postcode
+            })
+          }).then(r => r.json())
+
+          console.log("Zip avg: ", responseZip)
+
+          if (!responseZip.ok) {
+            throw new Error(responseZip.message || 'Request failed')
+          }
+
+          const responseCity = await fetch(`${BASE_URL}/predictions/city-averages`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model_name: "Real_Estate_Price_predictor_2004_2020_CT",
+              city: savedAutocomplete.city
+            })
+          }).then(r => r.json())
+
+          console.log("City avg: ", responseCity)
+
+          if (!responseZip.ok) {
+            throw new Error(responseCity.message || 'Request failed')
+          }
 
 
-        const pid = json.data.find((a: Attribute) => a.label === "pid")?.value
-        const predictionPropertyJson = await fetch(`${BASE_URL}/predictions/property-predictions`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ model_name: "Real_Estate_Price_predictor_2004_2020_CT", pid: pid })
-        }).then(r => r.json())
 
-        console.log("predictionProperties: ", predictionPropertyJson)
-        setPropertyPrediction(predictionPropertyJson !== undefined && predictionPropertyJson.length !== 0 ? predictionPropertyJson[0].predicted_value : null)
+          // --- Google Street View ---
+          const superSecretKey = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
+          const lat = json.data.find((a: Attribute) => a.label === "Latitude")?.value
+          const lon = json.data.find((a: Attribute) => a.label === "Longitude")?.value
 
-        setPage('listing')
-      } else {
-        setError('Property not found in database.')
-        setAttributes([])
+          /*
+          if (lat && lon) {
+            const metadataUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lon}&source=outdoor&key=${superSecretKey}`
+            const metadataRes = await fetch(metadataUrl)
+            const metadataJson = await metadataRes.json()
+            console.log(metadataJson)
+
+            const panoId = metadataJson.pano_id
+            if (panoId) {
+              const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x250&pano=${panoId}&source=outdoor&key=${superSecretKey}`
+              const imageRes = await fetch(imageUrl)
+              const imageBlob = await imageRes.blob()
+              setStreetViewUrl(window.URL.createObjectURL(imageBlob))
+            }
+          }
+          // --- End Google Street View ---
+          */
+
+          const [salesJson, zipJson, cityJson, stateJson] = await Promise.all([
+            fetch(`${BASE_URL}/property-sales`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ address: normalizedAddress, city, zipcode, state })
+            }).then(r => r.json()),
+            cachedFetch(`${BASE_URL}/property-sales/zipcode-history`, { zipcode, state }),
+            cachedFetch(`${BASE_URL}/property-sales/city-history`,    { city, state }),
+            cachedFetch(`${BASE_URL}/property-sales/state-history`,   { state }),
+          ])
+
+          setSalesData(salesJson.status  === 'success' ? salesJson.data  : [])
+          setZipData(zipJson.status      === 'success' ? zipJson.data    : [])
+          setCityData(cityJson.status    === 'success' ? cityJson.data   : [])
+          setStateData(stateJson.status  === 'success' ? stateJson.data  : [])
+
+
+          const pid = json.data.find((a: Attribute) => a.label === "pid")?.value
+          const predictionPropertyJson = await fetch(`${BASE_URL}/predictions/property-predictions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ model_name: "Real_Estate_Price_predictor_2004_2020_CT", pid: pid })
+          }).then(r => r.json())
+
+          console.log("predictionProperties: ", predictionPropertyJson)
+          setPropertyPrediction(predictionPropertyJson !== undefined && predictionPropertyJson.length !== 0 ? predictionPropertyJson[0].predicted_value : null)
+
+          setPage('listing')
+        } else {
+          setError('Property not found in database.')
+          setAttributes([])
+        }
+      } catch (err) {
+        setError('Failed to connect to server.')
+        console.error(err)
+      } finally {
+        setLoading(false)
       }
-    } catch (err) {
-      setError('Failed to connect to server.')
-      console.error(err)
-    } finally {
-      setLoading(false)
     }
   }
 
