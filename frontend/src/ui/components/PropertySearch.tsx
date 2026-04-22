@@ -6,14 +6,14 @@ import { useState } from 'react'
 interface searchProp {
     onPlaceSelected: (feature: any) => void,
     onSubmit: (feature: any) => void,
-    setAddress?: React.Dispatch<React.SetStateAction<string>>,
+    onUserInput?: (value: string) => void,
     address?: string,
     disabled?: boolean
 }
 
 
 
-function PropertySearch({onPlaceSelected, onSubmit, setAddress, address, disabled}: searchProp) {
+function PropertySearch({onPlaceSelected, onSubmit, onUserInput, address, disabled}: searchProp) {
     const [loading, setLoading] = useState(false)
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -31,7 +31,7 @@ function PropertySearch({onPlaceSelected, onSubmit, setAddress, address, disable
         <div className="search-wrap">
             <div className="search-bar" onKeyDown={handleKeyDown}>
                 <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
-                    {address && setAddress &&
+                    {address && onUserInput &&
                         <GeoapifyGeocoderAutocomplete
                             placeholder="Enter an address..."
                             lang="en"
@@ -40,7 +40,7 @@ function PropertySearch({onPlaceSelected, onSubmit, setAddress, address, disable
                             filterByRect={{lon1:-73.817139, lat1:40.998972, lat2:42.028644643491326, lon2: -71.79274724265612}}
                             onRequestStart={() => setLoading(true)}
                             onRequestEnd={() => setLoading(false)}
-                            onUserInput={(addy) => setAddress(addy)}
+                            onUserInput={onUserInput}
                             value={address}
                         />
                     }

@@ -37,7 +37,7 @@ interface ListingProps {
   stateData:  {year: string, avg_price: number}[]
   streetViewUrl: string | null
   propertyPrediction: number | null
-  coordinate: Coordinate // [lon,lat]
+  coordinate: Coordinate | null// [lon,lat]
 }
 
 
@@ -142,7 +142,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
       {/*Header with search bar*/}
       <header className="pdp-header">
         <h1>HomeView</h1>
-        <PropertySearch setAddress={setAddress} address={address} onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading}/>
+        <PropertySearch onUserInput={setAddress} address={address} onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading}/>
         {/* <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
           <GeoapifyGeocoderAutocomplete
             placeholder="Enter an address..."
@@ -201,7 +201,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
               attributes = {displayAttributes}
               />
             </div>
-            <NavMap centerAt={coordinate} onPlaceSelected={onPlaceSelected} setAddress={setAddress}/>
+            {coordinate && <NavMap centerAt={coordinate} onPlaceSelected={onPlaceSelected} setAddress={setAddress}/>}
           </section>
 
           {/* RIGHT: charts sidebar */}
