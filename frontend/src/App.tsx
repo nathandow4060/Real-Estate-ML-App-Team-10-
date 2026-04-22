@@ -154,6 +154,46 @@ function App() {
         console.log(json)
         setAttributes(json.data)
 
+            const responseZip = await fetch(`${BASE_URL}/predictions/zipcode-averages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model_name: "Real_Estate_Price_predictor_2004_2020_CT",
+                    zipcode: savedAutocomplete.postcode
+                })
+            })
+
+            const result = await responseZip.json()
+
+            console.log("Zip avg: "+ JSON.stringify(result.data))
+
+            if (!responseZip.ok) {
+                throw new Error(result.message || 'Request failed')
+            }
+
+            const responseCity = await fetch(`${BASE_URL}/predictions/city-averages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model_name: "Real_Estate_Price_predictor_2004_2020_CT",
+                    city: savedAutocomplete.city
+                })
+            })
+
+            const result2 = await responseCity.json()
+
+            console.log("City avg: "+ JSON.stringify(result2.data))
+
+            if (!responseZip.ok) {
+                throw new Error(result.message || 'Request failed')
+            }
+
+
+
         // --- Google Street View ---
         const superSecretKey = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
         const lat = json.data.find((a: Attribute) => a.label === "Latitude")?.value
