@@ -27,13 +27,15 @@ interface PropertyDataItem {
 
 interface NavMapProps {
   onPlaceSelected: (feature: any) => void,
-  setAddress: React.Dispatch<React.SetStateAction<string>>
-  address: string,
+  setAddress: (value: string) => void
+  address?: string,
 //   coordinates to be centered at [lon,lat]
   centerAt?: Coordinate
 }
 
-const STARTING_ZOOM = 9
+const DEFAULT_STARTING_ZOOM = 9
+const DEFAULT_CENTER_COORDINATE = [-72.7, 41.6]
+const PROPERTY_STARTING_ZOOM = 17
 const MIN_PIN_ZOOM = 12
 
 // SVG pin for hover/selected state
@@ -44,15 +46,22 @@ const pinSvg = encodeURIComponent(`
   </svg>
 `)
 
-function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}: NavMapProps) {
+export function toTitleCase(str: string): string {
+    return str.toLowerCase().split(' ').map((word: any) => {
+        return (word.charAt(0).toUpperCase() + word.slice(1));
+    }).join(' ');
+}
+
+function NavMap({ onPlaceSelected, address, setAddress, centerAt=DEFAULT_CENTER_COORDINATE}: NavMapProps) {
   const mapRef = useRef<Map | null>(null)
   const propertySourceRef = useRef<VectorSource | null>(null)
   const hoveredFeatureRef = useRef<Feature<Point> | null>(null)
   const onPlaceSelectedRef = useRef(onPlaceSelected)
+  let overLayRef = useRef<HTMLDivElement | null>(null);
   
   onPlaceSelectedRef.current = onPlaceSelected
   
-  const [zoomLevel, setZoomLevel] = useState(STARTING_ZOOM)
+  const [zoomLevel, setZoomLevel] = useState(DEFAULT_STARTING_ZOOM)
   const [isLoading, setIsLoading] = useState(false)
   const [loadedCount, setLoadedCount] = useState(0)
 
@@ -111,7 +120,6 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
 
     return { data, lat, lon }
   }
-
   // Transform property data to Geoapify format
   const transformToGeoapifyFormat = (propertyData: Record<string, any>) => {
     return {
@@ -136,11 +144,12 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
   }
 
   useEffect(() => {
+    const effectiveStartingZoom:number = centerAt != DEFAULT_CENTER_COORDINATE  ? PROPERTY_STARTING_ZOOM : DEFAULT_STARTING_ZOOM 
     // Initialize property source with viewport-based loading
     propertySourceRef.current = new VectorSource({
       strategy: bbox,
       loader: (extent, resolution, projection) => {
-        const zoom = mapRef.current?.getView().getZoom() || STARTING_ZOOM
+        const zoom = mapRef.current?.getView().getZoom() || DEFAULT_STARTING_ZOOM
         
         if (zoom < MIN_PIN_ZOOM) {
           propertySourceRef.current?.clear()
@@ -207,11 +216,12 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
       minZoom: MIN_PIN_ZOOM
     })
 
-    // Initialize map
+    // Initialize mapRestricting layer rendering to a limited extent.
     const mainLayer = new TileLayer({
         source: new OSM(),
         zIndex:0,
     })
+
     mapRef.current = new Map({
       target: 'map',
       layers: [
@@ -220,7 +230,7 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
       ],
       view: new View({
         center: fromLonLat(centerAt),
-        zoom: STARTING_ZOOM,
+        zoom: effectiveStartingZoom,
         minZoom: 9,
         maxZoom: 20,
         // extent: [40.998972, -73.817139, 42.104744, -71.630859], not working for some reason
@@ -290,11 +300,13 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
         const properties = selected.getProperties();
         const { geometry, ...propertyData } = properties;
         // Transform to expected format
-        const transformedFeature = transformToGeoapifyFormat(propertyData);
         
-        // Call handler via ref to avoid React rerender
-        onPlaceSelectedRef.current(transformedFeature);
-        setAddress(normalizeAddress(propertyData["Displayed Address"]));
+        setAddress(toTitleCase(propertyData['Display Address'])+ ', United States of America');
+        console.log(propertyData['Display Address'])
+        console.log(`The normalized address: ${propertyData['Display Address']}`)
+        
+        onPlaceSelected(transformToGeoapifyFormat(propertyData))
+        // onPlaceSelectedRef.current(transformedFeature);
         
         // Keep pin style on selected feature
         selected.setStyle(pinStyle);
@@ -303,7 +315,7 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
 
     // Track zoom level
     mapRef.current.getView().on('change:resolution', () => {
-      const zoom = mapRef.current?.getView().getZoom() || STARTING_ZOOM
+      const zoom = mapRef.current?.getView().getZoom() || DEFAULT_STARTING_ZOOM
       setZoomLevel(Math.round(zoom * 10) / 10)
       
       if (zoom < MIN_PIN_ZOOM - 2) {
@@ -352,6 +364,7 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=[-72.7, 41.6]}:
             </div>
           )}
         </div>
+        <div className="overlay" ref={overLayRef}></div>
         <div id="map" className="map-view"></div>
       </div>
       <p className="map-instruction">

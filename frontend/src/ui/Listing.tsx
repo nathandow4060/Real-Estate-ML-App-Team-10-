@@ -9,6 +9,8 @@ import Carousel from "./components/Carousel.tsx";
 import PropertySearch from "./components/PropertySearch.tsx";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import NavMap from "./components/NavMap.tsx";
+import type { Coordinate } from "ol/coordinate";
 
 interface Attribute {
   label: string
@@ -35,11 +37,12 @@ interface ListingProps {
   stateData:  {year: string, avg_price: number}[]
   streetViewUrl: string | null
   propertyPrediction: number | null
-
+  coordinate: Coordinate | null// [lon,lat]
 }
 
 
-function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl, propertyPrediction}: ListingProps) {
+function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl, propertyPrediction, coordinate}: ListingProps) {
+    const [address, setAddress] = useState<string | undefined>();
 
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
   const housePastY: ChartDataset[] = [{
@@ -139,7 +142,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
       {/*Header with search bar*/}
       <header className="pdp-header">
         <h1>HomeView</h1>
-        <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading}/>
+        <PropertySearch onUserInput={setAddress} address={address} onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading}/>
         {/* <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
           <GeoapifyGeocoderAutocomplete
             placeholder="Enter an address..."
@@ -160,10 +163,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
       {!loading && attributes.length > 0 && (
         <div className="pdp-body">
 
-          {/* LEFT: photo + attribute table */}
+          {/* LEFT: photo + attribute table + map*/}
           <section className="pdp-main">
-              {/*<Carousel></Carousel>/}              
-              {/* <img src={House} alt="Property" className="pdp-photo" />  */}
+              {/* <Carousel></Carousel>               */}
               <img 
                 src={streetViewUrl || House} 
                 alt="Property" 
@@ -199,6 +201,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
               attributes = {displayAttributes}
               />
             </div>
+            {coordinate && <NavMap centerAt={coordinate} onPlaceSelected={onPlaceSelected} setAddress={setAddress}/>}
           </section>
 
           {/* RIGHT: charts sidebar */}
