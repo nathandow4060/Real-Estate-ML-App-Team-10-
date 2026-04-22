@@ -118,7 +118,41 @@ exports.getPropertiesByCity = async (req, res, next) => {
             WHERE city = $1`,
             [city]
         )
-        res.json({ status: 'success', count: result.rowCount, data: result.rows })
+
+        var prop = []
+        var attrArray = []
+        var k = 0; //counter for json reply array
+        for(var i =  0; i < result.rowCount; i++ ){
+
+            prop = result.rows[i]
+
+            const attributes = [
+                { label: "Display Address",     value: `${prop.street_address}, ${prop.city}, ${prop.state} ${prop.zipcode}` },
+                { label: "Address",     value: prop.street_address},
+                { label: "City",        value: prop.city },
+                { label: "Zip",         value: prop.zipcode },
+                { label: "State",       value: prop.state },
+                { label: "Longitude",   value: prop.longitude },
+                { label: "Latitude",    value: prop.latitude },
+                {label: "Current Price", value: prop.current_price},
+            ]
+
+            nonNull = attributes.filter(attr => 
+            attr.value !== null && 
+            attr.value !== undefined && 
+            attr.value !== '' && 
+            String(attr.value) !== 'NaN'
+            )
+
+            if(nonNull.length === 8 || (attributes.find(a =>a.label === "Current Price")?.value === null && nonNull.length === 7)){
+                attrArray[k] = attributes
+                k++
+            }
+        }
+  
+
+        //console.log('raw row:', result.rows[0])
+        res.json({ status: 'success', count: result.rowCount, data: attrArray})
   } catch (err) {
     next(err)
   }
