@@ -60,7 +60,6 @@ exports.getPropertyAttributes = async (req, res, next) => {
             String(attr.value) !== 'NaN'
         )
 
-        console.log('raw row:', result.rows[0])
         
         res.json({ status: 'success', data: nonNull })
     } catch (err) {
@@ -82,8 +81,6 @@ exports.getPropertyCoordinates = async (req, res, next) => {
             street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
             [street_addr, city, state, zipcode]
         )
-
-        //console.log('raw row:', result.rows[0])
         if (result.rowCount === 0) {
             return res.status(404).json({ status: 'error', message: 'Property not found' })
         }
@@ -100,7 +97,6 @@ exports.getPropertyCoordinates = async (req, res, next) => {
             String(attr.value) !== 'NaN'
         )
 
-        console.log('raw row:', result.rows[0])
         
         res.json({ status: 'success', data: nonNull })
     } catch (err) {
@@ -149,9 +145,8 @@ exports.getPropertiesByCity = async (req, res, next) => {
                 k++
             }
         }
-  
 
-        //console.log('raw row:', result.rows[0])
+        if(attrArray.length === 0 ) throw new Error('No Properties in City')
         res.json({ status: 'success', count: result.rowCount, data: attrArray})
   } catch (err) {
     next(err)
