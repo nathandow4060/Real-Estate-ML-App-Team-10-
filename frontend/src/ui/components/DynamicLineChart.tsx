@@ -36,12 +36,13 @@ Y format: [
 */
 
 
-function DynamicLineChart({pastX, pastY, futureX, futureY, name}: {
+function DynamicLineChart({pastX, pastY, futureX, futureY, name, append}: {
   pastX: string[]
   pastY: any[]
   futureX: string[]
   futureY: any[]
   name: string
+  append: string | null
 }) 
 
   // the DynamicLineChart will take X and Y data for 2 graphs 
@@ -51,7 +52,7 @@ function DynamicLineChart({pastX, pastY, futureX, futureY, name}: {
     datasets: pastY,
   });
   const[buttonText, setButtonText] = useState<'view prediction' | 'view history'>("view prediction");
-  const[headerText, setHeaderText] = useState(name + " History")
+  const[headerText, setHeaderText] = useState(append? name + " History: " + append : name + " History")
 
   const switchData = () => {
     if(buttonText === "view prediction"){
@@ -60,7 +61,7 @@ function DynamicLineChart({pastX, pastY, futureX, futureY, name}: {
         datasets: futureY,
       }));
       setButtonText("view history");
-      setHeaderText(name + " Prediction")
+      setHeaderText(append? name + " Prediction: " + append : name + " Prediction")
     }
     if(buttonText === "view history"){
       setChartData(() => ({
@@ -68,7 +69,7 @@ function DynamicLineChart({pastX, pastY, futureX, futureY, name}: {
         datasets: pastY,
       }));
       setButtonText("view prediction");
-      setHeaderText(name + " History")
+      setHeaderText(append? name + " History: " + append : name + " History")
     }
   };
 

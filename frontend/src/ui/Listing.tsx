@@ -133,7 +133,10 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     attr.label !== "On the Market" && 
     attr.label !== "Longitude" && 
     attr.label !== "Latitude" &&
-    attr.label !== "pid"
+    attr.label !== "pid" &&
+    attr.label !== "City" &&
+    attr.label !== "State" &&
+    attr.label !== "Zip Code"
   )
 
   return (
@@ -216,11 +219,13 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 pastX={housePastX} pastY={housePastY}
                 futureX={houseFutureX} futureY={houseFutureY}
                 name = {"Property Price"}
+                append = {null}
               />
               :
               <LineChart
                 X={housePastX} Y={housePastY}
                 name = {"Property Price"}
+                append = {null}
               />
                 }
             </div>
@@ -230,6 +235,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 pastX={zipPastX} pastY={zipPastY}
                 futureX={houseFutureX} futureY={houseFutureY}
                 name = {"Zip-Code Price"}
+                append = {attributes.find(a =>a.label === "Zip Code")?.value}
               />
             </div>
 
@@ -238,6 +244,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 pastX={cityPastX} pastY={cityPastY}
                 futureX={houseFutureX} futureY={houseFutureY}
                 name = {"City Price"}
+                append = {attributes.find(a =>a.label === "City")?.value}
               />
             </div>
 
@@ -246,6 +253,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 pastX={statePastX} pastY={statePastY}
                 futureX={houseFutureX} futureY={houseFutureY}
                 name = {"State Price"}
+                append = {attributes.find(a =>a.label === "State")?.value}
               />
             </div>
           </aside>
