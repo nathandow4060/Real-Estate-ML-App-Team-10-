@@ -13,13 +13,15 @@ interface HomeProps {
 
 function Home({ onPlaceSelected, onSubmit, loading }: HomeProps) {
     const [address, setAddress] = useState<string>('')
+    const syncAddress = (value:string) => {setAddress(value)}
+
   return (
     <main className="home-wrapper">
       <header className="home-header">
         <h1>HomeView</h1>
         <p className="home-subtitle">Search any property to view price history and predictions</p>
       </header>
-      <PropertySearch onPlaceSelected={onPlaceSelected} onSubmit={onSubmit} address={address} setAddress={setAddress} disabled={loading}/>
+      <PropertySearch onPlaceSelected={onPlaceSelected} onSubmit={onSubmit} address={address} onUserInput={syncAddress} disabled={loading}/>
       
       {/*<div className="home-search">
         <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
@@ -35,7 +37,7 @@ function Home({ onPlaceSelected, onSubmit, loading }: HomeProps) {
       <NavMap
         onPlaceSelected = {onPlaceSelected}
         address={address}
-        setAddress={setAddress}
+        setAddress={syncAddress}
       />
     </main>
   )

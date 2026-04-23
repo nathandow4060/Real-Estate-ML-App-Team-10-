@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Home from './ui/Home.tsx'
 import Listing from './ui/Listing.tsx'
 import * as addr from 'parse-address'
+import type { Coordinate } from 'ol/coordinate'
 import AreaListings from './ui/AreaListings.tsx'
 import { set } from 'ol/transform'
 
@@ -9,6 +10,7 @@ interface Attribute {
   label: string
   value: any
 }
+
 
 const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
@@ -91,6 +93,7 @@ function App() {
 
   // Street View image URL — must be state so updates trigger a re-render
   const [streetViewUrl, setStreetViewUrl] = useState<string | null>(null)
+  const [coordinate, setCoordinate] = useState<Coordinate | null>(null) // set at [lon,lat]
 
   /*Testing:
   const [page, setPage] = useState<'home' | 'listing'>('listing')
@@ -284,6 +287,11 @@ function App() {
           
 
 
+        // --- Google Street View ---
+        const superSecretKey = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
+        const lat = json.data.find((a: Attribute) => a.label === "Latitude")?.value
+        const lon = json.data.find((a: Attribute) => a.label === "Longitude")?.value
+        setCoordinate([lon,lat])
           // --- Google Street View ---
           const superSecretKey = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
           const lat = json.data.find((a: Attribute) => a.label === "Latitude")?.value
@@ -370,6 +378,7 @@ function App() {
           zipData={zipData}
           stateData={stateData}
           streetViewUrl={streetViewUrl}
+          coordinate={coordinate}
           propertyPrediction = {propertyPrediction}
         />
       )}
