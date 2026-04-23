@@ -9,6 +9,7 @@ router.post('/city-state', ctrl.getPropertiesByCityState) //returns all properti
 router.post('/attributes', ctrl.getPropertyAttributes)
 router.post('/map', ctrl.getPropertiesForMap) // returns all properties with data for pin location and for a '/attributes' query
 router.post('/city',ctrl.getPropertiesByCity )
+router.post('/zip',ctrl.getPropertiesByZIP)
 router.post('/coordinate', ctrl.getPropertyCoordinates)
 router.get('/city-list', ctrl.getCityListingProperties)
 module.exports = router

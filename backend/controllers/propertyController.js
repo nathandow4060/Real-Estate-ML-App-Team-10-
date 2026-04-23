@@ -148,6 +148,65 @@ exports.getPropertiesByCity = async (req, res, next) => {
   }
 }
 
+exports.getPropertiesByZIP = async (req, res, next) => {
+  try {
+        const postcode  = req.body.postcode
+        //add error checks here
+        const result = await db.query(
+            `SELECT *
+            FROM public."Property"
+            WHERE LPAD(zipcode::text, 5, '0') = $1`,
+            [postcode]
+        )
+
+        var prop = []
+        var attrArray = []
+        var nonNull = []
+        var k = 0; //counter for json reply array
+        for(var i =  0; i < result.rowCount; i++ ){
+
+            prop = result.rows[i]
+
+            const attributes = [
+                { label: "Address",     value: `${prop.street_address}, ${prop.city}, ${prop.state} ${prop.zipcode}` },
+                { label: "Current Price", value: prop.current_price },
+                {label: "City",         value: prop.city },
+                {label: "State",        value: prop.state },
+                {label: "Zip Code",     value: prop.zipcode },
+                { label: "Year Built",  value: prop.year_built },
+                { label: "Style",       value: prop.house_style },
+                { label: "Bedrooms",    value: prop.num_bedrooms },
+                { label: "Bathrooms",   value: prop.num_bathrooms },
+                { label: "Sq Ft",       value: prop.living_area_sqft },
+                { label: "Stories",     value: prop.stories }, 
+                { label: "On the Market", value: prop.market_status },
+                { label: "Longitude", value: prop.longitude },
+                { label: "Latitude", value: prop.latitude },
+                {label: "pid", value: prop.pid}
+            ]
+
+            const hasValue = (v) => v !== null && v !== undefined && v !== '' && v !==NaN;
+
+            if(hasValue(prop.street_address) && hasValue(prop.city) && hasValue(prop.state) && hasValue(prop.zipcode)){
+                attrArray[k] = attributes
+
+                nonNull[k] = attributes.filter(attr => 
+                attr.value !== null && 
+                attr.value !== undefined && 
+                attr.value !== '' && 
+                String(attr.value) !== 'NaN'
+                )
+                k++
+            }
+        }
+
+        if(attrArray.length === 0 ) throw new Error('No Properties with this ZIP code')
+        res.json({ status: 'success', count: result.rowCount, data: nonNull})
+  } catch (err) {
+    next(err)
+  }
+}
+
 
 //Search Gets
 //returns all properties stored in db; get route
@@ -303,10 +362,12 @@ exports.getCityListingProperties = async (req, res) => {
 module.exports = {
     getAllPropertiesByState: exports.getAllPropertiesByState,
     getPropertiesByCity: exports.getPropertiesByCity,
+    getPropertiesByZIP: exports.getPropertiesByZIP,
     getPropertyByAddr: exports.getPropertyByAddr,
     getPropertiesByCityState: exports.getPropertiesByCityState,
     getPropertyAttributes:    exports.getPropertyAttributes,
     getPropertiesForMap: exports.getPropertiesForMap,
     getPropertyCoordinates: exports.getPropertyCoordinates,
     getCityListingProperties: exports.getCityListingProperties
+
 }
