@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Home from './ui/Home.tsx'
 import Listing from './ui/Listing.tsx'
 import * as addr from 'parse-address'
+import AreaListings from './ui/AreaListings.tsx'
+import { set } from 'ol/transform'
 
 interface Attribute {
   label: string
@@ -75,10 +77,12 @@ export function normalizeAddress(address: string): string {
 
 
 function App() {
-  const [page, setPage] = useState<'home' | 'listing' | 'city'>('home')
+  const [page, setPage] = useState<'home' | 'listing' | 'area'>('home')
   const [attributes, setAttributes] = useState<Attribute[]>([])
-  const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
+  const [areaResults, setAreaResults] = useState<Attribute[][]>([])
+  const [areaName, setAreaName] = useState <String>('')
 
+  const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
   const [cityData,  setCityData]  = useState<{year: string, avg_price: number}[]>([])
   const [zipData,   setZipData]   = useState<{year: string, avg_price: number}[]>([])
   const [stateData, setStateData] = useState<{year: string, avg_price: number}[]>([])
@@ -118,13 +122,13 @@ function App() {
 
   const onPlaceSelected = async (feature: any) => {
 
-    if (feature?.properties.result_type !== "building" && feature?.properties.result_type !== "city") return
+    if (feature?.properties.result_type !== "building" && feature?.properties.result_type !== "city"&& feature?.properties.result_type !== "postcode") return
 
     savedAutocomplete.address_line1 = feature.properties.address_line1
     savedAutocomplete.city          = feature.properties.city
     savedAutocomplete.postcode      = feature.properties.postcode
     savedAutocomplete.state_code    = feature.properties.state_code
-    savedAutocomplete.result_type = feature.properties.result_type
+    savedAutocomplete.result_type   = feature.properties.result_type
 
     console.log('Selected:', savedAutocomplete.address_line1, savedAutocomplete.city, savedAutocomplete.postcode, savedAutocomplete.state_code, savedAutocomplete.result_type)
   }
@@ -157,9 +161,58 @@ function App() {
           })
         }).then(r => r.json())
 
-        console.log("properties: ", responseCity)
+        if (responseCity.status === 'success'){
 
-        // setpage('city')
+          console.log("properties: ", responseCity)
+
+          setAreaResults(responseCity.data)
+          setAreaName("in City: " + city)
+          setPage('area')
+        }
+        else{
+          setError('no properties found in this city')
+        }
+
+      }catch (err) {
+        setError('Failed to connect to server.')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+
+    }
+
+    if(type == "postcode"){
+
+      const normalizedAddress = normalizeAddress(savedAutocomplete.address_line1)
+      const postcode    = savedAutocomplete.postcode
+      const state   = savedAutocomplete.state_code
+
+      console.log('Sending to backend:', { address: normalizedAddress, postcode, state })
+
+      try{
+
+        const responseCity = await fetch(`${BASE_URL}/property/ZIP`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            postcode: postcode
+          })
+        }).then(r => r.json())
+
+        if (responseCity.status === 'success'){
+
+          console.log("properties: ", responseCity)
+
+          setAreaResults(responseCity.data)
+          setAreaName("with ZIP code: " + postcode)
+          setPage('area')
+        }
+        else{
+          setError('no properties found with this zipcode')
+        }
 
       }catch (err) {
         setError('Failed to connect to server.')
@@ -206,9 +259,10 @@ function App() {
 
           console.log("Zip avg: ", responseZip)
 
-          if (!responseZip.ok) {
+          if (responseZip.status !== 'success') {
             throw new Error(responseZip.message || 'Request failed')
           }
+          
 
           const responseCity = await fetch(`${BASE_URL}/predictions/city-averages`, {
             method: 'POST',
@@ -223,10 +277,11 @@ function App() {
 
           console.log("City avg: ", responseCity)
 
-          if (!responseZip.ok) {
+          
+          if (responseZip.status !== 'success') {
             throw new Error(responseCity.message || 'Request failed')
           }
-
+          
 
 
           // --- Google Street View ---
@@ -291,6 +346,7 @@ function App() {
         setLoading(false)
       }
     }
+
   }
 
   return (
@@ -315,6 +371,16 @@ function App() {
           stateData={stateData}
           streetViewUrl={streetViewUrl}
           propertyPrediction = {propertyPrediction}
+        />
+      )}
+      {page === 'area' && (
+        <AreaListings
+          onPlaceSelected={onPlaceSelected}
+          onSubmit={onSubmit}
+          listings={areaResults}
+          area = {areaName}
+          loading={loading}
+          error={error}
         />
       )}
     </>
