@@ -4,7 +4,6 @@ import Listing from './ui/Listing.tsx'
 import * as addr from 'parse-address'
 import type { Coordinate } from 'ol/coordinate'
 import AreaListings from './ui/AreaListings.tsx'
-import { set } from 'ol/transform'
 
 interface Attribute {
   label: string
@@ -292,10 +291,7 @@ function App() {
         const lat = json.data.find((a: Attribute) => a.label === "Latitude")?.value
         const lon = json.data.find((a: Attribute) => a.label === "Longitude")?.value
         setCoordinate([lon,lat])
-          // --- Google Street View ---
-          const superSecretKey = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
-          const lat = json.data.find((a: Attribute) => a.label === "Latitude")?.value
-          const lon = json.data.find((a: Attribute) => a.label === "Longitude")?.value
+
 
           /*
           if (lat && lon) {
