@@ -102,6 +102,7 @@ exports.getPropertiesByCity = async (req, res, next) => {
 
         var prop = []
         var attrArray = []
+        var nonNull = []
         var k = 0; //counter for json reply array
         for(var i =  0; i < result.rowCount; i++ ){
 
@@ -130,11 +131,18 @@ exports.getPropertiesByCity = async (req, res, next) => {
             if(hasValue(prop.street_address) && hasValue(prop.city) && hasValue(prop.state) && hasValue(prop.zipcode)){
                 attrArray[k] = attributes
                 k++
+
+                nonNull[k] = attributes.filter(attr => 
+                attr.value !== null && 
+                attr.value !== undefined && 
+                attr.value !== '' && 
+                String(attr.value) !== 'NaN'
+                )
             }
         }
 
         if(attrArray.length === 0 ) throw new Error('No Properties in City')
-        res.json({ status: 'success', count: result.rowCount, data: attrArray})
+        res.json({ status: 'success', count: result.rowCount, data: nonNull})
   } catch (err) {
     next(err)
   }
