@@ -9,22 +9,7 @@ exports.getPropertyAttributes = async (req, res, next) => {
         const zipcode = req.body.zipcode
         const state = req.body.state
         const result = await db.query(
-            `SELECT 
-                pid,
-                street_address,
-                city,
-                state,
-                zipcode,
-                year_built,
-                house_style,
-                num_bedrooms,
-                num_bathrooms,
-                living_area_sqft,
-                stories,
-                current_price,
-                market_status,
-                longitude,
-                latitude
+            `SELECT *
             FROM public."Property" WHERE 
             street_address = $1 AND city = $2 AND state = $3 AND zipcode = $4`,
             [street_addr, city, state, zipcode]
@@ -123,24 +108,26 @@ exports.getPropertiesByCity = async (req, res, next) => {
             prop = result.rows[i]
 
             const attributes = [
-                { label: "Display Address",     value: `${prop.street_address}, ${prop.city}, ${prop.state} ${prop.zipcode}` },
-                { label: "Address",     value: prop.street_address},
-                { label: "City",        value: prop.city },
-                { label: "Zip",         value: prop.zipcode },
-                { label: "State",       value: prop.state },
-                { label: "Longitude",   value: prop.longitude },
-                { label: "Latitude",    value: prop.latitude },
-                {label: "Current Price", value: prop.current_price},
+                { label: "Address",     value: `${prop.street_address}, ${prop.city}, ${prop.state} ${prop.zipcode}` },
+                { label: "Current Price", value: prop.current_price },
+                {label: "City",         value: prop.city },
+                {label: "State",        value: prop.state },
+                {label: "Zip Code",     value: prop.zipcode },
+                { label: "Year Built",  value: prop.year_built },
+                { label: "Style",       value: prop.house_style },
+                { label: "Bedrooms",    value: prop.num_bedrooms },
+                { label: "Bathrooms",   value: prop.num_bathrooms },
+                { label: "Sq Ft",       value: prop.living_area_sqft },
+                { label: "Stories",     value: prop.stories }, 
+                { label: "On the Market", value: prop.market_status },
+                { label: "Longitude", value: prop.longitude },
+                { label: "Latitude", value: prop.latitude },
+                {label: "pid", value: prop.pid}
             ]
 
-            nonNull = attributes.filter(attr => 
-            attr.value !== null && 
-            attr.value !== undefined && 
-            attr.value !== '' && 
-            String(attr.value) !== 'NaN'
-            )
+            const hasValue = (v) => v !== null && v !== undefined && v !== '' && v !==NaN;
 
-            if(nonNull.length === 8 || (attributes.find(a =>a.label === "Current Price")?.value === null && nonNull.length === 7)){
+            if(hasValue(prop.street_address) && hasValue(prop.city) && hasValue(prop.state) && hasValue(prop.zipcode)){
                 attrArray[k] = attributes
                 k++
             }
