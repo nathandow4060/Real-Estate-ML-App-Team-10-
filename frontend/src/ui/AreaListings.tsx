@@ -44,7 +44,7 @@ function AreaListings({ onPlaceSelected, onSubmit, listings, area, loading, erro
         <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading}/>
       {loading && <p className="status-msg">Loading property data...</p>}
       {error   && <p className="status-msg error">{error}</p>}
-        <h1>Listings {area} </h1>
+        <h2>Listings {area} </h2>
 
         {DisplayAttributes.map((listing, i: number) => 
 
