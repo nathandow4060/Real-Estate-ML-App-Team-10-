@@ -130,7 +130,6 @@ exports.getPropertiesByCity = async (req, res, next) => {
 
             if(hasValue(prop.street_address) && hasValue(prop.city) && hasValue(prop.state) && hasValue(prop.zipcode)){
                 attrArray[k] = attributes
-                k++
 
                 nonNull[k] = attributes.filter(attr => 
                 attr.value !== null && 
@@ -138,6 +137,7 @@ exports.getPropertiesByCity = async (req, res, next) => {
                 attr.value !== '' && 
                 String(attr.value) !== 'NaN'
                 )
+                k++
             }
         }
 
