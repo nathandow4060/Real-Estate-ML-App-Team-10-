@@ -37,12 +37,19 @@ interface ListingProps {
   stateData:  {year: string, avg_price: number}[]
   streetViewUrl: string | null
   propertyPrediction: number | null
+  zipPrediction: number | null
+  cityPrediction: number | null
   coordinate: Coordinate | null// [lon,lat]
 }
 
 
-function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl, propertyPrediction, coordinate}: ListingProps) {
+function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl, propertyPrediction, zipPrediction, cityPrediction,  coordinate}: ListingProps) {
     const [address, setAddress] = useState<string | undefined>();
+
+    console.log("HELLO FROM LISTING", zipPrediction)
+    console.log("HELLO FROM LISTING", cityPrediction)
+
+
 
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
   const housePastY: ChartDataset[] = [{
@@ -53,7 +60,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
-  //Still needs to be predicted
+
   const houseFutureX: string[] = []
   let houseFutureY: ChartDataset[] = [{
     label: "Price Prediction (USD $)",
@@ -72,12 +79,30 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
+  const zipFutureX: string[] = []
+  let zipFutureY: ChartDataset[] = [{
+    label: "Price Prediction (USD $)",
+    data: [],
+    backgroundColor: 'rgba(255, 26, 104, 0.2)',
+    borderColor: 'rgba(255, 26, 104, 1)',
+    borderWidth: 1
+  }]
+
   const cityPastX: string[] = cityData.map(d => d.year)
   const cityPastY: ChartDataset[] = [{
     label: "Avg City Sale Price (USD $)",
     data: cityData.map(d => d.avg_price),
     backgroundColor: "rgba(153,102,255,0.4)",
     borderColor: 'rgba(153,102,255,1)',
+    borderWidth: 1
+  }]
+
+  const cityFutureX: string[] = []
+  let cityFutureY: ChartDataset[] = [{
+    label: "Price Prediction (USD $)",
+    data: [],
+    backgroundColor: 'rgba(255, 26, 104, 0.2)',
+    borderColor: 'rgba(255, 26, 104, 1)',
     borderWidth: 1
   }]
 
@@ -124,6 +149,20 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
   if(propertyPrediction !==null){
     houseFutureY[0].data.push(propertyPrediction)
     houseFutureX.push((currentYear+1).toString() + " (prediction)")
+
+  }
+
+  // append prediction price to zipFuture
+  if(zipPrediction !==null){
+    zipFutureY[0].data.push(zipPrediction)
+    zipFutureX.push((currentYear+1).toString() + " (prediction)")
+
+  }
+
+  // append prediction price to cityFuture
+  if(cityPrediction !==null){
+    cityFutureY[0].data.push(cityPrediction)
+    cityFutureX.push((currentYear+1).toString() + " (prediction)")
 
   }
 
@@ -231,21 +270,37 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
             </div>
 
             <div className="chart-block">
+              {zipPrediction ?
               <DynamicLineChart
                 pastX={zipPastX} pastY={zipPastY}
-                futureX={houseFutureX} futureY={houseFutureY}
-                name = {"Zip-Code Price"}
+                futureX={zipFutureX} futureY={zipFutureY}
+                name = {"Zip Price"}
                 append = {attributes.find(a =>a.label === "Zip Code")?.value}
               />
+              :
+              <LineChart
+                X={zipPastX} Y={zipPastY}
+                name = {"Zip Price"}
+                append = {attributes.find(a =>a.label === "Zip Code")?.value}
+              />
+                }
             </div>
 
             <div className="chart-block">
+              {cityPrediction ?
               <DynamicLineChart
                 pastX={cityPastX} pastY={cityPastY}
-                futureX={houseFutureX} futureY={houseFutureY}
+                futureX={cityFutureX} futureY={cityFutureY}
                 name = {"City Price"}
                 append = {attributes.find(a =>a.label === "City")?.value}
               />
+              :
+              <LineChart
+                X={zipPastX} Y={zipPastY}
+                name = {"Zip Price"}
+                append = {attributes.find(a =>a.label === "City")?.value}
+              />
+                }
             </div>
 
             <div className="chart-block">

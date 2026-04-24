@@ -89,6 +89,8 @@ function App() {
   const [stateData, setStateData] = useState<{year: string, avg_price: number}[]>([])
 
   const[propertyPrediction, setPropertyPrediction] = useState <number | null>(null)
+  const[zipPrediction, setZipPrediction] = useState <number | null>(null)
+  const[cityPrediction, setcityPrediction] = useState <number | null>(null)
 
   // Street View image URL — must be state so updates trigger a re-render
   const [streetViewUrl, setStreetViewUrl] = useState<string | null>(null)
@@ -260,6 +262,7 @@ function App() {
           }).then(r => r.json())
 
           console.log("Zip avg: ", responseZip)
+          setZipPrediction(responseZip.data.avg_predicted_value)
 
           if (responseZip.status !== 'success') {
             throw new Error(responseZip.message || 'Request failed')
@@ -277,8 +280,9 @@ function App() {
             })
           }).then(r => r.json())
 
-          console.log("City avg: ", responseCity)
+          console.log("City avg: ", responseCity.data.avg_predicted_value)
 
+          setcityPrediction(responseCity.data.avg_predicted_value)
           
           if (responseZip.status !== 'success') {
             throw new Error(responseCity.message || 'Request failed')
@@ -376,6 +380,8 @@ function App() {
           streetViewUrl={streetViewUrl}
           coordinate={coordinate}
           propertyPrediction = {propertyPrediction}
+          zipPrediction={zipPrediction}
+          cityPrediction={cityPrediction}
         />
       )}
       {page === 'area' && (
