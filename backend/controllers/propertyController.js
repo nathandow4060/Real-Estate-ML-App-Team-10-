@@ -276,6 +276,7 @@ exports.getPropertiesForMap = async (req, res, next) => {
         //const city = req.body.city
         //const zipcode = req.body.zipcode
         //const state = req.body.state
+        const [minLon, minLat, maxLon, maxLat] = req.body.bbox
         const result = await db.query(
             `SELECT 
                 pid,
@@ -286,7 +287,10 @@ exports.getPropertiesForMap = async (req, res, next) => {
                 longitude,
                 latitude,
                 current_price
-            FROM public."Property"`
+            FROM public."Property"
+            WHERE longitude BETWEEN $1 AND $2
+                AND latitude BETWEEN $3 AND $4;`
+                , [minLon,maxLon,minLat,maxLat]
         )
 
         //console.log('raw row:', result.rows[0])

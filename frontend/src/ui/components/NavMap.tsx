@@ -19,10 +19,26 @@ import { Control } from 'ol/control'
 
 const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
-// Property data item from backend (array of label/value objects)
 interface PropertyDataItem {
   label: string
   value: any
+}
+
+interface SelectedProperty {
+  address: string
+  displayAddress: string
+  city: string
+  zip: string
+  beds: number | null
+  baths: number | null
+  sqft: number | null
+  yearBuilt: number | null
+  lastSalePrice: number | null
+  lastSaleDate: string | null
+  lat: number | null
+  lon: number | null
+  streetViewUrl: string | null
+  streetViewLoading: boolean
 }
 
 interface NavMapProps {
@@ -62,8 +78,32 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=DEFAULT_CENTER_
   onPlaceSelectedRef.current = onPlaceSelected
   
   const [zoomLevel, setZoomLevel] = useState(DEFAULT_STARTING_ZOOM)
+  const [hoverPropertyAddress, setHoverPropertyAddress] = useState('')
+  const [clickPropertyAddress, setClickPropertyAddress] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false)
   const [loadedCount, setLoadedCount] = useState(0)
+
+  // Selected property panel state
+  const [selectedProperty, setSelectedProperty] = useState<SelectedProperty | null>(null)
+
+  const STREET_VIEW_KEY = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
+
+  const fetchStreetView = async (lat: number, lon: number): Promise<string | null> => {
+    try {
+      const metaRes = await fetch(
+        `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lon}&source=outdoor&key=${STREET_VIEW_KEY}`
+      )
+      const meta = await metaRes.json()
+      if (!meta.pano_id) return null
+      const imgRes = await fetch(
+        `https://maps.googleapis.com/maps/api/streetview?size=400x220&pano=${meta.pano_id}&source=outdoor&key=${STREET_VIEW_KEY}`
+      )
+      const blob = await imgRes.blob()
+      return window.URL.createObjectURL(blob)
+    } catch {
+      return null
+    }
+  }
 
   // Circle style (default)
   const circleStyle = new Style({
@@ -298,18 +338,46 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=DEFAULT_CENTER_
       
       if (selected) {
         const properties = selected.getProperties();
-        const { geometry, ...propertyData } = properties;
-        // Transform to expected format
-        
+        let { geometry, ...propertyData } = properties;
         setAddress(toTitleCase(propertyData['Display Address'])+ ', United States of America');
-        console.log(propertyData['Display Address'])
-        console.log(`The normalized address: ${propertyData['Display Address']}`)
-        
-        onPlaceSelected(transformToGeoapifyFormat(propertyData))
-        // onPlaceSelectedRef.current(transformedFeature);
-        
-        // Keep pin style on selected feature
+        setClickPropertyAddress(propertyData.Address);
+        onPlaceSelected(transformToGeoapifyFormat(propertyData));
+        console.log(propertyData);
+
         selected.setStyle(pinStyle);
+
+        // Build selected property panel data
+        const lat = propertyData['Latitude'] ?? null
+        const lon = propertyData['Longitude'] ?? null
+        const panel: SelectedProperty = {
+          address: propertyData['Address'] ?? '',
+          displayAddress: toTitleCase(propertyData['Display Address'] ?? ''),
+          city: toTitleCase(propertyData['City'] ?? ''),
+          zip: propertyData['Zip'] ?? '',
+          beds: propertyData['Bedrooms'] ?? null,
+          baths: propertyData['Bathrooms'] ?? null,
+          sqft: propertyData['Sq Ft'] ?? propertyData['SqFt'] ?? propertyData['Square Feet'] ?? null,
+          yearBuilt: propertyData['Year Built'] ?? null,
+          lastSalePrice: propertyData['Last Sale Price'] ?? propertyData['Sale Amount'] ?? null,
+          lastSaleDate: propertyData['Last Sale Date'] ?? propertyData['Date of Sale'] ?? null,
+          lat,
+          lon,
+          streetViewUrl: null,
+          streetViewLoading: lat != null && lon != null,
+        }
+        setSelectedProperty(panel)
+
+        // Fetch street view asynchronously
+        if (lat != null && lon != null) {
+          fetchStreetView(lat, lon).then(url => {
+            setSelectedProperty(prev =>
+              prev ? { ...prev, streetViewUrl: url, streetViewLoading: false } : prev
+            )
+          })
+        }
+      } else {
+        // Clicked empty space — deselect
+        setSelectedProperty(null)
       }
     })
 
@@ -364,12 +432,93 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=DEFAULT_CENTER_
             </div>
           )}
         </div>
-        <div className="overlay" ref={overLayRef}></div>
         <div id="map" className="map-view"></div>
       </div>
+
       <p className="map-instruction">
-        Hover over a circle to see pin, click to view property details
+        Hover over a pin, click to see property details
       </p>
+
+      {/* ── Property preview panel ── */}
+      {selectedProperty && (
+        <div className="map-property-panel">
+          <button
+            className="map-panel-close"
+            onClick={() => setSelectedProperty(null)}
+            aria-label="Close panel"
+          >
+            ✕
+          </button>
+
+          {/* Street View photo */}
+          <div className="map-panel-photo-wrap">
+            {selectedProperty.streetViewLoading ? (
+              <div className="map-panel-photo-placeholder">
+                <span>Loading photo…</span>
+              </div>
+            ) : selectedProperty.streetViewUrl ? (
+              <img
+                src={selectedProperty.streetViewUrl}
+                alt="Street view"
+                className="map-panel-photo"
+              />
+            ) : (
+              <div className="map-panel-photo-placeholder">
+                <span>No photo available</span>
+              </div>
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="map-panel-info">
+            <h3 className="map-panel-address">{selectedProperty.displayAddress}</h3>
+            <p className="map-panel-city">
+              {selectedProperty.city}{selectedProperty.zip ? `, CT ${selectedProperty.zip}` : ''}
+            </p>
+
+            {/* Stats row */}
+            <div className="map-panel-stats">
+              {selectedProperty.beds != null && (
+                <div className="map-panel-stat">
+                  <span className="stat-value">{selectedProperty.beds}</span>
+                  <span className="stat-label">Beds</span>
+                </div>
+              )}
+              {selectedProperty.baths != null && (
+                <div className="map-panel-stat">
+                  <span className="stat-value">{selectedProperty.baths}</span>
+                  <span className="stat-label">Baths</span>
+                </div>
+              )}
+              {selectedProperty.sqft != null && (
+                <div className="map-panel-stat">
+                  <span className="stat-value">{selectedProperty.sqft.toLocaleString()}</span>
+                  <span className="stat-label">Sq Ft</span>
+                </div>
+              )}
+              {selectedProperty.yearBuilt != null && (
+                <div className="map-panel-stat">
+                  <span className="stat-value">{selectedProperty.yearBuilt}</span>
+                  <span className="stat-label">Built</span>
+                </div>
+              )}
+            </div>
+
+            {/* Last sale */}
+            {selectedProperty.lastSalePrice != null && (
+              <div className="map-panel-sale">
+                <span className="sale-label">Last Sale</span>
+                <span className="sale-price">
+                  ${selectedProperty.lastSalePrice.toLocaleString()}
+                </span>
+                {selectedProperty.lastSaleDate && (
+                  <span className="sale-date">{selectedProperty.lastSaleDate}</span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
