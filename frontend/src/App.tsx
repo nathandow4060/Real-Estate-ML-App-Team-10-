@@ -293,7 +293,7 @@ function App() {
         setCoordinate([lon,lat])
 
 
-          /*
+          
           if (lat && lon) {
             const metadataUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lon}&source=outdoor&key=${superSecretKey}`
             const metadataRes = await fetch(metadataUrl)
@@ -309,7 +309,7 @@ function App() {
             }
           }
           // --- End Google Street View ---
-          */
+        
 
           const [salesJson, zipJson, cityJson, stateJson] = await Promise.all([
             fetch(`${BASE_URL}/property-sales`, {
