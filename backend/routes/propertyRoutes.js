@@ -12,4 +12,5 @@ router.post('/city',ctrl.getPropertiesByCity )
 router.post('/zip',ctrl.getPropertiesByZIP)
 router.post('/coordinate', ctrl.getPropertyCoordinates)
 router.get('/city-list', ctrl.getCityListingProperties)
+router.get('/zip-list', ctrl.getZipListingProperties)
 module.exports = router

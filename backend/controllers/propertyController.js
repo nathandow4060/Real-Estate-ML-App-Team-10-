@@ -364,6 +364,29 @@ exports.getCityListingProperties = async (req, res) => {
   }
 };
 
+//Get The Zipcode List
+exports.getZipListingProperties = async (req, res) => {
+  const { zipcode } = req.query;
+
+  if (!zipcode) {
+    return res.status(400).json({ error: 'zipcode query param is required' });
+  }
+
+  try {
+    const result = await db.query(
+      `SELECT pid, street_address, zipcode, city, living_area_sqft, num_bedrooms, num_bathrooms, market_status, current_price,
+      longitude, latitude
+      FROM "Property"
+      WHERE LPAD(zipcode::text, 5, '0') = $1`,
+      [zipcode]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching properties by zipcode:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 
 module.exports = {
     getAllPropertiesByState: exports.getAllPropertiesByState,
@@ -374,6 +397,6 @@ module.exports = {
     getPropertyAttributes:    exports.getPropertyAttributes,
     getPropertiesForMap: exports.getPropertiesForMap,
     getPropertyCoordinates: exports.getPropertyCoordinates,
-    getCityListingProperties: exports.getCityListingProperties
-
+    getCityListingProperties: exports.getCityListingProperties,
+    getZipListingProperties: exports.getZipListingProperties
 }

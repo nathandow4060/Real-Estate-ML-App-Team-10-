@@ -214,7 +214,7 @@ function App() {
 
       try{
 
-        const responseCity = await fetch(`${BASE_URL}/property/ZIP`, {
+        const responseCity = await fetch(`${BASE_URL}/property/zip-list`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
