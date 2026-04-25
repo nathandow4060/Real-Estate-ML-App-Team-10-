@@ -170,36 +170,37 @@ function App() {
 
       console.log('Sending to backend:', { address: normalizedAddress, city, state })
 
-      try{
+      try {
+        const response = await fetch(`${BASE_URL}/property/city-list?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`)
+          .then(r => r.json())
 
-        const responseCity = await fetch(`${BASE_URL}/property/city`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            city: city
-          })
-        }).then(r => r.json())
-
-        if (responseCity.status === 'success'){
-
-          console.log("properties: ", responseCity)
-
-          setAreaResults(responseCity.data)
+        if (Array.isArray(response) && response.length > 0) {
+          const mapped: Attribute[][] = response.map((prop: any) => [
+            { label: "Address",   value: prop.street_address },
+            { label: "Sq Ft",     value: prop.living_area_sqft },
+            { label: "Bedrooms",  value: prop.num_bedrooms },
+            { label: "Bathrooms", value: prop.num_bathrooms },
+            { label: "For Sale",  value: prop.market_status },
+            { label: "Price",     value: prop.current_price },
+            { label: "City",      value: prop.city },
+            { label: "Zip Code",  value: prop.zipcode },
+            { label: "Latitude",  value: prop.latitude },
+            { label: "Longitude", value: prop.longitude },
+            { label: "pid",       value: prop.pid },
+          ])
+          setAreaResults(mapped)
           setAreaName("in City: " + city)
           setPage('area')
+        } else {
+          setError('No properties found in this city.')
         }
-        else{
-          setError('no properties found in this city')
-        }
-
-      }catch (err) {
+      } catch (err) {
         setError('Failed to connect to server.')
         console.error(err)
       } finally {
         setLoading(false)
       }
+
 
     }
 
