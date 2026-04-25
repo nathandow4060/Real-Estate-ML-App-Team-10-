@@ -233,7 +233,7 @@ function App() {
             { label: "Longitude", value: prop.longitude },
           ])
           setAreaResults(mapped)
-          setAreaName("with ZIP code: " + postcode)
+          setAreaName("with ZIP code: " + postcode + " (" + savedAutocomplete.city + ")")
           setPage('area')
         } else {
           setError('No properties found with this ZIP code.')
