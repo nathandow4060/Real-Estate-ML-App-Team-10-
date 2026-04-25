@@ -214,26 +214,29 @@ function App() {
 
       try{
 
-        const responseCity = await fetch(`${BASE_URL}/property/zip-list`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            postcode: postcode
-          })
-        }).then(r => r.json())
+        const response = await fetch(
+          `${BASE_URL}/property/zip-list?zipcode=${encodeURIComponent(postcode)}`
+        ).then(r => r.json())
 
-        if (responseCity.status === 'success'){
-
-          console.log("properties: ", responseCity)
-
-          setAreaResults(responseCity.data)
+        if (Array.isArray(response) && response.length > 0) {
+          const mapped: Attribute[][] = response.map((prop: any) => [
+            { label: "Address",   value: prop.street_address },
+            { label: "City",      value: prop.city },
+            { label: "Zip Code",  value: prop.zipcode },
+            { label: "Bedrooms",  value: prop.num_bedrooms },
+            { label: "Bathrooms", value: prop.num_bathrooms },
+            { label: "Sq Ft",     value: prop.living_area_sqft },
+            { label: "For Sale",  value: prop.market_status },
+            { label: "Price",     value: prop.current_price },
+            { label: "pid",       value: prop.pid },
+            { label: "Latitude",  value: prop.latitude },
+            { label: "Longitude", value: prop.longitude },
+          ])
+          setAreaResults(mapped)
           setAreaName("with ZIP code: " + postcode)
           setPage('area')
-        }
-        else{
-          setError('no properties found with this zipcode')
+        } else {
+          setError('No properties found with this ZIP code.')
         }
 
       }catch (err) {
