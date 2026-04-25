@@ -4,6 +4,7 @@ import Listing from './ui/Listing.tsx'
 import * as addr from 'parse-address'
 import type { Coordinate } from 'ol/coordinate'
 import AreaListings from './ui/AreaListings.tsx'
+import { fetchStreetViewUrl } from './utils/streetView'
 
 interface Attribute {
   label: string
@@ -287,27 +288,16 @@ function App() {
 
 
         // --- Google Street View ---
-        const superSecretKey = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
         const lat = json.data.find((a: Attribute) => a.label === "Latitude")?.value
         const lon = json.data.find((a: Attribute) => a.label === "Longitude")?.value
         setCoordinate([lon,lat])
 
 
           
-          if (lat && lon) {
-            const metadataUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lon}&source=outdoor&key=${superSecretKey}`
-            const metadataRes = await fetch(metadataUrl)
-            const metadataJson = await metadataRes.json()
-            console.log(metadataJson)
-
-            const panoId = metadataJson.pano_id
-            if (panoId) {
-              const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x250&pano=${panoId}&source=outdoor&key=${superSecretKey}`
-              const imageRes = await fetch(imageUrl)
-              const imageBlob = await imageRes.blob()
-              setStreetViewUrl(window.URL.createObjectURL(imageBlob))
-            }
-          }
+        if (lat && lon) {
+          const url = await fetchStreetViewUrl(lat, lon)
+          if (url) setStreetViewUrl(url)
+        }
           // --- End Google Street View ---
         
 

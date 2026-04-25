@@ -348,8 +348,10 @@ exports.getCityListingProperties = async (req, res) => {
   }
 
   try {
+    //Long and lat for google street image
     const result = await db.query(
-        `SELECT pid, street_address, zipcode, city, living_area_sqft, num_bedrooms, num_bathrooms, market_status, current_price
+        `SELECT pid, street_address, zipcode, city, living_area_sqft, num_bedrooms, num_bathrooms, market_status, current_price, 
+        longitude, latitude
         FROM "Property"
         WHERE city ILIKE $1
         AND state ILIKE $2`,
