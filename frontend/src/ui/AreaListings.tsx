@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react"
 import PropertyListCard from "./components/PropertyListCard.tsx"
 import PropertySearch from "./components/PropertySearch.tsx"
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
@@ -14,9 +15,41 @@ interface AreaListingsProps {
   listings: (Attribute[])[]
   loading: boolean
   error: string | null
+  onPropertySelect: (listing: Attribute[]) => void 
 }
 
-function AreaListings({ onPlaceSelected, onSubmit, listings, area, loading, error }: AreaListingsProps) {
+// Lazy Loading size
+const PAGE_SIZE = 10
+
+function AreaListings({ onPlaceSelected, onSubmit, listings, area, loading, error, onPropertySelect}: AreaListingsProps) {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
+
+  // Reset visible count when listings change (new search)
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [listings])
+
+  // Watch the sentinel div at the bottom — when it scrolls into view, load 10 more
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => Math.min(prev + PAGE_SIZE, listings.length))
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [listings.length])
+
+  const visibleListings = listings.slice(0, visibleCount)
+
   return (
     <>
       <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading} />
@@ -24,7 +57,7 @@ function AreaListings({ onPlaceSelected, onSubmit, listings, area, loading, erro
       {error && <p className="status-msg error">{error}</p>}
       <h2>Listings {area}</h2>
 
-      {listings.map((listing, i: number) => {
+      {visibleListings.map((listing, i: number) => {
 
         // Pull lat/lon out BEFORE filtering, since PropertyListCard needs them
         // for the Street View fetch but they shouldn't show in the attribute table
@@ -44,7 +77,7 @@ function AreaListings({ onPlaceSelected, onSubmit, listings, area, loading, erro
         )
 
         return (
-          <div key={i}>
+          <div key={i} onClick={() => onPropertySelect(listings[i])}>
             <PropertyListCard
               attributes={displayAttrs}
               lat={lat}
@@ -53,6 +86,15 @@ function AreaListings({ onPlaceSelected, onSubmit, listings, area, loading, erro
           </div>
         )
       })}
+      {/* Sentinel — sits just below the last visible card.
+          When it enters the viewport the observer fires and loads 10 more. */}
+      <div ref={sentinelRef} style={{ height: '1px' }} />
+
+      {visibleCount < listings.length && (
+        <p className="status-msg">
+          Showing {visibleCount} of {listings.length} properties...
+        </p>
+      )}
     </>
   )
 }

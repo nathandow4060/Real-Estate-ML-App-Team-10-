@@ -136,6 +136,24 @@ function App() {
     console.log('Selected:', savedAutocomplete.address_line1, savedAutocomplete.city, savedAutocomplete.postcode, savedAutocomplete.state_code, savedAutocomplete.result_type)
   }
 
+
+  //For Area List Click
+  const onPropertySelect = async (listing: Attribute[]) => {
+    const address = listing.find(a => a.label === 'Address')?.value
+    const city    = listing.find(a => a.label === 'City')?.value
+    const zip     = listing.find(a => a.label === 'Zip Code')?.value
+    const state   = 'CT'
+    const zipcode = String(zip).padStart(5, '0')
+
+    savedAutocomplete.address_line1 = address
+    savedAutocomplete.city          = city
+    savedAutocomplete.postcode      = zipcode
+    savedAutocomplete.state_code    = state
+    savedAutocomplete.result_type   = 'building'
+
+    await onSubmit()
+  }
+
   const onSubmit = async () => {
     setLoading(true)
     setError(null)
@@ -373,9 +391,10 @@ function App() {
           onPlaceSelected={onPlaceSelected}
           onSubmit={onSubmit}
           listings={areaResults}
-          area = {areaName}
+          area={areaName}
           loading={loading}
           error={error}
+          onPropertySelect={onPropertySelect}
         />
       )}
     </>
