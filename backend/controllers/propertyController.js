@@ -348,8 +348,10 @@ exports.getCityListingProperties = async (req, res) => {
   }
 
   try {
+    //Long and lat for google street image
     const result = await db.query(
-        `SELECT pid, street_address, zipcode, city, living_area_sqft, num_bedrooms, num_bathrooms, market_status, current_price
+        `SELECT pid, street_address, zipcode, city, living_area_sqft, num_bedrooms, num_bathrooms, market_status, current_price, 
+        longitude, latitude
         FROM "Property"
         WHERE city ILIKE $1
         AND state ILIKE $2`,
@@ -358,6 +360,29 @@ exports.getCityListingProperties = async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error('Error fetching properties by city/state:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+//Get The Zipcode List
+exports.getZipListingProperties = async (req, res) => {
+  const { zipcode } = req.query;
+
+  if (!zipcode) {
+    return res.status(400).json({ error: 'zipcode query param is required' });
+  }
+
+  try {
+    const result = await db.query(
+      `SELECT pid, street_address, zipcode, city, living_area_sqft, num_bedrooms, num_bathrooms, market_status, current_price,
+      longitude, latitude
+      FROM "Property"
+      WHERE LPAD(zipcode::text, 5, '0') = $1`,
+      [zipcode]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching properties by zipcode:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -372,6 +397,6 @@ module.exports = {
     getPropertyAttributes:    exports.getPropertyAttributes,
     getPropertiesForMap: exports.getPropertiesForMap,
     getPropertyCoordinates: exports.getPropertyCoordinates,
-    getCityListingProperties: exports.getCityListingProperties
-
+    getCityListingProperties: exports.getCityListingProperties,
+    getZipListingProperties: exports.getZipListingProperties
 }

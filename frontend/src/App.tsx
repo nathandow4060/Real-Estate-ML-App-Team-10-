@@ -4,6 +4,7 @@ import Listing from './ui/Listing.tsx'
 import * as addr from 'parse-address'
 import type { Coordinate } from 'ol/coordinate'
 import AreaListings from './ui/AreaListings.tsx'
+import { fetchStreetViewUrl } from './utils/streetView'
 
 interface Attribute {
   label: string
@@ -135,6 +136,24 @@ function App() {
     console.log('Selected:', savedAutocomplete.address_line1, savedAutocomplete.city, savedAutocomplete.postcode, savedAutocomplete.state_code, savedAutocomplete.result_type)
   }
 
+
+  //For Area List Click
+  const onPropertySelect = async (listing: Attribute[]) => {
+    const address = listing.find(a => a.label === 'Address')?.value
+    const city    = listing.find(a => a.label === 'City')?.value
+    const zip     = listing.find(a => a.label === 'Zip Code')?.value
+    const state   = 'CT'
+    const zipcode = String(zip).padStart(5, '0')
+
+    savedAutocomplete.address_line1 = address
+    savedAutocomplete.city          = city
+    savedAutocomplete.postcode      = zipcode
+    savedAutocomplete.state_code    = state
+    savedAutocomplete.result_type   = 'building'
+
+    await onSubmit()
+  }
+
   const onSubmit = async () => {
     setLoading(true)
     setError(null)
@@ -151,36 +170,37 @@ function App() {
 
       console.log('Sending to backend:', { address: normalizedAddress, city, state })
 
-      try{
+      try {
+        const response = await fetch(`${BASE_URL}/property/city-list?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`)
+          .then(r => r.json())
 
-        const responseCity = await fetch(`${BASE_URL}/property/city`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            city: city
-          })
-        }).then(r => r.json())
-
-        if (responseCity.status === 'success'){
-
-          console.log("properties: ", responseCity)
-
-          setAreaResults(responseCity.data)
+        if (Array.isArray(response) && response.length > 0) {
+          const mapped: Attribute[][] = response.map((prop: any) => [
+            { label: "Address",   value: prop.street_address },
+            { label: "Sq Ft",     value: prop.living_area_sqft },
+            { label: "Bedrooms",  value: prop.num_bedrooms },
+            { label: "Bathrooms", value: prop.num_bathrooms },
+            { label: "For Sale",  value: prop.market_status },
+            { label: "Price",     value: prop.current_price },
+            { label: "City",      value: prop.city },
+            { label: "Zip Code",  value: prop.zipcode },
+            { label: "Latitude",  value: prop.latitude },
+            { label: "Longitude", value: prop.longitude },
+            { label: "pid",       value: prop.pid },
+          ])
+          setAreaResults(mapped)
           setAreaName("in City: " + city)
           setPage('area')
+        } else {
+          setError('No properties found in this city.')
         }
-        else{
-          setError('no properties found in this city')
-        }
-
-      }catch (err) {
+      } catch (err) {
         setError('Failed to connect to server.')
         console.error(err)
       } finally {
         setLoading(false)
       }
+
 
     }
 
@@ -194,26 +214,29 @@ function App() {
 
       try{
 
-        const responseCity = await fetch(`${BASE_URL}/property/ZIP`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            postcode: postcode
-          })
-        }).then(r => r.json())
+        const response = await fetch(
+          `${BASE_URL}/property/zip-list?zipcode=${encodeURIComponent(postcode)}`
+        ).then(r => r.json())
 
-        if (responseCity.status === 'success'){
-
-          console.log("properties: ", responseCity)
-
-          setAreaResults(responseCity.data)
+        if (Array.isArray(response) && response.length > 0) {
+          const mapped: Attribute[][] = response.map((prop: any) => [
+            { label: "Address",   value: prop.street_address },
+            { label: "City",      value: prop.city },
+            { label: "Zip Code",  value: prop.zipcode },
+            { label: "Bedrooms",  value: prop.num_bedrooms },
+            { label: "Bathrooms", value: prop.num_bathrooms },
+            { label: "Sq Ft",     value: prop.living_area_sqft },
+            { label: "For Sale",  value: prop.market_status },
+            { label: "Price",     value: prop.current_price },
+            { label: "pid",       value: prop.pid },
+            { label: "Latitude",  value: prop.latitude },
+            { label: "Longitude", value: prop.longitude },
+          ])
+          setAreaResults(mapped)
           setAreaName("with ZIP code: " + postcode)
           setPage('area')
-        }
-        else{
-          setError('no properties found with this zipcode')
+        } else {
+          setError('No properties found with this ZIP code.')
         }
 
       }catch (err) {
@@ -287,27 +310,16 @@ function App() {
 
 
         // --- Google Street View ---
-        const superSecretKey = "AIzaSyC10WuDUmrqJg0OkAS99Oyn76yb3brq8I4"
         const lat = json.data.find((a: Attribute) => a.label === "Latitude")?.value
         const lon = json.data.find((a: Attribute) => a.label === "Longitude")?.value
         setCoordinate([lon,lat])
 
 
           
-          if (lat && lon) {
-            const metadataUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lon}&source=outdoor&key=${superSecretKey}`
-            const metadataRes = await fetch(metadataUrl)
-            const metadataJson = await metadataRes.json()
-            console.log(metadataJson)
-
-            const panoId = metadataJson.pano_id
-            if (panoId) {
-              const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x250&pano=${panoId}&source=outdoor&key=${superSecretKey}`
-              const imageRes = await fetch(imageUrl)
-              const imageBlob = await imageRes.blob()
-              setStreetViewUrl(window.URL.createObjectURL(imageBlob))
-            }
-          }
+        if (lat && lon) {
+          const url = await fetchStreetViewUrl(lat, lon)
+          if (url) setStreetViewUrl(url)
+        }
           // --- End Google Street View ---
         
 
@@ -383,9 +395,10 @@ function App() {
           onPlaceSelected={onPlaceSelected}
           onSubmit={onSubmit}
           listings={areaResults}
-          area = {areaName}
+          area={areaName}
           loading={loading}
           error={error}
+          onPropertySelect={onPropertySelect}
         />
       )}
     </>
