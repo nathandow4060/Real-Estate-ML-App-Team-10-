@@ -5,6 +5,7 @@ import * as addr from 'parse-address'
 import type { Coordinate } from 'ol/coordinate'
 import AreaListings from './ui/AreaListings.tsx'
 import { fetchStreetViewUrl } from './utils/streetView'
+import { Routes, Route, useNavigate, Navigate} from 'react-router-dom'
 
 interface Attribute {
   label: string
@@ -79,7 +80,7 @@ export function normalizeAddress(address: string): string {
 
 
 function App() {
-  const [page, setPage] = useState<'home' | 'listing' | 'area'>('home')
+  const navigate = useNavigate()
   const [attributes, setAttributes] = useState<Attribute[]>([])
   const [areaResults, setAreaResults] = useState<Attribute[][]>([])
   const [areaName, setAreaName] = useState <String>('')
@@ -190,7 +191,7 @@ function App() {
           ])
           setAreaResults(mapped)
           setAreaName("in City: " + city)
-          setPage('area')
+          navigate('/area')
         } else {
           setError('No properties found in this city.')
         }
@@ -234,7 +235,7 @@ function App() {
           ])
           setAreaResults(mapped)
           setAreaName("with ZIP code: " + postcode + " (" + savedAutocomplete.city + ")")
-          setPage('area')
+          navigate('/area')
         } else {
           setError('No properties found with this ZIP code.')
         }
@@ -350,7 +351,7 @@ function App() {
           console.log("predictionProperties: ", predictionPropertyJson)
           setPropertyPrediction(predictionPropertyJson !== undefined && predictionPropertyJson.length !== 0 ? predictionPropertyJson[0].predicted_value : null)
 
-          setPage('listing')
+          navigate(`/listing/${pid}`)
         } else {
           setError('Property not found in database.')
           setAttributes([])
@@ -366,42 +367,50 @@ function App() {
   }
 
   return (
-    <>
-      {page === 'home' && (
+    <Routes>
+      <Route path="/" element={
         <Home
           onPlaceSelected={onPlaceSelected}
           onSubmit={onSubmit}
           loading={loading}
         />
-      )}
-      {page === 'listing' && (
-        <Listing
-          onPlaceSelected={onPlaceSelected}
-          onSubmit={onSubmit}
-          attributes={attributes}
-          loading={loading}
-          error={error}
-          salesData={salesData}
-          cityData={cityData}
-          zipData={zipData}
-          stateData={stateData}
-          streetViewUrl={streetViewUrl}
-          coordinate={coordinate}
-          propertyPrediction = {propertyPrediction}
-        />
-      )}
-      {page === 'area' && (
-        <AreaListings
-          onPlaceSelected={onPlaceSelected}
-          onSubmit={onSubmit}
-          listings={areaResults}
-          area={areaName}
-          loading={loading}
-          error={error}
-          onPropertySelect={onPropertySelect}
-        />
-      )}
-    </>
+      } />
+
+      <Route path="/listing/:pid" element={
+        attributes.length > 0
+          ? <Listing
+              onPlaceSelected={onPlaceSelected}
+              onSubmit={onSubmit}
+              attributes={attributes}
+              loading={loading}
+              error={error}
+              salesData={salesData}
+              cityData={cityData}
+              zipData={zipData}
+              stateData={stateData}
+              streetViewUrl={streetViewUrl}
+              coordinate={coordinate}
+              propertyPrediction={propertyPrediction}
+            />
+          : <Navigate to="/" replace />
+      } />
+
+      <Route path="/area" element={
+        areaResults.length > 0
+          ? <AreaListings
+              onPlaceSelected={onPlaceSelected}
+              onSubmit={onSubmit}
+              listings={areaResults}
+              area={areaName}
+              loading={loading}
+              error={error}
+              onPropertySelect={onPropertySelect}
+            />
+          : <Navigate to="/" replace />
+      } />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
