@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react"
 import PropertyListCard from "./components/PropertyListCard.tsx"
 import PropertySearch from "./components/PropertySearch.tsx"
+import './Listing.css'
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
+import { useNavigate } from 'react-router-dom';
 
 interface Attribute {
   label: string
@@ -22,6 +24,7 @@ interface AreaListingsProps {
 const PAGE_SIZE = 10
 
 function AreaListings({ onPlaceSelected, onSubmit, listings, area, loading, error, onPropertySelect}: AreaListingsProps) {
+  const navigate = useNavigate()
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
@@ -52,7 +55,10 @@ function AreaListings({ onPlaceSelected, onSubmit, listings, area, loading, erro
 
   return (
     <>
-      <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading} />
+      <header className="pdp-header">
+        <h1 onClick = {() =>  navigate('/') }>HomeView</h1>
+        <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading} />
+      </header>
       {loading && <p className="status-msg">Loading property data...</p>}
       {error && <p className="status-msg error">{error}</p>}
       <h2>Listings {area}</h2>

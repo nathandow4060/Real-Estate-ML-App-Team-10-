@@ -11,6 +11,7 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import NavMap from "./components/NavMap.tsx";
 import type { Coordinate } from "ol/coordinate";
+import { useNavigate } from 'react-router-dom';
 
 interface Attribute {
   label: string
@@ -44,13 +45,8 @@ interface ListingProps {
 
 
 function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl, propertyPrediction, zipPrediction, cityPrediction,  coordinate}: ListingProps) {
-    const [address, setAddress] = useState<string | undefined>();
-
-    console.log("HELLO FROM LISTING", zipPrediction)
-    console.log("HELLO FROM LISTING", cityPrediction)
-
-
-
+  const navigate = useNavigate()
+  const [address, setAddress] = useState<string | undefined>();
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
   const housePastY: ChartDataset[] = [{
     label: "Purchase History (USD $)",
@@ -183,7 +179,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
       {/*Header with search bar*/}
       <header className="pdp-header">
-        <h1>HomeView</h1>
+        <h1 onClick = {() =>  navigate('/') }>HomeView</h1>
         <PropertySearch onUserInput={setAddress} address={address} onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading}/>
         {/* <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
           <GeoapifyGeocoderAutocomplete
@@ -311,9 +307,8 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
             </div>
 
             <div className="chart-block">
-              <DynamicLineChart
-                pastX={statePastX} pastY={statePastY}
-                futureX={houseFutureX} futureY={houseFutureY}
+              <LineChart
+                X={statePastX} Y={statePastY}
                 name = {"State Price"}
                 append = {attributes.find(a =>a.label === "State")?.value}
               />
