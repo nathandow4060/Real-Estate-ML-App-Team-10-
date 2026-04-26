@@ -1,10 +1,7 @@
-import React, { useState } from "react";
-import House from './assets/house.jpg'
-import './Listing.css'
+import { useState, useEffect, useRef } from "react"
 import PropertyListCard from "./components/PropertyListCard.tsx"
+import PropertySearch from "./components/PropertySearch.tsx"
 import '@geoapify/geocoder-autocomplete/styles/round-borders-dark.css'
-import Carousel from "./components/Carousel.tsx";
-import PropertySearch from "./components/PropertySearch.tsx";
 
 interface Attribute {
   label: string
@@ -18,44 +15,88 @@ interface AreaListingsProps {
   listings: (Attribute[])[]
   loading: boolean
   error: string | null
-
+  onPropertySelect: (listing: Attribute[]) => void 
 }
 
-function AreaListings({ onPlaceSelected, onSubmit, listings, area, loading, error}: AreaListingsProps) {
+// Lazy Loading size
+const PAGE_SIZE = 10
 
-    console.log("Hello from inside AreaListings", listings)
-    console.log("Hello from inside AreaListings ", area)
+function AreaListings({ onPlaceSelected, onSubmit, listings, area, loading, error, onPropertySelect}: AreaListingsProps) {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
 
-    const DisplayAttributes = listings.map(listing =>
-    listing.filter(attr =>
-            attr.label !== "On the Market" &&
-            attr.label !== "Longitude" &&
-            attr.label !== "Latitude" &&
-            attr.label !== "pid" &&
-            attr.label !== "City" &&
-            attr.label !== "State" &&
-            attr.label !== "Zip Code"
-        )
-    );
-    console.log("Hello from inside AreaListings display attributes ", DisplayAttributes);
+  // Reset visible count when listings change (new search)
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [listings])
 
+  // Watch the sentinel div at the bottom — when it scrolls into view, load 10 more
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
 
-    return(<>
-        <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading}/>
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => Math.min(prev + PAGE_SIZE, listings.length))
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [listings.length])
+
+  const visibleListings = listings.slice(0, visibleCount)
+
+  return (
+    <>
+      <PropertySearch onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading} />
       {loading && <p className="status-msg">Loading property data...</p>}
-      {error   && <p className="status-msg error">{error}</p>}
-        <h2>Listings {area} </h2>
+      {error && <p className="status-msg error">{error}</p>}
+      <h2>Listings {area}</h2>
 
-        {DisplayAttributes.map((listing, i: number) => 
+      {visibleListings.map((listing, i: number) => {
 
-        <div key={i}>
+        // Pull lat/lon out BEFORE filtering, since PropertyListCard needs them
+        // for the Street View fetch but they shouldn't show in the attribute table
+        const lat = listing.find(a => a.label === 'Latitude')?.value
+        const lon = listing.find(a => a.label === 'Longitude')?.value
+
+        // These are the labels we never want to show in the card's attribute table.
+        // pid is an internal DB key, lat/lon are used only for street view,
+        // city/state/zip are already visible in the address or redundant at this level.
+        const displayAttrs = listing.filter(attr =>
+          attr.label !== 'Longitude' &&
+          attr.label !== 'Latitude' &&
+          attr.label !== 'pid' &&
+          attr.label !== 'City' &&
+          attr.label !== 'State' &&
+          attr.label !== 'Zip Code'
+        )
+
+        return (
+          <div key={i} onClick={() => onPropertySelect(listings[i])}>
             <PropertyListCard
-            attributes={listing}
+              attributes={displayAttrs}
+              lat={lat}
+              lon={lon}
             />
-        </div>
-            
-)}
+          </div>
+        )
+      })}
+      {/* Sentinel — sits just below the last visible card.
+          When it enters the viewport the observer fires and loads 10 more. */}
+      <div ref={sentinelRef} style={{ height: '1px' }} />
 
-    </>)
+      {visibleCount < listings.length && (
+        <p className="status-msg">
+          Showing {visibleCount} of {listings.length} properties...
+        </p>
+      )}
+    </>
+  )
 }
+
 export default AreaListings

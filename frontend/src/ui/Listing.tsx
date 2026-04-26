@@ -239,9 +239,16 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
             <div className="pdp-attributes">
               <h2>Property Details</h2>
-              <PropertyListCard
-              attributes = {displayAttributes}
-              />
+              <table>
+                <tbody>
+                  {displayAttributes.map((attr, i) => (
+                    <tr key={i}>
+                      <td className="attr-label">{attr.label}</td>
+                      <td className="attr-value">{attr.value ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
             {coordinate && <NavMap centerAt={coordinate} onPlaceSelected={onPlaceSelected} setAddress={setAddress}/>}
           </section>
