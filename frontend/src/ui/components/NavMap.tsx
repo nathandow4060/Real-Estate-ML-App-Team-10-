@@ -16,8 +16,7 @@ import { normalizeAddress } from '../../App'
 import './style/mapStyle.css'
 import type { Coordinate } from 'ol/coordinate'
 import { Control } from 'ol/control'
-
-const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
+import { BASE_URL } from '../../App'
 
 interface PropertyDataItem {
   label: string

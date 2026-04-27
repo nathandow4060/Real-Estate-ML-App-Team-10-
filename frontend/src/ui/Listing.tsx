@@ -12,7 +12,7 @@ import "yet-another-react-lightbox/styles.css";
 import NavMap from "./components/NavMap.tsx";
 import type { Coordinate } from "ol/coordinate";
 
-interface Attribute {
+export interface Attribute {
   label: string
   value: any
 }
@@ -39,7 +39,6 @@ interface ListingProps {
   propertyPrediction: number | null
   coordinate: Coordinate | null// [lon,lat]
 }
-
 
 function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl, propertyPrediction, coordinate}: ListingProps) {
     const [address, setAddress] = useState<string | undefined>();
@@ -89,8 +88,6 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderColor: 'rgba(255,99,132,1)',
     borderWidth: 1
   }]
-
-  const [open, setOpen] = useState(false);
 
   const currentYear = new Date().getFullYear();
 
@@ -161,7 +158,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
       {/*Loading / Error states*/}
       {loading && <p className="status-msg">Loading property data...</p>}
       {error   && <p className="status-msg error">{error}</p>}
-
+    
       {/*Main two-column layout */}
       {!loading && attributes.length > 0 && (
         <div className="pdp-body">
@@ -173,23 +170,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 src={streetViewUrl || House} 
                 alt="Property" 
                 className="pdp-photo" 
-                onClick={() => setOpen(true)}
+                // onClick={() => setOpen(true)}
               /> 
-
-              <Lightbox 
-                open={open} 
-                close={() => setOpen(false)} 
-                controller={{ closeOnBackdropClick: true }}
-                carousel={{ finite: true , padding:70}}
-                slides={[{ src: streetViewUrl || House}]} 
-                styles={{ container: { backgroundColor: "rgba(0, 0, 0, .6)"} }}
-                render={{
-                  buttonPrev: () => null,
-                  buttonNext: () => null,
-                  buttonClose: () => null,
-                }}
-              />
-
+              
             <div className="pdp-price">
               <h2>{lastSaleText}</h2>
               <p className="price-value">
@@ -200,16 +183,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
             <div className="pdp-attributes">
               <h2>Property Details</h2>
-              <table>
-                <tbody>
-                  {displayAttributes.map((attr, i) => (
-                    <tr key={i}>
-                      <td className="attr-label">{attr.label}</td>
-                      <td className="attr-value">{attr.value ?? '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <PropertyListCard
+              attributes = {displayAttributes}
+              />
             </div>
             {coordinate && <NavMap centerAt={coordinate} onPlaceSelected={onPlaceSelected} setAddress={setAddress}/>}
           </section>
