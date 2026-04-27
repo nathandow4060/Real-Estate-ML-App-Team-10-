@@ -400,10 +400,11 @@
 }
 
 .map-controls {
-    top: 8px;
+    /* top: 8px;
     right: 8px;
-    left: 8px;
-    max-width: none;
+    left: 8px; */
+    margin: .5rem;
+    max-width: 20%;
     font-size: 13px;
     padding: 8px;
 }
