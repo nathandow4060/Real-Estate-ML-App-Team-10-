@@ -338,7 +338,7 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=DEFAULT_CENTER_
       if (selected) {
         const properties = selected.getProperties();
         let { geometry, ...propertyData } = properties;
-        setAddress(toTitleCase(propertyData['Display Address'])+ ', United States of America');
+        setAddress(toTitleCase(normalizeAddress(propertyData['Display Address']))+ ', United States of America');
         setClickPropertyAddress(propertyData.Address);
         onPlaceSelected(transformToGeoapifyFormat(propertyData));
         console.log(propertyData);
