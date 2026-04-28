@@ -201,11 +201,8 @@ exports.getAveragePredictionsByCity = async (req, res, next) => {
 
         res.status(200).json({
             status: 'success',
-            data: {
-                city: result.rows[0].city,
-                parcel_count: parseInt(result.rows[0].parcel_count, 10),
-                avg_predicted_value: result.rows[0].avg_predicted_value
-            }
+            data: result.rows[0]
+        
         })
     } catch (error) {
         next(error)
