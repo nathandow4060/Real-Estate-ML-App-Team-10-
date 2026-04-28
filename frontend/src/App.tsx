@@ -285,8 +285,8 @@ function App() {
             })
           }).then(r => r.json())
 
-          console.log("Zip avg: ", responseZip)
-          setZipPrediction(responseZip.data.avg_predicted_value)
+          //console.log("Zip avg: ", responseZip)
+          if(responseZip.data) setZipPrediction(responseZip.data.avg_predicted_value)
 
           if (responseZip.status !== 'success') {
             throw new Error(responseZip.message || 'Request failed')
@@ -304,9 +304,9 @@ function App() {
             })
           }).then(r => r.json())
 
-          console.log("City avg: ", responseCity.data.avg_predicted_value)
-
-          setcityPrediction(responseCity.data.avg_predicted_value)
+          //console.log("City avg: ", responseCity.data.avg_predicted_value)
+          
+          if(responseCity.data) setcityPrediction(responseCity.data.avg_predicted_value)
           
           if (responseZip.status !== 'success') {
             throw new Error(responseCity.message || 'Request failed')
