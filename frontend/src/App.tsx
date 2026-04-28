@@ -92,7 +92,7 @@ function App() {
 
   const[propertyPrediction, setPropertyPrediction] = useState <number | null>(null)
   const[zipPrediction, setZipPrediction] = useState <number | null>(null)
-  const[cityPrediction, setcityPrediction] = useState <number | null>(null)
+  const[cityPrediction, setCityPrediction] = useState <number | null>(null)
 
   // Street View image URL — must be state so updates trigger a re-render
   const [streetViewUrl, setStreetViewUrl] = useState<string | null>(null)
@@ -285,8 +285,15 @@ function App() {
             })
           }).then(r => r.json())
 
-          //console.log("Zip avg: ", responseZip)
-          if(responseZip.data) setZipPrediction(responseZip.data.avg_predicted_value)
+          
+          setZipPrediction(null)
+          if(responseZip.data) {
+            setZipPrediction(responseZip.data.avg_predicted_value)
+            console.log("Zip avg: ", responseZip)
+          }
+          else{
+            setZipPrediction(null)
+          }
 
           if (responseZip.status !== 'success') {
             throw new Error(responseZip.message || 'Request failed')
@@ -304,9 +311,13 @@ function App() {
             })
           }).then(r => r.json())
 
-          //console.log("City avg: ", responseCity.data.avg_predicted_value)
-          
-          if(responseCity.data) setcityPrediction(responseCity.data.avg_predicted_value)
+          if(responseCity.data) {
+            setCityPrediction(responseCity.data.avg_predicted_value)
+            console.log("City avg: ", responseCity.data.avg_predicted_value)
+          }
+          else{
+            setCityPrediction(null)
+          }
           
           if (responseZip.status !== 'success') {
             throw new Error(responseCity.message || 'Request failed')
