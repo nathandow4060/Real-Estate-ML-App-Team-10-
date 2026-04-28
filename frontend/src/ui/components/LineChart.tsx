@@ -52,7 +52,7 @@ function LineChart({X, Y, name, append}: {
     <div>
       <h2>{append? name + " History: " + append  : name + " History"}</h2>
       <Line data={chartData} />
-      <p>no prediction data available</p>
+      <p>No prediction data available</p>
     </div>
   );
 }

@@ -13,7 +13,7 @@ interface Attribute {
 }
 
 
-const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
+export const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
 // Wake up the server immediately when the app loads
 fetch(`${BASE_URL}/property-sales/state-history`, {
@@ -83,7 +83,7 @@ function App() {
   const navigate = useNavigate()
   const [attributes, setAttributes] = useState<Attribute[]>([])
   const [areaResults, setAreaResults] = useState<Attribute[][]>([])
-  const [areaName, setAreaName] = useState <String>('')
+  const [areaName, setAreaName] = useState <string>('')
 
   const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
   const [cityData,  setCityData]  = useState<{year: string, avg_price: number}[]>([])
@@ -91,6 +91,8 @@ function App() {
   const [stateData, setStateData] = useState<{year: string, avg_price: number}[]>([])
 
   const[propertyPrediction, setPropertyPrediction] = useState <number | null>(null)
+  const[zipPrediction, setZipPrediction] = useState <number | null>(null)
+  const[cityPrediction, setCityPrediction] = useState <number | null>(null)
 
   // Street View image URL — must be state so updates trigger a re-render
   const [streetViewUrl, setStreetViewUrl] = useState<string | null>(null)
@@ -283,7 +285,15 @@ function App() {
             })
           }).then(r => r.json())
 
-          console.log("Zip avg: ", responseZip)
+          
+          setZipPrediction(null)
+          if(responseZip.data) {
+            setZipPrediction(responseZip.data.avg_predicted_value)
+            console.log("Zip avg: ", responseZip)
+          }
+          else{
+            setZipPrediction(null)
+          }
 
           if (responseZip.status !== 'success') {
             throw new Error(responseZip.message || 'Request failed')
@@ -301,8 +311,13 @@ function App() {
             })
           }).then(r => r.json())
 
-          console.log("City avg: ", responseCity)
-
+          if(responseCity.data) {
+            setCityPrediction(responseCity.data.avg_predicted_value)
+            console.log("City avg: ", responseCity.data.avg_predicted_value)
+          }
+          else{
+            setCityPrediction(null)
+          }
           
           if (responseZip.status !== 'success') {
             throw new Error(responseCity.message || 'Request failed')
@@ -391,6 +406,8 @@ function App() {
               streetViewUrl={streetViewUrl}
               coordinate={coordinate}
               propertyPrediction={propertyPrediction}
+              zipPrediction={zipPrediction}
+              cityPrediction={cityPrediction}
             />
           : <Navigate to="/" replace />
       } />

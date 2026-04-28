@@ -11,8 +11,9 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import NavMap from "./components/NavMap.tsx";
 import type { Coordinate } from "ol/coordinate";
+import { useNavigate } from 'react-router-dom';
 
-interface Attribute {
+export interface Attribute {
   label: string
   value: any
 }
@@ -37,13 +38,15 @@ interface ListingProps {
   stateData:  {year: string, avg_price: number}[]
   streetViewUrl: string | null
   propertyPrediction: number | null
+  zipPrediction: number | null
+  cityPrediction: number | null
   coordinate: Coordinate | null// [lon,lat]
 }
 
 
-function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl, propertyPrediction, coordinate}: ListingProps) {
-    const [address, setAddress] = useState<string | undefined>();
-
+function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesData, cityData, zipData, stateData, streetViewUrl, propertyPrediction, zipPrediction, cityPrediction,  coordinate}: ListingProps) {
+  const navigate = useNavigate()
+  const [address, setAddress] = useState<string | undefined>();
   const housePastX: string[] = salesData.map(s => s.date_of_sale)
   const housePastY: ChartDataset[] = [{
     label: "Purchase History (USD $)",
@@ -53,7 +56,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
-  //Still needs to be predicted
+
   const houseFutureX: string[] = []
   let houseFutureY: ChartDataset[] = [{
     label: "Price Prediction (USD $)",
@@ -72,12 +75,30 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderWidth: 1
   }]
 
+  const zipFutureX: string[] = []
+  let zipFutureY: ChartDataset[] = [{
+    label: "Price Prediction (USD $)",
+    data: [],
+    backgroundColor: 'rgba(255, 26, 104, 0.2)',
+    borderColor: 'rgba(255, 26, 104, 1)',
+    borderWidth: 1
+  }]
+
   const cityPastX: string[] = cityData.map(d => d.year)
   const cityPastY: ChartDataset[] = [{
     label: "Avg City Sale Price (USD $)",
     data: cityData.map(d => d.avg_price),
     backgroundColor: "rgba(153,102,255,0.4)",
     borderColor: 'rgba(153,102,255,1)',
+    borderWidth: 1
+  }]
+
+  const cityFutureX: string[] = []
+  let cityFutureY: ChartDataset[] = [{
+    label: "Price Prediction (USD $)",
+    data: [],
+    backgroundColor: 'rgba(255, 26, 104, 0.2)',
+    borderColor: 'rgba(255, 26, 104, 1)',
     borderWidth: 1
   }]
 
@@ -89,8 +110,6 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
     borderColor: 'rgba(255,99,132,1)',
     borderWidth: 1
   }]
-
-  const [open, setOpen] = useState(false);
 
   const currentYear = new Date().getFullYear();
 
@@ -127,6 +146,20 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
   }
 
+  // append prediction price to zipFuture
+  if(zipPrediction !==null){
+    zipFutureY[0].data.push(zipPrediction)
+    zipFutureX.push((currentYear+1).toString() + " (prediction)")
+
+  }
+
+  // append prediction price to cityFuture
+  if(cityPrediction !==null){
+    cityFutureY[0].data.push(cityPrediction)
+    cityFutureX.push((currentYear+1).toString() + " (prediction)")
+
+  }
+
 
   const displayAttributes = attributes.filter(attr => 
     attr.label !== "Current Price" && 
@@ -144,7 +177,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
       {/*Header with search bar*/}
       <header className="pdp-header">
-        <h1>HomeView</h1>
+        <h1 onClick = {() =>  navigate('/') }>HomeView</h1>
         <PropertySearch onUserInput={setAddress} address={address} onSubmit={onSubmit} onPlaceSelected={onPlaceSelected} disabled={loading}/>
         {/* <GeoapifyContext apiKey="c56847c51cc54d77a23f9d4caed09c74">
           <GeoapifyGeocoderAutocomplete
@@ -161,7 +194,7 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
       {/*Loading / Error states*/}
       {loading && <p className="status-msg">Loading property data...</p>}
       {error   && <p className="status-msg error">{error}</p>}
-
+    
       {/*Main two-column layout */}
       {!loading && attributes.length > 0 && (
         <div className="pdp-body">
@@ -173,23 +206,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 src={streetViewUrl || House} 
                 alt="Property" 
                 className="pdp-photo" 
-                onClick={() => setOpen(true)}
+                // onClick={() => setOpen(true)}
               /> 
-
-              <Lightbox 
-                open={open} 
-                close={() => setOpen(false)} 
-                controller={{ closeOnBackdropClick: true }}
-                carousel={{ finite: true , padding:70}}
-                slides={[{ src: streetViewUrl || House}]} 
-                styles={{ container: { backgroundColor: "rgba(0, 0, 0, .6)"} }}
-                render={{
-                  buttonPrev: () => null,
-                  buttonNext: () => null,
-                  buttonClose: () => null,
-                }}
-              />
-
+              
             <div className="pdp-price">
               <h2>{lastSaleText}</h2>
               <p className="price-value">
@@ -200,16 +219,9 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
 
             <div className="pdp-attributes">
               <h2>Property Details</h2>
-              <table>
-                <tbody>
-                  {displayAttributes.map((attr, i) => (
-                    <tr key={i}>
-                      <td className="attr-label">{attr.label}</td>
-                      <td className="attr-value">{attr.value ?? '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <PropertyListCard
+              attributes = {displayAttributes}
+              />
             </div>
             {coordinate && <NavMap centerAt={coordinate} onPlaceSelected={onPlaceSelected} setAddress={setAddress}/>}
           </section>
@@ -238,27 +250,42 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
             </div>
 
             <div className="chart-block">
+              {zipPrediction ?
               <DynamicLineChart
                 pastX={zipPastX} pastY={zipPastY}
-                futureX={houseFutureX} futureY={houseFutureY}
-                name = {"Zip-Code Price"}
-                append = {attributes.find(a =>a.label === "Zip Code")?.value}
+                futureX={zipFutureX} futureY={zipFutureY}
+                name = {"Zip Price"}
+                append = { String(attributes.find(a =>a.label === "Zip Code")?.value).trim().padStart(5, '0')}
               />
+              :
+              <LineChart
+                X={zipPastX} Y={zipPastY}
+                name = {"Zip Price"}
+                append = {String(attributes.find(a =>a.label === "Zip Code")?.value).trim().padStart(5, '0')}
+              />
+                }
             </div>
 
             <div className="chart-block">
+              {cityPrediction ?
               <DynamicLineChart
                 pastX={cityPastX} pastY={cityPastY}
-                futureX={houseFutureX} futureY={houseFutureY}
+                futureX={cityFutureX} futureY={cityFutureY}
                 name = {"City Price"}
                 append = {attributes.find(a =>a.label === "City")?.value}
               />
+              :
+              <LineChart
+                X={cityPastX} Y={cityPastY}
+                name = {"City Price"}
+                append = {attributes.find(a =>a.label === "City")?.value}
+              />
+                }
             </div>
 
             <div className="chart-block">
-              <DynamicLineChart
-                pastX={statePastX} pastY={statePastY}
-                futureX={houseFutureX} futureY={houseFutureY}
+              <LineChart
+                X={statePastX} Y={statePastY}
                 name = {"State Price"}
                 append = {attributes.find(a =>a.label === "State")?.value}
               />
