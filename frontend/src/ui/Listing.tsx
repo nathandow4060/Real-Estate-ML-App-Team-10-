@@ -299,8 +299,8 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
               />
               :
               <LineChart
-                X={zipPastX} Y={zipPastY}
-                name = {"Zip Price"}
+                X={cityPastX} Y={cityPastY}
+                name = {"City Price"}
                 append = {attributes.find(a =>a.label === "City")?.value}
               />
                 }
