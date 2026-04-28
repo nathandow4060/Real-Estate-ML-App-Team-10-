@@ -16,8 +16,7 @@ import { normalizeAddress } from '../../App'
 import './style/mapStyle.css'
 import type { Coordinate } from 'ol/coordinate'
 import { Control } from 'ol/control'
-
-const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
+import { BASE_URL } from '../../App'
 
 interface PropertyDataItem {
   label: string
@@ -339,7 +338,7 @@ function NavMap({ onPlaceSelected, address, setAddress, centerAt=DEFAULT_CENTER_
       if (selected) {
         const properties = selected.getProperties();
         let { geometry, ...propertyData } = properties;
-        setAddress(toTitleCase(propertyData['Display Address'])+ ', United States of America');
+        setAddress(toTitleCase(normalizeAddress(propertyData['Display Address']))+ ', United States of America');
         setClickPropertyAddress(propertyData.Address);
         onPlaceSelected(transformToGeoapifyFormat(propertyData));
         console.log(propertyData);

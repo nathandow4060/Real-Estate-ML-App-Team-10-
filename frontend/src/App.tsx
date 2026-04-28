@@ -13,7 +13,7 @@ interface Attribute {
 }
 
 
-const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
+export const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
 // Wake up the server immediately when the app loads
 fetch(`${BASE_URL}/property-sales/state-history`, {
