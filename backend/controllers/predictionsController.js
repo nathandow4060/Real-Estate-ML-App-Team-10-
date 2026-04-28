@@ -122,12 +122,15 @@ exports.getAveragePredictionsByZipcode = async (req, res, next) => {
             [model_name, zipcode]
         )
 
+
+        /*
         if (result.rowCount === 0) {
             return res.status(404).json({
                 status: 'error',
                 message: `No zipcode average found for zipcode ${zipcode} and model ${model_name}`
             })
         }
+        */
 
         res.json({
             status: 'success',
@@ -187,12 +190,14 @@ exports.getAveragePredictionsByCity = async (req, res, next) => {
             [model_name, city]
         )
 
+        /*
         if (result.rowCount === 0) {
             return res.status(404).json({
                 status: 'error',
                 message: `No city average found for city ${city} and model ${model_name}`
             })
         }
+        */
 
         res.status(200).json({
             status: 'success',
