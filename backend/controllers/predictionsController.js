@@ -207,10 +207,80 @@ exports.getAveragePredictionsByCity = async (req, res, next) => {
     }
 }
 
+exports.getAveragePredictionsByState = async (req, res, next) => {
+    try {
+        const model_name = req.body.model_name
+        const rawState = req.body.state || req.query.state
+
+        if (!model_name) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'model_name is required'
+            })
+        }
+
+        if (!rawState) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'state is required'
+            })
+        }
+
+        const state = String(rawState).trim()
+
+        const result = await db.query(
+            `WITH latest_prediction_per_property AS (
+                SELECT DISTINCT ON (mp.pid)
+                    mp.pid,
+                    mp.sid,
+                    mp.model_name,
+                    mp.dataset,
+                    mp.predicted_value
+                FROM public."Model_Predictions" mp
+                JOIN public."Property_Sale" ps
+                    ON ps.sid = mp.sid
+                WHERE mp.model_name = $1
+                ORDER BY mp.pid, ps.date_of_sale DESC, mp.updated_at DESC
+            )
+            SELECT
+                UPPER(TRIM(p.state)) AS state,
+                COUNT(*) AS parcel_count,
+                ROUND(AVG(lpp.predicted_value))::integer AS avg_predicted_value
+            FROM latest_prediction_per_property lpp
+            JOIN public."Property" p
+                ON p.pid = lpp.pid
+            WHERE p.state IS NOT NULL
+              AND LOWER(TRIM(p.state)) = LOWER(TRIM($2))
+            GROUP BY UPPER(TRIM(p.state));
+            `,
+            [model_name, state]
+        )
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                status: 'error',
+                message: `No state average found for state ${state} and model ${model_name}`
+            })
+        }
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                state: result.rows[0].state,
+                parcel_count: parseInt(result.rows[0].parcel_count, 10),
+                avg_predicted_value: result.rows[0].avg_predicted_value
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     getPropertyPrediction: exports.getPropertyPrediction,
     getModelDetailsByName: exports.getModelDetailsByName,
     getModelMetricsByName: exports.getModelMetricsByName,
     getAveragePredictionsByZipcode: exports.getAveragePredictionsByZipcode,
-    getAveragePredictionsByCity: exports.getAveragePredictionsByCity
+    getAveragePredictionsByCity: exports.getAveragePredictionsByCity,
+    getAveragePredictionsByState: exports.getAveragePredictionsByState
 }
