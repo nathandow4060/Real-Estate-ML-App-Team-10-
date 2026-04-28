@@ -278,13 +278,13 @@ function Listing({ onPlaceSelected, onSubmit, attributes, loading, error, salesD
                 pastX={zipPastX} pastY={zipPastY}
                 futureX={zipFutureX} futureY={zipFutureY}
                 name = {"Zip Price"}
-                append = {attributes.find(a =>a.label === "Zip Code")?.value}
+                append = { String(attributes.find(a =>a.label === "Zip Code")?.value).trim().padStart(5, '0')}
               />
               :
               <LineChart
                 X={zipPastX} Y={zipPastY}
                 name = {"Zip Price"}
-                append = {attributes.find(a =>a.label === "Zip Code")?.value}
+                append = {String(attributes.find(a =>a.label === "Zip Code")?.value).trim().padStart(5, '0')}
               />
                 }
             </div>
