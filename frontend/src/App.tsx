@@ -303,11 +303,27 @@ function App() {
 
           console.log("City avg: ", responseCity)
 
-          
-          if (responseZip.status !== 'success') {
+          if (responseCity.status !== 'success') {
             throw new Error(responseCity.message || 'Request failed')
           }
-          
+
+          const responseState = await fetch(`${BASE_URL}/predictions/state-averages`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model_name: "Real_Estate_Price_predictor_2004_2020_CT",
+              state: savedAutocomplete.state_code
+            })
+          }).then(r => r.json())
+
+          console.log("State avg: ", responseState)
+
+          if (responseState.status !== 'success') {
+            throw new Error(responseState.message || 'Request failed')
+          }
+
 
 
         // --- Google Street View ---
