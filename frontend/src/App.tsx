@@ -13,7 +13,7 @@ interface Attribute {
 }
 
 
-export const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
+const BASE_URL = 'https://real-estate-ml-app-team-10.onrender.com'
 
 // Wake up the server immediately when the app loads
 fetch(`${BASE_URL}/property-sales/state-history`, {
@@ -83,7 +83,7 @@ function App() {
   const navigate = useNavigate()
   const [attributes, setAttributes] = useState<Attribute[]>([])
   const [areaResults, setAreaResults] = useState<Attribute[][]>([])
-  const [areaName, setAreaName] = useState <string>('')
+  const [areaName, setAreaName] = useState <String>('')
 
   const [salesData, setSalesData] = useState<{date_of_sale: string, sale_amount: number}[]>([])
   const [cityData,  setCityData]  = useState<{year: string, avg_price: number}[]>([])
