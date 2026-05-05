@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchStreetViewUrl } from '../../utils/streetView'
-import './style/PropertyListCard.css'
+import '../components/style/propertyListCard.css'
 
 interface Attribute {
   label: string

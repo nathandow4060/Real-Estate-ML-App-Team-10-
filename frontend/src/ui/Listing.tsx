@@ -13,7 +13,7 @@ import NavMap from "./components/NavMap.tsx";
 import type { Coordinate } from "ol/coordinate";
 import { useNavigate } from 'react-router-dom';
 
-interface Attribute {
+export interface Attribute {
   label: string
   value: any
 }
